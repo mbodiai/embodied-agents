@@ -1,0 +1,47 @@
+name: "MacOS | Python 3.12|3.11|3.10"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.11", "3.10"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run install script
+        run: |
+          chmod +x ./install.bash
+          ./install.bash
+
+      - name: Cache packages
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-packages
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('install.bash') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-
+      - name: Run tests
+        run: |
+          hatch run test

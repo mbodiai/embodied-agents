@@ -1,0 +1,215 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mbodied"
+dynamic = ["version"]
+description = 'Embodied AI for the Mbodi Platform'
+readme = "README.md"
+requires-python = ">=3.10, <=3.13"
+license = "apache-2.0"
+keywords = []
+authors = [{ name = "Mbodi Team", email = "info@mbodi.ai" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/mbodiai/mbodied#readme"
+Issues = "https://github.com/mbodiai/mbodied/issues"
+Source = "https://github.com/mbodiai/mbodied"
+
+[project.scripts]
+
+[tool.hatch.version]
+path = "src/mbodied/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+
+[tool.hatch.envs.default]
+
+python = "3.11"
+path = ".mbodied/envs/mbodied"
+
+dependencies = [
+  "coverage[toml]>=6.5",
+  "toml==0.10.2",
+  "pytest==8.1.1",
+  "pytest-mock",
+  "gym==0.26.2",
+  "pillow==10.3.0",
+  "numpy==1.26.4",
+  "opencv-python==4.9.0.80",
+  "anthropic==0.25.6",
+  "openai",
+  "anthropic",
+  "backoff==2.2.1",
+  "pydantic==2.7",
+  "pydantic_numpy",
+  "torch",
+  "h5py",
+  "click",
+  "datasets",
+  "playsound==1.3.0",
+  "pyaudio",
+  "xarm-python-sdk",
+  "jsonref",
+  "art",
+]
+
+[tool.hatch.envs.default.env-vars]
+
+
+[tool.hatch.envs.conda]
+type = "conda"
+python = "310"                       # Python version 3.10
+command = "conda"                    # Options: conda, mamba, micromamba
+conda-forge = false                  # Use conda-forge index
+environment-file = "environment.yml" # Specify environment file
+prefix = ".venv/"                    # Create environment in .venv/ folder
+
+[tool.hatch.envs.default.scripts]
+test = "pytest -vv --ignore third_party {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = ["- coverage combine", "coverage report"]
+cov = ["test-cov", "cov-report"]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = ["mypy>=1.0.0"]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/mbodied tests}"
+
+[tool.coverage.run]
+source_pkgs = ["mbodied", "tests"]
+branch = true
+parallel = true
+omit = ["src/mbodied/__about__.py"]
+
+[tool.coverage.paths]
+mbodied = ["src/mbodied", "mbodied"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-unsafe-fixes = ["ALL"]
+# List of rules: https://docs.astral.sh/ruff/rules
+select = [
+  # flake8-builtins
+  "A",
+  # flake8-commas
+  "COM812",
+  # flake8-comprehensions
+  "C4",
+  # pydocstyle
+  "D",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # flake8-implicit-str-concat
+  "ISC",
+  # pep8-naming
+  "N",
+  # flake8-annotations
+  "ANN",
+  # flake8-async
+  "ASYNC",
+  # flake8-bandid selected
+  "S",
+  # flake8-print
+  "T20",
+  # flake8-return
+  "RET",
+  # flake8-simplify
+  "SIM",
+  # flake8-unused-arguments
+  "ARG",
+  # flake8-use-pathlib
+  "PTH",
+  # eradicate
+  "ERA",
+  # pandas-vet
+  "PD",
+  # Import sort
+  "I",
+  # avoid shadowing
+  "PLW",
+]
+ignore = [
+  "D100",
+  "D101",
+  "D104",
+  "D106",
+  # missing-type-self
+  "ANN101",
+  # missing-type-cls
+  "ANN102",
+  # missing-type-kwargs
+  "ANN003",
+  # utf-8 encoding skip
+  "UP009",
+  # Missing return type annotation for special method `__init__`
+  "ANN204",
+  # Star-arg unpacking after a keyword argument is strongly discouraged
+  "B026",
+  # Missing type annotation for function argument `self`
+  "ANN001",
+  # Dynamically typed expressions (typing.Any) are disallowed in `wrapper`
+  "ANN401",
+  # We don't need docstrings for every method
+  "ANN202",
+  "D107",
+  "D102",
+  "D103",
+  # Inline lambdas
+  "E731",
+  # Sometimes we need List and Tuple
+  "UP006",
+  "UP035",
+  "ANN002",
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,docs}/*" = ["ALL"]
+"**__init__.py" = ["F401"]
