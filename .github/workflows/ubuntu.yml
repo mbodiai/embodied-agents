@@ -1,0 +1,61 @@
+name: "Ubuntu"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ubuntu:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11
+
+      - name: Run install script
+        run: |
+          chmod +x ./install.bash
+          ./install.bash
+
+      - name: Cache packages
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-packages
+        with:
+          path: ~/.local/bin ~/.local/lib .mbodied/envs/mbodied
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('install.bash') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-
+
+      - name: Check disk usage
+        run: df -h
+
+      - name: Clean up before running tests
+        run: |
+          # Add commands to clean up unnecessary files
+          sudo apt-get clean
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+          # Add more cleanup commands as needed
+
+      - name: Check disk usage after cleanup
+        run: df -h
+
+      - name: Run tests
+        run: |
+          hatch run test
