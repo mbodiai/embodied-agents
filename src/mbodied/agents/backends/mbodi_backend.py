@@ -54,7 +54,7 @@ class MbodiBackend(Backend):
     ]
     DEFAULT_MODEL = "mbodi"
     # Note: This is a placeholder URL and will be updated when the API is available.
-    API_URL = "https://api.mbodi.ai/inference"
+    API_URL = "https://api.mbodi.ai/process"
 
     def __init__(self, url: str, **kwargs):
         """Initializes the MbodiBackend with Mbodi API url.
@@ -80,11 +80,11 @@ class MbodiBackend(Backend):
         """
         serialized_messages = [
             self.serializer.serialize_msg(msg) for msg in messages]
-        payload = {"data": serialized_messages}
+        payload = {"messages": serialized_messages}
         response = requests.post(self.url, json=payload, headers={
                                  'Content-Type': 'application/json'})
         if response.status_code != 200:
             logging.warning(
                 f"Failed to get response from Mbodi backend. Status code: {response.status_code}")
 
-        return response.json()["data"][0]
+        return response.json()["response"]
