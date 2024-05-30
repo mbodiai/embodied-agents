@@ -7,24 +7,43 @@
 [![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
 [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
-Welcome to **Mbodied Agents**! This repository is your gateway to integrating generative AI and various transformers with robotics. By leveraging vision-language models, transformers, and a robust data handling infrastructure, Mbodied Agents provides a comprehensive, versatile, and easy-to-use platform for diverse environments and embodiments.
+Welcome to **Mbodied Agents**! This repository is a toolkit for integrating various state-of-the-art transformers in robotics. We wanted to make a consistent interface for calling different AI models, handling multimodal data, and using/creating datasets trained on different robots. Be sure to checkout the example section for how to automatically fine-tune a foundational model in as little as 10 lines of code.  With that in mind, Mbodied Agents offers the following features:
 
-You can simply command and teach any robot to do anything while collecting datasets!
+- **Configurability** : Define your desired Observation and Action spaces and read data into the format that works best for your system.
+- **Modularity** : Easily swap out different backends, transformers, and hardware interfaces. For even better results, run multiple agents in separate threads.
+- **Validation** : Ensure that your data is in the correct format and that your actions are within the correct bounds.
+- **FAISS Indexing** : Use FAISS to index your robot's recent memory and perform RAG rather than pollute its context.
+- **Automatic Dataset Creation** : Record your robot's interactions and automatically and save them to a huggingface dataset for continual or offline training.
+
+
+## Support Matrix
+
+If you would like to integrate a new backend, it is very easy to do so. Please refer to the [contributing guide](CONTRIBUTING.md) for more information.
+
+- OpenAI
+- Anthropic
+- Mbodi (Coming Soon)
+- HuggingFace (Coming Soon)
+
+## In Beta
+
+- **Mbodi Backend** : We are currently working on a backend that will allow you to use Mbodi's models for your robot. This will include a vision-language model, a 3D image segmentation model, and a diffusion-based data augmentation model.
+
+Please fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at info@mbodi.ai for access.
+
+
+## Roadmap
+
+- **Data Augmentation** : Build invariance to different environments by augmenting your dataset with Mbodi's diffusion-based data augmentation.
+- **Observability** : See how GPT4o, Claude Opus, or other custom models are performing on various datasets and benchmarks.
+- **Few Shot Prompting** : Use verbal or visual prompts to correct your robot's actions and calibrate its behavior to a new environment.
+
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
-Each time you interact with a robot, the data is automatically recorded into a dataset, which can be augmented and used for model training, without wasting any conversation or action. To learn more about how to use the dataset, augment the data, or train/finetune a foundational model, please fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at info@mbodi.ai.
 
 <img src="assets/demo_gif.gif" alt="Demo GIF" style="width: 625px;">
 
-Upcoming Features:
-
-- Mbodi's backend
-- HuggingFace backend
-- Mbodi diffusion-based data augmentation backend
-- Mbodi image 3D segmentation backend
-- Dataset replayer
-- And much more! Stay tuned.
 
 We welcome any questions, issues, or PRs! Refer to the Contributing section below for more details.
 
