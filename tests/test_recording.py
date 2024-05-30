@@ -3,10 +3,10 @@ import h5py
 import numpy as np
 import os
 from gym import spaces
-from mbodied.data.recording import Recorder, create_dataset_for_space_dict
-from mbodied.base.sample import Sample
+from mbodied_agents.data.recording import Recorder, create_dataset_for_space_dict
+from mbodied_agents.base.sample import Sample
 from tempfile import TemporaryDirectory
-from mbodied.types.vision import Image
+from mbodied_agents.types.vision import Image
 import pytest
 import logging
 

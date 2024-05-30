@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mbodied"
+name = "mbodied-agents"
 dynamic = ["version"]
 description = 'Embodied AI for the Mbodi Platform'
 readme = "README.md"
@@ -21,14 +21,14 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://github.com/mbodiai/mbodied#readme"
-Issues = "https://github.com/mbodiai/mbodied/issues"
-Source = "https://github.com/mbodiai/mbodied"
+Documentation = "https://github.com/mbodiai/mbodied-agents#readme"
+Issues = "https://github.com/mbodiai/mbodied-agents/issues"
+Source = "https://github.com/mbodiai/mbodied-agents"
 
 [project.scripts]
 
 [tool.hatch.version]
-path = "src/mbodied/__about__.py"
+path = "src/mbodied_agents/__about__.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -37,7 +37,7 @@ allow-direct-references = true
 [tool.hatch.envs.default]
 
 python = "3.11"
-path = ".mbodied/envs/mbodied"
+path = ".mbodied_agents/envs/mbodied_agents"
 
 dependencies = [
   "coverage[toml]>=6.5",
@@ -88,16 +88,16 @@ python = ["3.10", "3.11", "3.12"]
 [tool.hatch.envs.types]
 dependencies = ["mypy>=1.0.0"]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/mbodied tests}"
+check = "mypy --install-types --non-interactive {args:src/mbodied_agents tests}"
 
 [tool.coverage.run]
-source_pkgs = ["mbodied", "tests"]
+source_pkgs = ["mbodied_agents", "tests"]
 branch = true
 parallel = true
-omit = ["src/mbodied/__about__.py"]
+omit = ["src/mbodied_agents/__about__.py"]
 
 [tool.coverage.paths]
-mbodied = ["src/mbodied", "mbodied"]
+mbodied = ["src/mbodied_agents", "mbodied_agents"]
 tests = ["tests"]
 
 [tool.coverage.report]

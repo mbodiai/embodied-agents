@@ -6,13 +6,13 @@ from pydantic import Field
 from pydantic_core import from_json
 from gym import spaces
 
-from mbodied.agents.language import CognitiveAgent
-from mbodied.agents.sense.audio_handler import AudioHandler
-from mbodied.base.sample import Sample
-from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.controls import HandControl
-from mbodied.types.vision import Image
-from mbodied.data.recording import Recorder
+from mbodied_agents.agents.language import CognitiveAgent
+from mbodied_agents.agents.sense.audio_handler import AudioHandler
+from mbodied_agents.base.sample import Sample
+from mbodied_agents.hardware.sim_interface import SimInterface
+from mbodied_agents.types.controls import HandControl
+from mbodied_agents.types.vision import Image
+from mbodied_agents.data.recording import Recorder
 
 
 # This can be customized to be anything you like.

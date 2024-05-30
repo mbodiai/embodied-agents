@@ -1,6 +1,6 @@
 import pytest
-from mbodied.types.controls import HandControl, Pose6D, JointControl
-from mbodied.hardware.sim_interface import SimInterface
+from mbodied_agents.types.controls import HandControl, Pose6D, JointControl
+from mbodied_agents.hardware.sim_interface import SimInterface
 
 
 @pytest.fixture

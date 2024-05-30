@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
-from mbodied.types.message import Message, Sample
-from mbodied.agents.backends.openai_backend import OpenAISerializer as OpenAISerializable
+from mbodied_agents.types.message import Message, Sample
+from mbodied_agents.agents.backends.openai_backend import OpenAISerializer as OpenAISerializable
 
 
 def test_openai_serializable_with_message():

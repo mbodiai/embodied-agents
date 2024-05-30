@@ -2,14 +2,14 @@ import pytest
 from unittest.mock import MagicMock
 import math
 
-from mbodied.types.controls import HandControl, Pose6D
-from mbodied.hardware.xarm_interface import XarmInterface
+from mbodied_agents.types.controls import HandControl, Pose6D
+from mbodied_agents.hardware.xarm_interface import XarmInterface
 
 
 @pytest.fixture
 def mock_xarm_api(mocker):
     # Mock the XArmAPI methods that are used in XarmInterface
-    mock = mocker.patch('mbodied.hardware.xarm_interface.XArmAPI')
+    mock = mocker.patch('mbodied_agents.hardware.xarm_interface.XArmAPI')
     mock_instance = mock.return_value
     mock_instance.motion_enable.return_value = None
     mock_instance.clean_error.return_value = None

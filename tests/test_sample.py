@@ -5,8 +5,8 @@ import h5py
 import os
 import tempfile
 
-from mbodied.data.recording import Recorder
-from mbodied.base.sample import Sample
+from mbodied_agents.data.recording import Recorder
+from mbodied_agents.base.sample import Sample
 
 
 def test_from_dict():

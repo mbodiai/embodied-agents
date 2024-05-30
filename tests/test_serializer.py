@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 from pydantic import ValidationError
-from mbodied.base.sample import Sample
-from mbodied.types.message import Message
-from mbodied.types.vision import Image
-from mbodied.base.serializer import Serializer
+from mbodied_agents.base.sample import Sample
+from mbodied_agents.types.message import Message
+from mbodied_agents.types.vision import Image
+from mbodied_agents.base.serializer import Serializer
 
 
 def test_serialize_string():

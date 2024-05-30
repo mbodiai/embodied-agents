@@ -6,8 +6,8 @@ from pathlib import Path
 import h5py
 from tempfile import TemporaryDirectory
 
-from mbodied.types.controls import LocationAngle, Pose6D, JointControl, FullJointControl, HandControl, HeadControl, MobileSingleArmControl, MobileSingleHandControl
-from mbodied.data.recording import Recorder
+from mbodied_agents.types.controls import LocationAngle, Pose6D, JointControl, FullJointControl, HandControl, HeadControl, MobileSingleArmControl, MobileSingleHandControl
+from mbodied_agents.data.recording import Recorder
 
 
 @pytest.fixture(autouse=True)

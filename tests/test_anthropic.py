@@ -1,6 +1,6 @@
 import pytest
-from mbodied.agents.backends.anthropic_backend import AnthropicBackend
-from mbodied.types.message import Message
+from mbodied_agents.agents.backends.anthropic_backend import AnthropicBackend
+from mbodied_agents.types.message import Message
 
 
 mock_anthropic_response = "Anthropic response text"

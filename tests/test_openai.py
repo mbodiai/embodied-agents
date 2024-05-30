@@ -1,8 +1,8 @@
 import pytest
-from mbodied.agents.backends.openai_backend import OpenAIBackend
-from mbodied.types.message import Message
-from mbodied.agents.language import CognitiveAgent
-from mbodied.types.vision import Image
+from mbodied_agents.agents.backends.openai_backend import OpenAIBackend
+from mbodied_agents.types.message import Message
+from mbodied_agents.agents.language import CognitiveAgent
+from mbodied_agents.types.vision import Image
 
 # Mock responses for the API callss
 mock_openai_response = "OpenAI response text"
