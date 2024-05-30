@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mbodied-agents"
 dynamic = ["version"]
-description = 'Embodied AI for the Mbodi Platform'
+description = 'Embodied AI'
 readme = "README.md"
 requires-python = ">=3.10, <=3.13"
 license = "apache-2.0"

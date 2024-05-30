@@ -1,32 +1,37 @@
-# Mbodied Agents </br> Bringing the Power of Generative AI to Robotics
+# Mbodied Agents
 
 <img src="assets/logo.jpeg" alt="Mbodied Agents Logo" style="width: 200px;">
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![MacOS | Python 3.12|3.11|3.10](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml)
 [![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
+[![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
-# Mbodied Agents </br> Bringing the Power of Generative AI to Robotics
+Welcome to **Mbodied Agents**! A toolkit and platform for integrating various state-of-the-art transformers in robotics for any embodiments. Mbodied Agents has a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and more!
 
-<img src="assets/logo.jpeg" alt="Mbodied Agents Logo" style="width: 200px;">
+<img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![MacOS | Python 3.12|3.11|3.10](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml)
-[![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
-[![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
+Each time you interact with a robot, the data is automatically recorded into a dataset, which can be augmented and used for model training. To learn more about how to process the dataset, augment the data, or train/finetune a foundation model, please fill out this [form](https://forms.gle/rv5rovK93dLucma37).
 
-Welcome to **Mbodied Agents**, a toolkit for integrating various state-of-the-art transformers in robotics. We wanted to make a consistent interface for calling different AI models, handling multimodal data, and using/creating datasets trained on different robots. Be sure to checkout the [examples](examples/README.md) for how to automatically fine-tune a foundational model in as little as 10 lines of code.  With that in mind, Mbodied Agents offers the following features:
+<img src="assets/demo_gif.gif" alt="Demo GIF" style="width: 625px;">
+
+We welcome any questions, issues, or PRs!
+
+Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discussions!
+
+**⭐ Give us a star on GitHub if you like us!**
+
+## Overview
+
+Mbodied Agents offers the following features:
 
 - **Configurability** : Define your desired Observation and Action spaces and read data into the format that works best for your system.
-- **Natural Language Control** : Use verbal prompts to correct a [cognitive agent](link here)'s actions and calibrate its behavior to a new environment.
+- **Natural Language Control** : Use verbal prompts to correct a cognitive agent's actions and calibrate its behavior to a new environment.
 - **Modularity** : Easily swap out different backends, transformers, and hardware interfaces. For even better results, run multiple agents in separate threads.
 - **Validation** : Ensure that your data is in the correct format and that your actions are within the correct bounds before sending them to the robot.
-  
-The core idea idea behind Mbodied Agents is end-to-end continual learning. We believe that the best way to train a robot is to have it learn from its own experiences.
-This is why we are building out a feature called __Conductor__ to record your conversation and the robot's actions as you interact with/teach the robot. This data can then be used to train a foundational model, which can be fine-tuned on your own data. This is a powerful tool for robotics research and development, as it allows you to train a robot to perform a task in a new environment without having to retrain the model from scratch.
 
-## Support Matrix
+### Support Matrix
 
 If you would like to integrate a new backend, sense, or motion control, it is very easy to do so. Please refer to the [contributing guide](CONTRIBUTING.md) for more information.
 
@@ -35,37 +40,22 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 - Mbodi (Coming Soon)
 - HuggingFace (Coming Soon)
 
-## In Beta
+### In Beta
 
-For access (or just to say hey (: ), please fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out us at info@mbodi.ai.
+For access (or just to say hey 😊), don't hesitate to fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at info@mbodi.ai.
 
-- **Conductor** : We are building out a service for automatically training your own models on your own data. We believe this will be a game-changer for robotics and AI research.
-- **Mbodied SVLM** : We are currently working on a new Spatial Vision Language Model trained specifically for spatial reasoning and robotics control.
-- **FAISS Indexing** : Use FAISS to index your robot's recent memory and perform RAG rather than pollute its context.
-  
-## Roadmap
+- **Conductor**: A service for processing and managing datasets, and automatically training your models on your own data.
+- **Data Augmentation**: Build invariance to different environments by augmenting your dataset with Mbodi's diffusion-based data augmentation to achieve better generalization.
+- **Mbodied SVLM**: A new Spatial Vision Language Model trained specifically for spatial reasoning and robotics control.
+- **FAISS Indexing**: Use FAISS to index your robot's recent memory and perform RAG rather than pollute its context.
 
-- **Data Augmentation** : Build invariance to different environments by augmenting your dataset with Mbodi's diffusion-based data augmentation.
-- **Conductor Dashboard** : See how GPT4o, Claude Opus, or your custom models are performing on your datasets and open benchmarks.
-- **Few Shot Visual Prompting** : Use verbal or visual prompts to correct your robot's actions and calibrate its behavior to a new environment.
+### Idea
 
-
-<img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
-
-Each time you interact with a robot, the data is automatically recorded into a dataset, which can be augmented and used for model training, without wasting any conversation or action. To learn more about how to use the dataset, augment the data, or train/finetune a foundational model, please fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at info@mbodi.ai.
-
-<img src="assets/demo_gif.gif" alt="Demo GIF" style="width: 625px;">
-
-
-We welcome any questions, issues, or PRs! Refer to the Contributing section below for more details.
-
-Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discussions!
-
-**⭐ Give us a star on GitHub if you like us!**
+The core idea behind Mbodied Agents is end-to-end continual learning. We believe that the best way to train a robot is to have it learn from its own experiences.
 
 ## Installation
 
-```pip install mbodied-agents```
+`pip install mbodied-agents`
 
 ## Dev Environment Setup
 
@@ -100,8 +90,7 @@ export OPENAI_API_KEY=your_api_key
 python examples/simple_robot_agent.py --backend=openai
 ```
 
-Upcoming feature:
-if you want to use `mbodi` as your backend:
+Upcoming feature: if you want to use `mbodi` as your backend:
 
 ```shell
 python examples/simple_robot_agent.py --backend=mbodi

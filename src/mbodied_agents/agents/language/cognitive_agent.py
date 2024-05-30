@@ -1,3 +1,17 @@
+# Copyright 2024 Mbodi AI
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     https://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import List, Union
 import logging
 from art import text2art
@@ -65,10 +79,10 @@ class CognitiveAgent(LanguageAgent):
             self.backend = AnthropicBackend(api_key, client=client, **kwargs)
             self.model = AnthropicBackend.DEFAULT_MODEL if model is None else model
         # # Upcoming backends:
-        # elif api_service == "mbodi":
-        #     self.starting_context = MbodiBackend.INITIAL_CONTEXT
-        #     self.backend = MbodiBackend(url=MbodiBackend.API_URL)
-        #     self.model = MbodiBackend.DEFAULT_MODEL if model is None else model
+        elif api_service == "mbodi":
+            self.starting_context = MbodiBackend.INITIAL_CONTEXT
+            self.backend = MbodiBackend(url=MbodiBackend.API_URL)
+            self.model = MbodiBackend.DEFAULT_MODEL if model is None else model
         # elif api_service == "huggingface":
         #     self.starting_context = HuggingFaceBackend.INITIAL_CONTEXT
         #     self.backend = HuggingFaceBackend()
