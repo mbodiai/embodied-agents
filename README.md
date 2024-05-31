@@ -8,7 +8,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
-Welcome to **Mbodied Agents**! A toolkit and platform for integrating various state-of-the-art transformers in robotics for any embodiments. Mbodied Agents has a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and more!
+Welcome to **Mbodied Agents**, a toolkit and platform for integrating various state-of-the-art transformers in robotics for any embodiments. Mbodied Agents has a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and more!
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
@@ -18,9 +18,17 @@ Each time you interact with a robot, the data is automatically recorded into a d
 
 We welcome any questions, issues, or PRs!
 
-Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discussions!
+Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discussions! **⭐ Give us a star on GitHub if you like us!**
 
-**⭐ Give us a star on GitHub if you like us!**
+## What is Mbodied Agents for
+
+Mbodied Agents simplifies the integration of advanced AI models in robotics. It offers a unified platform for controlling various robots using state-of-the-art transformers and multimodal data processing. This toolkit enables experimentation with AI models, dataset collection and augmentation, and model training or finetuning for specific tasks. The goal is to develop intelligent, adaptable robots that learn from interactions and perform complex tasks in dynamic environments.
+
+### Example use case
+
+Imagine you are working on a project to develop a home assistant robot capable of performing household chores. Using Mbodied Agents, you can leverage pre-trained AI models to control the robot's actions based on voice commands and visual inputs.
+
+For instance, you can train the robot to understand natural language instructions, and perform tasks such as fetching items, cleaning, etc. By continuously recording the robot's interactions and augmenting the collected data to train models, you can improve its performance over time, making it more efficient and reliable in various scenarios.
 
 ## Overview
 
@@ -39,15 +47,16 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 - Anthropic
 - Mbodi (Coming Soon)
 - HuggingFace (Coming Soon)
+- Gemini (Coming Soon)
 
 ### In Beta
 
 For access (or just to say hey 😊), don't hesitate to fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at info@mbodi.ai.
 
 - **Conductor**: A service for processing and managing datasets, and automatically training your models on your own data.
+- **Conductor Dashboard**: See how GPT-4o, Claude Opus, or your custom models are performing on your datasets and open benchmarks.
 - **Data Augmentation**: Build invariance to different environments by augmenting your dataset with Mbodi's diffusion-based data augmentation to achieve better generalization.
 - **Mbodied SVLM**: A new Spatial Vision Language Model trained specifically for spatial reasoning and robotics control.
-- **FAISS Indexing**: Use FAISS to index your robot's recent memory and perform RAG rather than pollute its context.
 
 ### Idea
 
@@ -123,43 +132,75 @@ python examples/simple_robot_agent.py --backend=mbodi
 
 - **Control**: An atomic action that is “handed off” to other processes outside the scope of consideration. An example is HandControl, which includes x, y, z, roll, pitch, yaw, and grasp. This is a motion control used to manage the position, orientation, and hand-openness of an end-effector. Typically, this is passed to lower-level hardware interfaces or libraries.
 
-## Details
+## Building Blocks
+
+### Sample
+
+The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. The Sample class supports any JSON API out of the box and can represent arbitrary action and observation spaces in robotics. It integrates seamlessly with H5, Gym, Arrow, PyTorch, DSPY, numpy, and HuggingFace.
+
+See [sample.py](src/mbodied_agents/base/sample.py) for more details.
+
+### Message
+
+The [Message](src/mbodied_agents/types/message.py) class represents a single completion sample space. It can be text, image, a list of text/images, Sample, or other modality. The Message class is designed to handle various types of content and supports different roles such as user, assistant, or system.
+
+You can create a `Message` in versatile ways. They can all be understood by mbodi's backend.
+
+```python
+Message(role="user", content="example text")
+Message(role="user", content=["example text", Image("example.jpg"), Image("example2.jpg")])
+Message(role="user", content=[Sample("Hello")])
+```
+
+### Backend
+
+The [Backend](src/mbodied_agents/base/backend.py) class is an abstract base class for Backend implementations. It provides the basic structure and methods required for interacting with different backend services, such as API calls for generating completions based on given messages. See [backend directory](src/mbodied_agents/agents/backends) on how various backends are implemented.
 
 ### Cognitive Agent
 
-The Cognitive Agent is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice.
+The [Cognitive Agent](src/mbodied_agents/agents/language/cognitive_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
-For example, to use OpenAI for your robot backend. Currently supported API services are OpenAI and Anthropic. Upcoming API services include Mbodi, Ollama, and HuggingFace.
+Currently supported API services are OpenAI and Anthropic. Upcoming API services include Mbodi, Ollama, and HuggingFace. Stay tuned for our Mbodi backend service!
 
-Stay tuned for our Mbodi backend service!
+For example, to use OpenAI for your robot backend:
 
 ```python
 robot_agent = CognitiveAgent(context=context_prompt, api_service="openai")
 ```
 
+``context`` can be either a string or a list, for example:
+
+```python
+context_prompt = "you are a robot"
+# OR
+context_prompt = [
+    Message(role="system", content="you are a robot"),
+    Message(role="user", content=["example text", Image("example.jpg")]),
+    Message(role="assistant", content="Understood."),
+]
+```
+
 To execute an instruction:
 
 ```python
-response = robot_agent.act(instruction, observation)[0]
-```
-
-You can also pass an arbituary number of text and image to the agent:
-
-```python
+response = robot_agent.act(instruction, image)[0]
+# You can also pass an arbituary number of text and image to the agent:
 response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 ```
 
+### Controls
+
+The [controls](src/mbodied_agents/types/controls.py) module defines various motions to control a robot as Pydantic models. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
+
 ### Hardware Interface
 
-Mapping robot actions from any model to any embodiment is very easy.
-
-In our example script, we use a mock hardware interface. We also have an XArm interface as an example at [src/mbodied/hardware/xarm_interface.py)](src/mbodied/hardware/xarm_interface.py).
+Mapping robot actions from any model to any embodiment is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](src/mbodied_agents/hardware/xarm_interface.py) as an example.
 
 Upcoming: a remote hardware interface with a communication protocol. This will be very convenient for controlling robots that have a computer attached, e.g., LoCoBot.
 
-### Dataset Recording
+### Recorder
 
-To record your conversation and the robot's actions to a dataset as you interact with/teach the robot.
+Dataset [Recorder](src/mbodied_agents/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
 
 Here's an example of recording observation, instruction, and the output HandControl (x, y, z, r, p, y, grasp).
 
@@ -182,7 +223,3 @@ The dataset is saved to `./saved_datasets`. Please fill out this [form](https://
 We believe in the power of collaboration and open-source development. This platform is designed to be shared, extended, and improved by the community. See the [contributing guide](CONTRIBUTING.md) for more information.
 
 Feel free to report any issues, ask questions, ask for features, or submit PRs.
-
-## About Mbodi AI
-
-Mbodi AI is an open-source robotics and AI platform designed to support end-to-end robotics applications involving artificial intelligence, data handling and augmentation, human-user interaction, and much more!
