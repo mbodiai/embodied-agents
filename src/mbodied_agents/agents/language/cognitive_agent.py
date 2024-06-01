@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union
 import logging
-from art import text2art
+from typing import List, Union
 
-from mbodied_agents.agents.backends import AnthropicBackend, OpenAIBackend, OllamaBackend, MbodiBackend, HuggingFaceBackend
+from art import text2art
+from mbodied_agents.agents.backends import (
+    AnthropicBackend,
+    HuggingFaceBackend,
+    MbodiBackend,
+    OllamaBackend,
+    OpenAIBackend,
+)
 from mbodied_agents.agents.language.language_agent import LanguageAgent
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.data.recording import Recorder

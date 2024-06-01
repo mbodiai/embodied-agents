@@ -1,35 +1,35 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pydantic import Field, ValidationError
 import json
+import logging
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
-import logging
+
 import jsonref
 import numpy as np
 import torch
-from gym import spaces
-from pydantic import BaseModel, ConfigDict
-from pydantic.fields import FieldInfo
-from pydantic_core import ValidationError, from_json
-from typing_extensions import Annotated
 from datasets import Dataset
+from gym import spaces
+from mbodied_agents.types.ndarray import NumpyArray
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic.fields import FieldInfo
+from pydantic_core import from_json
+from typing_extensions import Annotated
 
-Flattenable = Annotated[Literal["dict", "np",
-                                "pt", "list"], "Numpy, PyTorch, list, or dict"]
+Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 
 
 class Sample(BaseModel):
@@ -41,8 +41,9 @@ class Sample(BaseModel):
     PyTorch, DSPY, numpy, and HuggingFace.
 
     Methods:
-        schema: Recursively simplify a JSON schema.
-        to: Convert the Sample instance to a different container type.
+        schema: Get a simplified json schema of your data.
+        to: Convert the Sample instance to a different container type:
+            - 
         default_value: Get the default value for the Sample instance.
         unflatten: Unflatten a one-dimensional array or dictionary into a Sample instance.
         flatten: Flatten the Sample instance into a one-dimensional array or dictionary.
@@ -67,6 +68,7 @@ class Sample(BaseModel):
         >>> print(unflattened_sample)
         Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
     """
+
     __doc__ = "A base model class for serializing, recording, and manipulating arbitray data."
 
     model_config: ConfigDict = ConfigDict(
@@ -114,16 +116,15 @@ class Sample(BaseModel):
         if not isinstance(one_d_array_or_dict, list):
             one_d_array_or_dict = list(one_d_array_or_dict)
 
-        if schema['type'] == 'object':
+        if schema["type"] == "object":
             obj = {}
             index = 0
-            for key, subschema in schema['properties'].items():
-                if subschema['type'] == 'object':
-                    sub_length = len(subschema['properties'])
-                    sub_array = one_d_array_or_dict[index:index + sub_length]
+            for key, subschema in schema["properties"].items():
+                if subschema["type"] == "object":
+                    sub_length = len(subschema["properties"])
+                    sub_array = one_d_array_or_dict[index : index + sub_length]
                     # Create a dict directly for nested properties
-                    sub_obj = dict(
-                        zip(subschema['properties'].keys(), sub_array, strict=False))
+                    sub_obj = dict(zip(subschema["properties"].keys(), sub_array, strict=False))
                     print(f"Key: {key}, Sub-Object: {sub_obj}")
                     obj[key] = sub_obj
                     index += sub_length
@@ -204,7 +205,7 @@ class Sample(BaseModel):
         return {}
 
     def schema(self, resolve_refs: bool = True) -> dict:
-        """Simplifies a given JSON schema.
+        """Returns a simplified json schema.
 
         Removing additionalProperties,
         selecting the first type in anyOf, and converting numpy schema to the desired type.
@@ -220,16 +221,15 @@ class Sample(BaseModel):
         schema = self.model_json_schema()
         if resolve_refs:
             schema = jsonref.replace_refs(schema)
-        if schema.get('additionalProperties', False):
-            del schema['additionalProperties']
+        if schema.get("additionalProperties", False):
+            del schema["additionalProperties"]
         for key, value in self.dict().items():
             if isinstance(value, Sample):
-                schema['properties'][key] = Sample.to_schema(
-                    value.schema(resolve_refs=resolve_refs))
+                schema["properties"][key] = Sample.to_schema(value.schema(resolve_refs=resolve_refs))
             elif isinstance(value, dict | list):
-                schema['properties'][key] = Sample.to_schema(value)
+                schema["properties"][key] = Sample.to_schema(value)
             if key not in self.model_fields:
-                schema['properties'][key] = Sample.to_schema(value)
+                schema["properties"][key] = Sample.to_schema(value)
         return schema
 
     @classmethod
@@ -246,8 +246,7 @@ class Sample(BaseModel):
             try:
                 data = cls.model_validate(from_json(data))
             except Exception as e:
-                logging.info(
-                    f"Error reading data: {e}. Attempting to read as JSON.")
+                logging.info(f"Error reading data: {e}. Attempting to read as JSON.")
                 if isinstance(data, str):
                     if Path(data).exists():
                         if hasattr(cls, "open"):
@@ -267,7 +266,7 @@ class Sample(BaseModel):
 
         Args:
             container (Any): The container type to convert to. Supported types are
-            'dict', 'list', 'np', 'pt' (pytorch), 'space' (gym.space), 
+            'dict', 'list', 'np', 'pt' (pytorch), 'space' (gym.space),
             'schema', 'json', 'hf' (datasets.Dataset) and any subtype of Sample.
 
         Returns:
@@ -275,7 +274,7 @@ class Sample(BaseModel):
         """
         if isinstance(container, Sample) and not issubclass(container, Sample):
             return container(**self.dict())
-        if issubclass(container, Sample):
+        if isinstance(container, type) and issubclass(container, Sample):
             return container.unflatten(self.flatten())
 
         if container == "dict":
@@ -294,6 +293,8 @@ class Sample(BaseModel):
             return self.model_dump_json()
         if container == "hf":
             return Dataset.from_dict(self.dict())
+        if container == "action":
+            return 
         raise ValueError(f"Unsupported container type: {container}")
 
     @classmethod
@@ -324,8 +325,7 @@ class Sample(BaseModel):
             if isinstance(value, Sample):
                 value = value.dict()
             return spaces.Dict(
-                {k: Sample.space_for(v, max_text_length, info)
-                 for k, v in value.items()},
+                {k: Sample.space_for(v, max_text_length, info) for k, v in value.items()},
             )
         if isinstance(value, str):
             return spaces.Text(max_length=max_text_length)
@@ -340,7 +340,12 @@ class Sample(BaseModel):
                 ge = info.metadata_lookup.get("ge")
                 dtype = info.metadata_lookup.get("dtype")
             logging.debug(
-                "Generating space for value: %s, shape: %s, le: %s, ge: %s, dtype: %s", value, shape, le, ge, dtype,
+                "Generating space for value: %s, shape: %s, le: %s, ge: %s, dtype: %s",
+                value,
+                shape,
+                le,
+                ge,
+                dtype,
             )
             try:
                 value = np.asfarray(value)
@@ -350,19 +355,15 @@ class Sample(BaseModel):
                 ge = ge or np.inf
                 return spaces.Box(low=le, high=ge, shape=shape, dtype=dtype)
             except Exception as e:
-                logging.info(
-                    f"Could not convert value {value} to numpy array: {e}")
+                logging.info(f"Could not convert value {value} to numpy array: {e}")
                 if len(value) > 0 and isinstance(value[0], dict | Sample):
                     return spaces.Tuple(
-                        [spaces.Dict(cls.space_for(v, max_text_length, info))
-                         for v in value],
+                        [spaces.Dict(cls.space_for(v, max_text_length, info)) for v in value],
                     )
                 return spaces.Tuple(
-                    [spaces.Dict(cls.space_for(value[0], max_text_length, info))
-                     for value in value[:1]],
+                    [spaces.Dict(cls.space_for(value[0], max_text_length, info)) for value in value[:1]],
                 )
-        raise ValueError(
-            f"Unsupported object {value} of type: {type(value)} for space generation")
+        raise ValueError(f"Unsupported object {value} of type: {type(value)} for space generation")
 
     @classmethod
     def init_from(cls, d: Any, pack=False) -> "Sample":
@@ -376,14 +377,12 @@ class Sample(BaseModel):
             try:
                 return cls.model_validate(d)
             except ValidationError as e:
-                logging.info(
-                    f" Unable to validate {d} as {cls} {e}. Attempting to unflatten.")
+                logging.info(f" Unable to validate {d} as {cls} {e}. Attempting to unflatten.")
 
                 try:
                     return cls.unflatten(d)
                 except Exception as e:
-                    logging.info(
-                        f" Unable to unflatten {d} as {cls} {e}. Attempting to read.")
+                    logging.info(f" Unable to unflatten {d} as {cls} {e}. Attempting to read.")
                     return cls.read(d)
         return cls(d)
 
@@ -404,7 +403,7 @@ class Sample(BaseModel):
         reconstructed = {}
 
         for flat_key, value in flat_dict.items():
-            keys = flat_key.split('.')
+            keys = flat_key.split(".")
             current = reconstructed
             for key in keys[:-1]:
                 if key not in current:
@@ -440,8 +439,7 @@ class Sample(BaseModel):
             return cls()
 
         first_sample = samples[0]
-        attributes = list(first_sample.keys()) if isinstance(
-            first_sample, dict) else list(first_sample.__dict__.keys())
+        attributes = list(first_sample.keys()) if isinstance(first_sample, dict) else list(first_sample.__dict__.keys())
 
         aggregated = {attr: [] for attr in attributes}
         for sample in samples:
@@ -455,16 +453,13 @@ class Sample(BaseModel):
 
     def unpack(self, to_dicts=False) -> List[Union["Sample", Dict]]:
         """Unpack the packed Sample object into a list of Sample objects or dictionaries."""
-        attributes = list(self.model_extra.keys()) + \
-            list(self.model_fields.keys())
-        attributes = [attr for attr in attributes if getattr(
-            self, attr) is not None]
+        attributes = list(self.model_extra.keys()) + list(self.model_fields.keys())
+        attributes = [attr for attr in attributes if getattr(self, attr) is not None]
         if not attributes or getattr(self, attributes[0]) is None:
             return []
 
         # Ensure all attributes are lists and have the same length
-        list_sizes = {len(getattr(self, attr))
-                      for attr in attributes if isinstance(getattr(self, attr), list)}
+        list_sizes = {len(getattr(self, attr)) for attr in attributes if isinstance(getattr(self, attr), list)}
         if len(list_sizes) != 1:
             raise ValueError("Not all attribute lists have the same length.")
         list_size = list_sizes.pop()
@@ -507,8 +502,7 @@ class Sample(BaseModel):
         """
         space_dict = {}
         for key, value in self.model_dump(exclude_none=True).items():
-            logging.debug(
-                "Generating space for key: '%s', value: %s", key, value)
+            logging.debug("Generating space for key: '%s', value: %s", key, value)
             info = self.model_field_info(key)
             space_dict[key] = self.space_for(value, info=info)
         return spaces.Dict(space_dict)
@@ -521,15 +515,7 @@ class Sample(BaseModel):
         return self.__class__.model_validate(self.space().sample())
 
 
-# from pydantic import Field, ValidationError
+class SampleList(Sample):
+    values: List[Sample] = Field(..., min_length=2, max_length=10)
+    numpy: NumpyArray | None = None
 
-
-# class SampleList(Sample):
-#     values: List[Sample] = Field(..., min_length=2, max_length=10)
-#     numpy: NumpyArray | None = None
-
-
-# from pprint import pprint
-
-# sl = SampleList(values=[Sample(x=1, y=2), Sample(x=3, y=4)], numpy=np.array([1, 2, 3, 4]))
-# pprint(sl.model_json_schema())
