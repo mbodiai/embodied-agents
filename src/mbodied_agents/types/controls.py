@@ -16,9 +16,8 @@ from typing import Sequence
 
 import numpy as np
 from gym import spaces
-from pydantic import Field
-
 from mbodied_agents.base.motion import AbsoluteMotionField, Motion, MotionField, RelativeMotionField
+from pydantic import Field
 
 """Motions to control a robot.
 

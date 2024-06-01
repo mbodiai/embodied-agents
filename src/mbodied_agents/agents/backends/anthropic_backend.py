@@ -16,7 +16,6 @@ import os
 from typing import Any
 
 import anthropic
-
 from mbodied_agents.base.backend import Backend
 from mbodied_agents.base.serializer import Serializer
 from mbodied_agents.types.message import Message

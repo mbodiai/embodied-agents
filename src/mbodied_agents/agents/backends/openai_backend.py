@@ -15,12 +15,11 @@
 import os
 from typing import Any, List
 
-from openai import OpenAI
-
 from mbodied_agents.base.backend import Backend
 from mbodied_agents.base.serializer import Serializer
 from mbodied_agents.types.message import Message
 from mbodied_agents.types.vision import Image
+from openai import OpenAI
 
 
 class OpenAISerializer(Serializer):
