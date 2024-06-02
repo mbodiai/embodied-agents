@@ -18,27 +18,6 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
-
-[project.urls]
-Documentation = "https://github.com/mbodiai/mbodied-agents#readme"
-Issues = "https://github.com/mbodiai/mbodied-agents/issues"
-Source = "https://github.com/mbodiai/mbodied-agents"
-
-[project.scripts]
-
-[tool.hatch.version]
-path = "src/mbodied_agents/__about__.py"
-
-[tool.hatch.metadata]
-allow-direct-references = true
-
-
-[tool.hatch.envs.default]
-
-python = "3.11"
-path = ".mbodied_agents/envs/mbodied_agents"
-
 dependencies = [
   "coverage[toml]>=6.5",
   "toml==0.10.2",
@@ -64,6 +43,25 @@ dependencies = [
   "jsonref",
   "art",
 ]
+
+[project.urls]
+Documentation = "https://github.com/mbodiai/mbodied-agents#readme"
+Issues = "https://github.com/mbodiai/mbodied-agents/issues"
+Source = "https://github.com/mbodiai/mbodied-agents"
+
+[project.scripts]
+
+[tool.hatch.version]
+path = "src/mbodied_agents/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+
+[tool.hatch.envs.default]
+
+python = "3.11"
+path = ".mbodied_agents/envs/mbodied_agents"
 
 [tool.hatch.envs.default.env-vars]
 
