@@ -138,6 +138,78 @@ python examples/simple_robot_agent.py --backend=mbodi
 
 The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. The Sample class supports any JSON API out of the box and can represent arbitrary action and observation spaces in robotics. It integrates seamlessly with H5, Gym, Arrow, PyTorch, DSPY, numpy, and HuggingFace.
 
+#### Creating a Sample
+
+To create a Sample, you can wrap your object in Sample(). By doing so, you automatically get the following functionalities:
+
+   - Gym Space: Create a new gym environment.
+   - Flattened List/Array/Tensor: Plug the flattened data into a machine learning model.
+   - HuggingFace Dataset: Utilize semantic search capabilities.
+   - Pydantic BaseModel: Ensure reliable and quick JSON validation.
+
+Here is an example of creating a Sample and using its methods:
+
+```python
+# Creating a Sample instance
+sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
+
+# Flattening the Sample instance
+flat_list = sample.flatten()
+print(flat_list) # Output: [1, 2, 3, 4, 5]
+
+# Generating a simplified JSON schema
+schema = sample.schema()
+print(schema)
+# Output: {'type': 'object', 'properties': {'x': {'type': 'number'}, 'y': {'type': 'number'}, 'z': {'type': 'object', 'properties': {'a': {'type': 'number'}, 'b': {'type': 'number'}}}, 'extra_field': {'type': 'number'}}}
+
+# Unflattening a list into a Sample instance
+unflattened_sample = Sample.unflatten(flat_list, schema)
+print(unflattened_sample) # Output: Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
+```
+
+#### Serialization and Deserialization with Pydantic
+
+The Sample class leverages Pydantic's powerful features for serialization and deserialization, allowing you to easily convert between Sample instances and JSON.
+
+To serialize or deserialize a Sample instance with JSON:
+
+``` python
+# Serialize the Sample instance to JSON
+sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
+json_data = sample.model_dump_json()
+
+# Deserialize the JSON data back into a Sample instance
+json_data = '{"x": 1, "y": 2, "z": {"a": 3, "b": 4}, "extra_field": 5}'
+sample = Sample.model_validate(from_json(json_data))
+```
+
+#### Converting to Different Containers
+
+``` python
+# Converting to a dictionary
+sample_dict = sample.to("dict")
+
+# Converting to a NumPy array
+sample_np = sample.to("np")
+
+# Converting to a PyTorch tensor
+sample_pt = sample.to("pt")
+
+# Converting to a HuggingFace Dataset
+sample_hf = sample.to("hf")
+```
+
+#### Gym Space Integration
+
+```python
+from gym import spaces
+
+# Creating a Gym space from the Sample instance
+gym_space = sample.space()
+print(gym_space)
+# Output: Dict('a': Box(0, 255, (1,), int64), 'b': Dict('c': Box(0, 255, (1,), int64), 'd': Box(0, 255, (1,), int64)))
+```
+
 See [sample.py](src/mbodied_agents/base/sample.py) for more details.
 
 ### Message
@@ -190,7 +262,7 @@ response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 
 ### Controls
 
-The [controls](src/mbodied_agents/types/controls.py) module defines various motions to control a robot as Pydantic models. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
+The [controls](src/mbodied_agents/types/controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from ``Sample``, thus possessing all the capability of ``Sample`` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
 
 ### Hardware Interface
 
