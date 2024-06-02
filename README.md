@@ -8,11 +8,11 @@
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
-Welcome to **Mbodied Agents**, a toolkit and platform for integrating various state-of-the-art transformers in robotics for any embodiments. Mbodied Agents has a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and more!
+Welcome to **Mbodied Agents**, a toolkit for integrating various state-of-the-art transformers into robotics stacks. Mbodied Agents is designed to provide a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and work for arbitrary observation and action spaces. See [Getting Started](#getting-started).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
-Each time you interact with a robot, the data is automatically recorded into a dataset, which can be augmented and used for model training. To learn more about how to process the dataset, augment the data, or train/finetune a foundation model, please fill out this [form](https://forms.gle/rv5rovK93dLucma37).
+Each time you interact with a robot, the data is automatically recorded into a dataset, which can be augmented and used for model training. We are actively developing tools for processing the dataset, augmenting the data, and finetuning foundation models. If you'd like to learn more or provide feedback, please fill out this [form](https://forms.gle/rv5rovK93dLucma37).◊
 
 <img src="assets/demo_gif.gif" alt="Demo GIF" style="width: 625px;">
 
@@ -20,15 +20,30 @@ We welcome any questions, issues, or PRs!
 
 Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discussions! **⭐ Give us a star on GitHub if you like us!**
 
+- [Mbodied Agents](#mbodied-agents)
+  - [What is Mbodied Agents for](#what-is-mbodied-agents-for)
+  - [Overview](#overview)
+    - [Support Matrix](#support-matrix)
+    - [In Beta](#in-beta)
+    - [Idea](#idea)
+  - [Installation](#installation)
+  - [Dev Environment Setup](#dev-environment-setup)
+  - [Getting Started](#getting-started)
+  - [Glossary](#glossary)
+  - [Building Blocks](#building-blocks)
+    - [The Sample class](#the-sample-class)
+    - [Message](#message)
+    - [Backend](#backend)
+    - [Cognitive Agent](#cognitive-agent)
+    - [Controls](#controls)
+    - [Hardware Interface](#hardware-interface)
+    - [Recorder](#recorder)
+  - [Directory Structure](#directory-structure)
+  - [Contributing](#contributing)
+
 ## What is Mbodied Agents for
 
 Mbodied Agents simplifies the integration of advanced AI models in robotics. It offers a unified platform for controlling various robots using state-of-the-art transformers and multimodal data processing. This toolkit enables experimentation with AI models, dataset collection and augmentation, and model training or finetuning for specific tasks. The goal is to develop intelligent, adaptable robots that learn from interactions and perform complex tasks in dynamic environments.
-
-### Example use case
-
-Imagine you are working on a project to develop a home assistant robot capable of performing household chores. Using Mbodied Agents, you can leverage pre-trained AI models to control the robot's actions based on voice commands and visual inputs.
-
-For instance, you can train the robot to understand natural language instructions, and perform tasks such as fetching items, cleaning, etc. By continuously recording the robot's interactions and augmenting the collected data to train models, you can improve its performance over time, making it more efficient and reliable in various scenarios.
 
 ## Overview
 
@@ -51,7 +66,7 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 
 ### In Beta
 
-For access (or just to say hey 😊), don't hesitate to fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at info@mbodi.ai.
+For access (or just to say hey 😊), don't hesitate to fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at <info@mbodi.ai>.
 
 - **Conductor**: A service for processing and managing datasets, and automatically training your models on your own data.
 - **Conductor Dashboard**: See how GPT-4o, Claude Opus, or your custom models are performing on your datasets and open benchmarks.
@@ -88,7 +103,7 @@ The core idea behind Mbodied Agents is end-to-end continual learning. We believe
 
 ## Getting Started
 
-Please refer to [examples/simple_robot_agent.py](examples/simple_robot_agent.py) or use the Colab below to get started.
+Please refer to [examples/simple_robot_agent.py](examples/simple_robot_agent.py) or use the Colab for a minimal example.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
@@ -97,31 +112,6 @@ To run `simple_robot_agent.py`, if you want to use OpenAI, for example, as your 
 ```shell
 export OPENAI_API_KEY=your_api_key
 python examples/simple_robot_agent.py --backend=openai
-```
-
-Upcoming feature: if you want to use `mbodi` as your backend:
-
-```shell
-python examples/simple_robot_agent.py --backend=mbodi
-```
-
-## Directory Structure
-
-```
-├─ assets/ ............. Images, icons, and other static assets
-├─ examples/ ........... Example scripts and usage demonstrations
-├─ resources/ .......... Additional resources for examples
-├─ src/
-│  └─ mbodied/
-│     ├─ agents/ ....... Modules for robot agents
-│     │  ├─ backends/ .. Backend implementations for different services for agents
-│     │  ├─ language/ .. Language based agents modules
-│     │  └─ sense/ ..... Sensory, e.g. audio, processing modules
-│     ├─ base/ ......... Base classes and core infra modules
-│     ├─ data/ ......... Data handling and processing
-│     ├─ hardware/ ..... Hardware interface and interaction
-│     └─ types/ ........ Common types and definitions
-└─ tests/ .............. Unit tests
 ```
 
 ## Glossary
@@ -134,18 +124,16 @@ python examples/simple_robot_agent.py --backend=mbodi
 
 ## Building Blocks
 
-### Sample
+### The [Sample](src/mbodied_agents/base/sample.py) class
 
-The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. The Sample class supports any JSON API out of the box and can represent arbitrary action and observation spaces in robotics. It integrates seamlessly with H5, Gym, Arrow, PyTorch, DSPY, numpy, and HuggingFace.
+The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](src/mbodied_agents/base/sample.py) class, you'll be able to convert to and from the following with ease:
+
+- a gym space for creating a new gym environment
+- a flattened list, array, or tensor for plugging into an ML model
+- a HuggingFace dataset with semantic search capabilities
+- a pydantic BaseModel for reliable and quick json serialization/deserialization.
 
 #### Creating a Sample
-
-To create a Sample, you can wrap your object in Sample(). By doing so, you automatically get the following functionalities:
-
-   - Gym Space: Create a new gym environment.
-   - Flattened List/Array/Tensor: Plug the flattened data into a machine learning model.
-   - HuggingFace Dataset: Utilize semantic search capabilities.
-   - Pydantic BaseModel: Ensure reliable and quick JSON validation.
 
 Here is an example of creating a Sample and using its methods:
 
@@ -173,7 +161,7 @@ The Sample class leverages Pydantic's powerful features for serialization and de
 
 To serialize or deserialize a Sample instance with JSON:
 
-``` python
+```python
 # Serialize the Sample instance to JSON
 sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
 json_data = sample.model_dump_json()
@@ -185,7 +173,7 @@ sample = Sample.model_validate(from_json(json_data))
 
 #### Converting to Different Containers
 
-``` python
+```python
 # Converting to a dictionary
 sample_dict = sample.to("dict")
 
@@ -240,7 +228,7 @@ For example, to use OpenAI for your robot backend:
 robot_agent = CognitiveAgent(context=context_prompt, api_service="openai")
 ```
 
-``context`` can be either a string or a list, for example:
+`context` can be either a string or a list, for example:
 
 ```python
 context_prompt = "you are a robot"
@@ -262,7 +250,7 @@ response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 
 ### Controls
 
-The [controls](src/mbodied_agents/types/controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from ``Sample``, thus possessing all the capability of ``Sample`` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
+The [controls](src/mbodied_agents/types/controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
 
 ### Hardware Interface
 
@@ -288,7 +276,26 @@ recorder = Recorder('example_recorder', out_dir='saved_datasets', observation_sp
 recorder.record(observation={'image': image, 'instruction': instruction,}, action=hand_control)
 ```
 
-The dataset is saved to `./saved_datasets`. Please fill out this [form](https://forms.gle/rv5rovK93dLucma37) if you are interested in getting the dataset processed, augmented, or use it for training etc.
+The dataset is saved to `./saved_datasets`. Learn more about augmenting, and finetuning with this dataset by filling out this [form](https://forms.gle/rv5rovK93dLucma37).
+
+## Directory Structure
+
+```shell
+├─ assets/ ............. Images, icons, and other static assets
+├─ examples/ ........... Example scripts and usage demonstrations
+├─ resources/ .......... Additional resources for examples
+├─ src/
+│  └─ mbodied/
+│     ├─ agents/ ....... Modules for robot agents
+│     │  ├─ backends/ .. Backend implementations for different services for agents
+│     │  ├─ language/ .. Language based agents modules
+│     │  └─ sense/ ..... Sensory, e.g. audio, processing modules
+│     ├─ base/ ......... Base classes and core infra modules
+│     ├─ data/ ......... Data handling and processing
+│     ├─ hardware/ ..... Hardware interface and interaction
+│     └─ types/ ........ Common types and definitions
+└─ tests/ .............. Unit tests
+```
 
 ## Contributing
 
