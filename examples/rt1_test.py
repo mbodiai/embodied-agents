@@ -24,11 +24,10 @@ config = {
 
 rt1_agent = RT1Agent(config)
 
-for name, param in rt1_agent.model.named_parameters():
-    print(f"{name}: {param.device}")
-
-rt1_agent.act(image=torch.rand(224, 224, 3),
+actions = rt1_agent.act(image=torch.rand(224, 224, 3),
               instruction_emb=torch.rand(1, 512))
+
+print("Complete")
 
 # Pass the dummy input through the model
 # output = model(dummy_input)

@@ -74,8 +74,6 @@ class RT1Agent(Agent):
         self,
         instruction_emb: torch.Tensor,
         image: SupportsImage,
-        mean_tokens=None,
-        std_tokens=None,
     ) -> List[Motion]:
         image = cv2.resize(np.array(image, dtype=np.uint8), (224, 224))
         self.image_history.append(torch.tensor(
@@ -113,21 +111,21 @@ class RT1Agent(Agent):
 
         self.policy_state = network_state
 
-        outs = self.action_tokenizer.detokenize(
-            out_tokens, action_mean=mean_tokens, action_std=std_tokens)
+        outs = self.action_tokenizer.detokenize(out_tokens)
         actions = [
             HandControl(
                 pose=Pose(
-                    xyz=np.array(outs["xyz"][0][i]),
-                    rpy=np.array(outs["rpy"][0][i]),
+                    x=outs["xyz"][0][i][0],
+                    y=outs["xyz"][0][i][1],
+                    z=outs["xyz"][0][i][2],
+                    roll=outs["rpy"][0][i][0],
+                    pitch=outs["rpy"][0][i][1],
+                    yaw=outs["rpy"][0][i][2],
                 ),
                 grasp=JointControl(value=outs["grasp"][0][i]),
             )
             for i in range(6)
         ]
-
-        for _action in actions:
-            pass
 
         self.step_num += 1
         return actions
