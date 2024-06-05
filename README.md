@@ -123,7 +123,7 @@ export OPENAI_API_KEY=your_api_key
 python examples/simple_robot_agent.py --backend=openai
 ```
 
-Alternatively, you can use another Colab to see our Cognitive agent in action within a SimplerEnv simulation. 
+Alternatively, you can use another Colab to see our **Cognitive agent** in action within a **SimplerEnv** simulation. 
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
 
