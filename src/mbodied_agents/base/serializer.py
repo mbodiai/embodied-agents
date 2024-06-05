@@ -1,11 +1,11 @@
+#
 # Copyright 2024 Mbodi AI
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,11 +14,10 @@
 
 from typing import Any
 
-from pydantic import ConfigDict, model_serializer, model_validator
-
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.types.message import Message
 from mbodied_agents.types.vision import Image
+from pydantic import ConfigDict, model_serializer, model_validator
 
 
 class Serializer(Sample):
@@ -39,8 +38,16 @@ class Serializer(Sample):
             wrapped: An instance of Message, Sample, a list of Messages, or None.
             message: An optional Message to be wrapped.
             sample: An optional Sample to be wrapped.
+            wrapped (Message | Sample | list[Message] | None): An instance of Message, Sample, a list of Messages, or None.
+            message (Message | None): An optional Message to be wrapped.
+            sample (Sample | None): An optional Sample to be wrapped.
             **data: Additional data to initialize the Sample base class.
 
+        Example:
+            >>> msg = Message(role="user", content=["Hello, world!"])
+            >>> serializer = Serializer(message=msg)
+            >>> print(serializer.serialize())
+            {'role': 'user', 'content': [{'type': 'text', 'text': 'Hello, world!'}]}
         """
         if wrapped is not None:
             data["wrapped"] = wrapped
@@ -57,9 +64,11 @@ class Serializer(Sample):
 
         Args:
             values: A dictionary of field values to validate.
+            values (dict[str, Any]): A dictionary of field values to validate.
 
         Returns:
             The validated values dictionary.
+            dict[str, Any]: The validated values dictionary.
 
         Raises:
             ValueError: If the 'wrapped' field contains an invalid type.
@@ -79,10 +88,12 @@ class Serializer(Sample):
 
         Args:
             sample: The sample to be serialized.
+            sample (Any): The sample to be serialized.
 
         Returns:
             A dictionary representing the serialized sample.
 
+            dict[str, Any]: A dictionary representing the serialized sample.
         """
         if not isinstance(sample, Sample):
             sample = Sample(sample)
@@ -102,6 +113,7 @@ class Serializer(Sample):
         Returns:
             A dictionary representing the serialized wrapped content.
 
+            dict[str, Any]: A dictionary representing the serialized wrapped content.
         """
         if isinstance(self.wrapped, Message):
             return self.serialize_msg(self.wrapped)
@@ -118,10 +130,12 @@ class Serializer(Sample):
 
         Args:
             message: The Message to be serialized.
+            message (Message): The Message to be serialized.
 
         Returns:
             A dictionary representing the serialized Message.
 
+            dict[str, Any]: A dictionary representing the serialized Message.
         """
         return {
             "role": message.role,
