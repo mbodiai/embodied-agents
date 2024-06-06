@@ -16,7 +16,7 @@ mbodied-agents v0.0.5: Fixed PyPI project dependency. Added dataset Replayer. Up
 
 ##
 
-Welcome to **Mbodied Agents**, a toolkit for integrating various state-of-the-art transformers into robotics stacks. Mbodied Agents is designed to provide a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and work for arbitrary observation and action spaces. See [Getting Started](#getting-started).
+Welcome to **Mbodied Agents**, a toolkit for integrating various state-of-the-art transformers into robotics stacks. Mbodied Agents is designed to provide a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and work for arbitrary observation and action spaces. It can be seamlessly integrated into real hardware or simulation. See [Getting Started](#getting-started).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
@@ -111,15 +111,8 @@ The core idea behind Mbodied Agents is end-to-end continual learning. We believe
 
 ## Getting Started
 
-### SimplerEnv Simulation
-
-Run an OpenAI based Cognitive Agent in action within a SimplerEnv simulation, that is prompt-tuned to output observations and actions in the form of X, Y, Z coordinates, roll, pitch, yaw, and grasp actions.
-
-Click the following Colab link to get started:
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
-
 ### Real Robot Hardware
+
 To run the Cognitive Agent on real robot hardware, refer to our in-depth tutorial provided in the Colab link below:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
@@ -133,12 +126,13 @@ export OPENAI_API_KEY=your_api_key
 python examples/simple_robot_agent.py --backend=openai
 ```
 
+### SimplerEnv Simulation
 
-To learn more about **SimplerEnv**, visit
+To run the Cognitive Agent in simulation, i.e. SimplerEnv, click the following Colab to get started:
 
-[![GitHub](https://img.shields.io/badge/GitHub-SimplerEnv-blue?logo=github)](https://github.com/simpler-env/SimplerEnv.git)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
 
-
+To learn more about **SimplerEnv**, please visit [![GitHub](https://img.shields.io/badge/GitHub-SimplerEnv-blue?logo=github)](https://github.com/simpler-env/SimplerEnv.git)
 
 ## Glossary
 
@@ -148,7 +142,7 @@ To learn more about **SimplerEnv**, visit
 
 - **Control**: An atomic action that is “handed off” to other processes outside the scope of consideration. An example is HandControl, which includes x, y, z, roll, pitch, yaw, and grasp. This is a motion control used to manage the position, orientation, and hand-openness of an end-effector. Typically, this is passed to lower-level hardware interfaces or libraries.
 
-- **Simulation**: A SimplerEnv environment that takes the `Action` from the **Control** and applies it to a robot over a specified number of timesteps, demonstrating the simulation. It can also be used to benchmark the accuracy of your agents (models) within a simulation environment.
+- **Simulation**: A SimplerEnv environment takes the Action from the Control and applies it to a robot over a specified number of timesteps, demonstrating the simulation. It can also be used to benchmark the accuracy of your agents (models) within the simulation environment.
 
 ## Building Blocks
 
