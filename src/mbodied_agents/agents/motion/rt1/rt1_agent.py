@@ -6,10 +6,10 @@ import numpy as np
 import torch
 from einops import rearrange, repeat
 from gym import spaces
+from mbodied_agents.agents.motion.motion_agent import MotionAgent
 from mbodied_agents.agents.motion.rt1.tokenizers.action_tokenizer import RT1ActionTokenizer
 from mbodied_agents.agents.motion.rt1.tokenizers.utils import batched_space_sampler, np_to_tensor
 from mbodied_agents.agents.motion.rt1.transformer_network import TransformerNetwork
-from mbodied_agents.base.agent import Agent
 from mbodied_agents.base.motion import Motion
 from mbodied_agents.types.controls import HandControl, JointControl, Pose
 from mbodied_agents.types.vision import SupportsImage
@@ -38,7 +38,7 @@ action_space_dict = OrderedDict(
 )
 
 
-class RT1Agent(Agent):
+class RT1Agent(MotionAgent):
     """RT1Agent class responsible for interacting with the environment based on the agent's policy.
 
     This agent uses a TransformerNetwork to generate actions based on the given observations
