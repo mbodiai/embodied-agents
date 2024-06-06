@@ -159,7 +159,6 @@ class RT1ActionTokenizer:
                     a = action_tokens[..., token_index:token_index + 1]
                     a = a / (self._vocab_size - 1)
                     a = a * (space.high[j] - space.low[j]) + space.low[j]
-                    
                     actions.append(a.to(self.device))
                     token_index += 1
                 

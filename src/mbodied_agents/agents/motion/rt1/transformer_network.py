@@ -41,7 +41,7 @@ class TransformerNetwork(nn.Module):
         vocab_size: int = 256, # Token dimension.
         num_heads: int = 8,
         image_tokens_size: int = 8,
-        token_embedding_dim: int = 512, # Embedded token dimension.
+        token_embedding_dim: int = 512, # Embedded token dwimension.
         num_layers: int = 1,
         layer_size: int = 4096,  # Attention key_dim which is the size of each attention head for query, key and values.
         dropout_rate: float = 0.1,
@@ -229,17 +229,6 @@ class TransformerNetwork(nn.Module):
         Returns:
             A tuple `(Detokenized output actions, network state)`.
         """
-
-        # used to determine training vs inference call
-        # outer_rank will be 2 -> [b, t] during training and
-        # outer_rank will be 1 -> [b] during inference
-        # print('observations: ')
-        # for k, v in observations.items():
-        #     print(k + ' : ' + str(v.size()))
-        # print('network_state: ')
-        # for k, v in network_state.items():
-        #     print(k + ' : ' + str(v.size()))
-
         with torch.no_grad():
             outer_rank = self.get_outer_rank(observations)
             assert outer_rank in (1, 2), "outer rank should be 1 or 2"

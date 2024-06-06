@@ -39,7 +39,40 @@ action_space_dict = OrderedDict(
 
 
 class RT1Agent(Agent):
+    """RT1Agent class responsible for interacting with the environment based on the agent's policy.
+
+    This agent uses a TransformerNetwork to generate actions based on the given observations
+    and context (natural language embedding).
+
+    Attributes:
+        config (dict): Configuration dictionary containing parameters for the agent.
+        device (torch.device): The device to run the computations (CPU or CUDA).
+        model (TransformerNetwork): The neural network model used for predicting actions.
+        policy_state (Optional[torch.Tensor]): The internal state of the policy network.
+        action_tokenizer (RT1ActionTokenizer): The action tokenizer for converting output to actions.
+        image_history (List[torch.Tensor]): History of the past observations.
+        step_num (int): Keeps track of the number of steps taken by the agent.
+    """
+
     def __init__(self, config, weights_path: str = None, **kwargs) -> None:
+        """Initializes the RT1Agent with the provided configuration and model weights.
+
+        Args:
+            config (dict): Configuration parameters for setting up the agent.
+            weights_path (str, optional): Path to the pre-trained model weights. Defaults to None.
+            **kwargs: Additional keyword arguments.
+
+        Example:
+            config = {
+                "observation_history_size": 6,
+                "future_prediction": 6,
+                "token_embedding_dim": 512,
+                "causal_attention": True,
+                "num_layers": 6,
+                "layer_size": 512,
+            }
+            agent = RT1Agent(config, weights_path="path/to/weights.pth")
+        """
         self.config = config
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
@@ -70,11 +103,30 @@ class RT1Agent(Agent):
 
         self.step_num: int = 0
 
-    def act(
-        self,
+    def act(self, 
         instruction_emb: torch.Tensor,
         image: SupportsImage,
     ) -> List[Motion]:
+        """Generate a sequence of actions based on the provided instruction embedding and image.
+
+        This method processes the image, maintains image history, constructs observations, and generates actions
+        using the model. The actions include the hand's pose and grasp control.
+
+        Args:
+            instruction_emb (torch.Tensor): A tensor representing the natural language instructions.
+            image (SupportsImage): An image used to inform the action decision.
+
+        Returns:
+            List[Motion]: A list of generated motions, each containing pose and grasp control.
+
+        Example:
+            >>> instruction_emb = torch.rand((1, 512))
+            >>> image = np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
+            >>> agent = RT1Agent(config={'observation_history_size': 6, 'future_prediction': 6, 'token_embedding_dim': 512, 'causal_attention': True, 'num_layers': 6, 'layer_size': 512})
+            >>> actions = agent.act(instruction_emb, image)
+            >>> all(isinstance(action, HandControl) for action in actions)
+            True
+        """
         image = cv2.resize(np.array(image, dtype=np.uint8), (224, 224))
         self.image_history.append(torch.tensor(
             image / 255.0, dtype=torch.float32, device=self.device).permute(1, 0, 2))
@@ -84,7 +136,7 @@ class RT1Agent(Agent):
             for _ in range(6 - len(self.image_history)):
                 self.image_history.append(
                     torch.tensor(image / 255.0, dtype=torch.float32,
-                                 device=self.device).permute(1, 0, 2),
+                                device=self.device).permute(1, 0, 2),
                 )
 
         images = torch.stack(self.image_history)[None]
@@ -129,3 +181,7 @@ class RT1Agent(Agent):
 
         self.step_num += 1
         return actions
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
