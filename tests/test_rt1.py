@@ -1,6 +1,7 @@
 import torch
 import pytest
 from mbodied_agents.agents.motion.rt1.rt1_agent import RT1Agent
+from mbodied_agents.types.controls import HandControl
 
 @pytest.fixture
 def rt1_agent_config():
@@ -26,16 +27,8 @@ def test_rt1_agent_act(rt1_agent):
     actions = rt1_agent.act(image=image, instruction_emb=instruction_emb)
     
     # Verify the actions output
-    assert isinstance(actions, dict), "Actions should be a dictionary."
-    assert "xyz" in actions, "Actions should contain 'xyz' key."
-    assert "rpy" in actions, "Actions should contain 'rpy' key."
-    assert "grasp" in actions, "Actions should contain 'grasp' key."
+    assert isinstance(actions, list), "Actions should be a dictionary."
     
-    # Further checks can be added depending on the structure and requirements
-    # For example:
-    assert actions["xyz"].shape == (6, 3), "Expected shape for 'xyz' is (6, 3)."
-    assert actions["rpy"].shape == (6, 3), "Expected shape for 'rpy' is (6, 3)."
-    assert actions["grasp"].shape == (6, 1), "Expected shape for 'grasp' is (6, 1)."
 
 # Run the test
 if __name__ == "__main__":

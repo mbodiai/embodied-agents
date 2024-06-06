@@ -64,32 +64,32 @@ class Pose6D(Motion):
 
     x: float = MotionField(
         default_factory=lambda: 0.0,
-        bounds=[-1, 1],
+        bounds=None,
         description="Movement of X position in 3D space. +x is forward; -x is backward.",
     )
     y: float = MotionField(
         default_factory=lambda: 0.0,
-        bounds=[-1, 1],
+        bounds=None,
         description="Movement of Y position in 3D space. +y is left; -y is right.",
     )
     z: float = MotionField(
         default_factory=lambda: 0.0,
-        bounds=[-1, 1],
+        bounds=None,
         description="Movement of Z position in 3D space. +z is up; -z is down.",
     )
     roll: float = MotionField(
         default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
+        bounds=None,
         description="Roll about the X-axis in radians. Positive roll is clockwise.",
     )
     pitch: float = MotionField(
         default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
+        bounds=None,
         description="Pitch about the Y-axis in radians. Positive pitch is down.",
     )
     yaw: float = MotionField(
         default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
+        bounds=None,
         description="Yaw about the Z-axis in radians. Positive yaw is left.",
     )
 

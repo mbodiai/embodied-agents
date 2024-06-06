@@ -130,9 +130,7 @@ class RT1ActionTokenizer:
                 token = (a - low) / (high - low)
                 # Bucket and discretize the action to vocab_size.
                 token = token * (self._vocab_size - 1)
-                # token = token.to(torch.int32) # The size is (action_size) or (batch, action_size).
-                # print('\n\n\n\n token device: ', self.device)
-            # if this action has action_size, this action will be action_size tokens.
+                
             action_tokens.append(token.to(self.device).long())
         # Contatenate all actions. The size will be (tokens_per_action) or (batch,  tokens_per_action)
         action_tokens = torch.concat(action_tokens, dim=-1)
