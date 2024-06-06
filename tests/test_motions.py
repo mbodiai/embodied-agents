@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,16 @@ from pathlib import Path
 import h5py
 from tempfile import TemporaryDirectory
 
-from mbodied_agents.types.controls import LocationAngle, Pose6D, JointControl, FullJointControl, HandControl, HeadControl, MobileSingleArmControl, MobileSingleHandControl
+from mbodied_agents.types.controls import (
+    LocationAngle,
+    Pose6D,
+    JointControl,
+    FullJointControl,
+    HandControl,
+    HeadControl,
+    MobileSingleArmControl,
+    Pose3D,
+)
 from mbodied_agents.data.recording import Recorder
 
 
@@ -161,6 +170,25 @@ def test_recording_pose(mock_file):
         assert file['observation/pitch'][0] == 0.2
         assert file['observation/yaw'][0] == 0.3
     recorder.close()
+
+
+def test_unflatten():
+    original_pose = Pose3D(x=0.5, y=-0.5, theta=1.57)
+    flattened_pose = original_pose.flatten(output_type="dict")
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "theta": {"type": "number"},
+        }
+    }
+    unflattened_pose = Pose3D.unflatten(flattened_pose, schema)
+
+    assert unflattened_pose.x == original_pose.x
+    assert unflattened_pose.y == original_pose.y
+    assert unflattened_pose.theta == original_pose.theta
 
 
 if __name__ == "__main__":
