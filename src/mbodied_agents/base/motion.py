@@ -168,23 +168,3 @@ class Motion(Sample):
     def get_metadata(self) -> None:
         """Retrieve metadata for the motion."""
         pass
-
-    def flatten(self, *args, with_metadata=False, **kwargs) -> NumpyArray:
-        """Flatten the motion data.
-
-        Args:
-            with_metadata (bool): Whether to include metadata in the flattened data.
-            *args: Additional arguments.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            NumpyArray: Flattened motion data.
-
-        Raises:
-            NotImplementedError: If metadata inclusion is requested but not supported.
-        """
-        flattened = np.array(super().flatten(*args, **kwargs))
-        if with_metadata and isinstance(flattened, (list, np.ndarray)):
-            list(get_origin(MotionSubtype)).index("absolute")
-            raise NotImplementedError("Metadata not supported yet.")
-        return flattened
