@@ -1,4 +1,4 @@
-# Mbodied Agents
+ # Mbodied Agents
 
 <img src="assets/logo.jpeg" alt="Mbodied Agents Logo" style="width: 200px;">
 
