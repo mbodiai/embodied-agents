@@ -51,6 +51,8 @@ def MotionField(
     Returns:
         Field: Configured Pydantic Field for motion.
     """
+    # TODO: Bounds is currently being explicitly set to NONE. Handle that
+    
     ge = bounds[0] if bounds is not None else None
     le = bounds[1] if bounds is not None else None
 
