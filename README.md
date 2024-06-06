@@ -46,7 +46,6 @@ Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discuss
     - [Controls](#controls)
     - [Hardware Interface](#hardware-interface)
     - [Recorder](#recorder)
-    - [Simulation](#task-visualization-using-simplerEnv)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
@@ -112,9 +111,20 @@ The core idea behind Mbodied Agents is end-to-end continual learning. We believe
 
 ## Getting Started
 
-Please refer to [examples/simple_robot_agent.py](examples/simple_robot_agent.py) or use the Colab for a minimal example.
+### SimplerEnv Simulation
+
+Run an OpenAI based Cognitive Agent in action within a SimplerEnv simulation, that is prompt-tuned to output observations and actions in the form of X, Y, Z coordinates, roll, pitch, yaw, and grasp actions.
+
+Click the following Colab link to get started:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
+
+### Real Robot Hardware
+To run the Cognitive Agent on real robot hardware, refer to our in-depth tutorial provided in the Colab link below:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
+
+Alternatively, you can also run [examples/simple_robot_agent.py](examples/simple_robot_agent.py)
 
 To run `simple_robot_agent.py`, if you want to use OpenAI, for example, as your backend:
 
@@ -123,9 +133,6 @@ export OPENAI_API_KEY=your_api_key
 python examples/simple_robot_agent.py --backend=openai
 ```
 
-Alternatively, you can use another Colab to see our **Cognitive agent** in action within a **SimplerEnv** simulation. 
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
 
 To learn more about **SimplerEnv**, visit
 
@@ -318,38 +325,6 @@ replayer = Replayer(path=str("path/to/dataset.h5"))
 for observation, action in replayer:
    ...
 ```
-### Task Visualization using SimplerEnv
-
-The SimplerEnv is a simulation environment for real robot setups, providing a place for evaluating the performance of your agents (models/policies). We use it to visualize the performance of our CognitiveAgent in a simulated environment.
-
-```python
-
-# Select one of the predefined tasks
-task_name = "google_robot_pick_coke_can"  # @param ["google_robot_pick_coke_can", "google_robot_move_near", "google_robot_open_drawer", "google_robot_close_drawer", "widowx_spoon_on_towel", "widowx_carrot_on_plate", "widowx_stack_cube", "widowx_put_eggplant_in_basket"]
-
-env = simpler_env.make(task_name)
-
-obs, reset_info = env.reset()
-instruction = env.get_language_instruction()
-
-frames = []
-done, truncated = False, False
-while not (done or truncated):
-   # action[:3]: delta xyz; action[3:6]: delta rotation in axis-angle representation;
-   # action[6:7]: gripper (the meaning of open / close depends on robot URDF)
-   image = get_image_from_maniskill2_obs_dict(env, obs)
-   action = env.action_space.sample() # replace this with your policy inference/agent
-   obs, reward, done, truncated, info = env.step(action) # Action: Numpy Array ([x, y, z, roll, pitch, yaw, grasp]) (7,)
-   frames.append(image)
-
-episode_stats = info.get('episode_stats', {})
-print("Episode stats", episode_stats)
-mediapy.show_video(frames, fps=10)
-
-```
-
-```python
-
 
 ## Directory Structure
 
