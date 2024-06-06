@@ -1,5 +1,5 @@
 import torch
-from mbodied_agents.agents.motion.rt1.rt1_agent import RT1Agent
+from mbodied_agents.agents.motor.rt1.rt1_agent import RT1Agent
 
 
 def main() -> None:

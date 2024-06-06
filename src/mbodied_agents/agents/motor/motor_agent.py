@@ -4,7 +4,7 @@ from typing import List
 from mbodied_agents.types.controls import Motion
 
 
-class MotionAgent(ABC):
+class MotorAgent(ABC):
     """Abstract base class for a Motion Agent.
 
     Subclasses must implement the `act` method, which generates a list of

@@ -23,7 +23,7 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 from gym import spaces
-from mbodied_agents.agents.motion.rt1.tokenizers import action_tokenizer
+from mbodied_agents.agents.motor.rt1.tokenizers import action_tokenizer
 
 from .tokenizers.image_tokenizer import RT1ImageTokenizer
 from .transformer import Transformer

@@ -24,8 +24,8 @@ from typing import Optional
 
 import torch
 import torch.nn as nn
-from mbodied_agents.agents.motion.rt1.film_efficientnet.efficient_net import EfficientNetB5
-from mbodied_agents.agents.motion.rt1.tokenizers.token_learner import TokenLearnerModule
+from mbodied_agents.agents.motor.rt1.film_efficientnet.efficient_net import EfficientNetB5
+from mbodied_agents.agents.motor.rt1.tokenizers.token_learner import TokenLearnerModule
 
 
 class RT1ImageTokenizer(nn.Module):
