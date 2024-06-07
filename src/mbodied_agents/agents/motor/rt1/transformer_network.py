@@ -1,3 +1,4 @@
+
 # Subject to the terms and conditions of the Apache License, Version 2.0 that the original code follows,
 # I have retained the following copyright notice written on it.
 
@@ -16,6 +17,9 @@
 # limitations under the License.
 
 # You can find the original code from here[https://github.com/google-research/robotics_transformer].
+
+# Copied and updated with significant changes from https://github.com/maruya24/pytorch_robotics_transformer
+
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np

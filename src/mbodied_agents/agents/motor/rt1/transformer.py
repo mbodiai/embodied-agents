@@ -17,6 +17,7 @@
 
 # You can find the original code from here[https://github.com/google-research/robotics_transformer].
 
+# Copied and updated with significant changes from https://github.com/maruya24/pytorch_robotics_transformer
 
 import math
 from typing import List, Optional, Tuple, Union
@@ -25,7 +26,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
-
 
 # This implementation is similar to tf.keras.layers.MultiHeadAttention, not torch.nn.MultiheadAttention.
 # This can be used in the situation where query = key = value.
