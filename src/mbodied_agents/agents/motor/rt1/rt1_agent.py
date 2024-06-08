@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ from mbodied_agents.agents.motor.rt1.transformer_network import TransformerNetwo
 from mbodied_agents.base.motion import Motion
 from mbodied_agents.types.controls import HandControl, JointControl, Pose
 from mbodied_agents.types.vision import SupportsImage
+from transformers import BertModel, BertTokenizer
 
 observation_space = spaces.Dict(
     {
@@ -89,7 +90,12 @@ class RT1Agent(MotorAgent):
         """
         self.config = config
         self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+        model_name = 'bert-base-uncased'
+        self.tokenizer = BertTokenizer.from_pretrained(model_name)
+        self.text_encoder_model = BertModel.from_pretrained(model_name)
+
         self.model = TransformerNetwork(
             observation_history_length=config["observation_history_size"],
             future_prediction_length=config["future_prediction"],
@@ -116,28 +122,43 @@ class RT1Agent(MotorAgent):
                 size=(224, 224, 3), dtype=torch.float, device=self.device))
 
         self.step_num: int = 0
+    
+    def get_text_embedding(self, text):
+        
+        # Tokenize the input text
+        inputs = self.tokenizer(text, return_tensors='pt')
 
-    def act(self, 
-        instruction_emb: torch.Tensor,
-        image: SupportsImage,
-    ) -> List[Motion]:
+        # Get the embeddings
+        with torch.no_grad():
+            outputs = self.text_encoder_model(**inputs)
+
+        # The last hidden states are in `outputs.last_hidden_state`
+        # You can typically use the embeddings of [CLS] token for the entire sentence representation
+        cls_embeddings = outputs.last_hidden_state[:, 0, :]
+
+        return cls_embeddings
+
+    def act(self,
+            instruction: str,
+            image: SupportsImage,
+            ) -> List[Motion]:
         """Generate a sequence of actions based on the provided instruction embedding and image.
 
         This method processes the image, maintains image history, constructs observations, and generates actions
         using the model. The actions include the hand's pose and grasp control.
 
         Args:
-            instruction_emb (torch.Tensor): A tensor representing the natural language instructions.
+            instruction (string): A string representing an instruction.
             image (SupportsImage): An image used to inform the action decision.
 
         Returns:
             List[Motion]: A list of generated motions, each containing pose and grasp control.
 
         Example:
-            >>> instruction_emb = torch.rand((1, 512))
+            >>> instruction = "Pick up the apple"
             >>> image = np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
             >>> agent = RT1Agent(config={'observation_history_size': 6, 'future_prediction': 6, 'token_embedding_dim': 512, 'causal_attention': True, 'num_layers': 6, 'layer_size': 512})
-            >>> actions = agent.act(instruction_emb, image)
+            >>> actions = agent.act(instruction, image)
             >>> all(isinstance(action, HandControl) for action in actions)
             True
         """
@@ -150,7 +171,7 @@ class RT1Agent(MotorAgent):
             for _ in range(6 - len(self.image_history)):
                 self.image_history.append(
                     torch.tensor(image / 255.0, dtype=torch.float32,
-                                device=self.device).permute(1, 0, 2),
+                                 device=self.device).permute(1, 0, 2),
                 )
 
         images = torch.stack(self.image_history)[None]
@@ -162,6 +183,8 @@ class RT1Agent(MotorAgent):
                 batch_size=1,
             ),
         )
+
+        instruction_emb = torch.tensor(self.get_text_embedding(instruction))
 
         obs = {
             "image_primary": video,
@@ -195,6 +218,7 @@ class RT1Agent(MotorAgent):
 
         self.step_num += 1
         return actions
+
 
 if __name__ == "__main__":
     import doctest

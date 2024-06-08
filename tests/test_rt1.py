@@ -35,10 +35,10 @@ def rt1_agent(rt1_agent_config):
 def test_rt1_agent_act(rt1_agent):
     # Create dummy inputs
     image = torch.rand(224, 224, 3)  # Assuming input shape is (224, 224, 3)
-    instruction_emb = torch.rand(1, 512)  # Assuming embedding shape is (1, 512)
+    instruction = "Pick up the ball"  # Assuming embedding shape is (1, 512)
     
     # Call the act method
-    actions = rt1_agent.act(image=image, instruction_emb=instruction_emb)
+    actions = rt1_agent.act(image=image, instruction=instruction)
     
     # Verify the actions output
     assert isinstance(actions, list) and all(isinstance(action, Motion) for action in actions), "Actions should be a list."

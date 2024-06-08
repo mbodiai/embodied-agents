@@ -27,10 +27,9 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 from gym import spaces
-from mbodied_agents.agents.motor.rt1.tokenizers import action_tokenizer
-
-from .tokenizers.image_tokenizer import RT1ImageTokenizer
-from .transformer import Transformer
+from mbodied_agents.agents.motor.rt1.tokenizers.action_tokenizer import RT1ActionTokenizer
+from mbodied_agents.agents.motor.rt1.tokenizers.image_tokenizer import RT1ImageTokenizer
+from mbodied_agents.agents.motor.rt1.transformer import Transformer
 
 
 class TransformerNetwork(nn.Module):
@@ -55,7 +54,6 @@ class TransformerNetwork(nn.Module):
         causal_attention: bool = True,
     ):
         super().__init__()
-
         
         self.observation_space = observation_space
         self.action_space = action_space
@@ -79,7 +77,7 @@ class TransformerNetwork(nn.Module):
             )
             for key in self.image_keys
         })
-        self.action_tokenizer = action_tokenizer.RT1ActionTokenizer(
+        self.action_tokenizer = RT1ActionTokenizer(
             action_space, vocab_size=self.vocab_size,
         )
         self.transformer = Transformer(

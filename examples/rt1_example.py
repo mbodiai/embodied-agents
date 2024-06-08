@@ -23,7 +23,7 @@ def main() -> None:
         "layer_size": 128,
         "observation_history_size": 6,
         "future_prediction": 6,
-        "token_embedding_dim": 512,
+        "token_embedding_dim": 768,
         "causal_attention": True,
     }
 
@@ -32,10 +32,10 @@ def main() -> None:
 
     # Create dummy input data
     image = torch.rand(224, 224, 3)  # Assume this is an example image input
-    instruction_emb = torch.rand(1, 512)  # Assume this is an example instruction embedding
+    instruction = 'Pick the banana peel'
 
     # Use the act method of RT1Agent to get actions
-    actions = rt1_agent.act(image=image, instruction_emb=instruction_emb)
+    actions = rt1_agent.act(image=image, instruction=instruction)
 
     # Print the actions
     print("Actions received from RT1Agent:")

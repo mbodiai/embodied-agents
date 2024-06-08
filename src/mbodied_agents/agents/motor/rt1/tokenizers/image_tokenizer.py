@@ -24,22 +24,22 @@ from typing import Optional
 
 import torch
 import torch.nn as nn
-from mbodied_agents.agents.motor.rt1.film_efficientnet.efficient_net import EfficientNetB5
+from mbodied_agents.agents.motor.rt1.film_vit.vit_film import VisionTransformerB16
 from mbodied_agents.agents.motor.rt1.tokenizers.token_learner import TokenLearnerModule
 
 
 class RT1ImageTokenizer(nn.Module):
     def __init__(
         self,
-        embedding_output_dim: int = 512,
-        language_embedding_size: int = 512,
+        embedding_output_dim: int = 768,
+        language_embedding_size: int = 768,
         use_token_learner: bool = False,
         num_tokens: int = 8,
     ):
         super().__init__()
-        self._tokenizer = EfficientNetB5(
-            language_embedding_size,
-        )
+        self._tokenizer = VisionTransformerB16(
+            context_dim=language_embedding_size,
+            )
 
         self._use_token_learner = use_token_learner
         if self._use_token_learner:
@@ -76,16 +76,16 @@ class RT1ImageTokenizer(nn.Module):
         if context is not None:
             context = context.reshape(b * t, -1)
 
-        tokens = self._tokenizer(image, context=context)  # [b * t, 512 , 10, 10]
+        tokens = self._tokenizer(image, context=context)
 
         if self._use_token_learner:
-            tokens = self._token_learner(tokens)  # [b * t, num_token, 512]
+            tokens = self._token_learner(tokens)  # [b * t, num_token, 768]
             # Unflatten the time axis, which was previously flattened into the batch.
             tokens = tokens.view(b, t, tokens.shape[1], -1)
             return tokens  # [b, t, num_token, 512]
         else:
             # Unflatten the time axis, which was previously flattened into the batch.
-            tokens = tokens.view(b, t, 512, -1)  # [b, t, 512 , 10 * 10]
+            tokens = tokens.view(b, t, 768, -1)  # [b, t, 512 , 10 * 10]
             # If you don't use token learner, the number of token is 100.
             tokens = tokens.transpose(2, 3)  # [b, t, 10 * 10, 512]
             return tokens
