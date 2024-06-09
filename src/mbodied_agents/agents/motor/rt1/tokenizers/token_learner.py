@@ -22,6 +22,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
+from einops import rearrange
 
 
 class TokenLearnerModule(nn.Module):
@@ -65,8 +66,11 @@ class TokenLearnerModule(nn.Module):
             self.dropout2 = nn.Identity()
 
     def forward(self, inputs: torch.Tensor):
+
+        inputs = rearrange(inputs, 'batch (h w) c -> batch h w c', h=14, w=14)
+
         # layer norm
-        x = self.layerNorm(inputs.permute(0, 2, 3, 1))
+        x = self.layerNorm(inputs)
         x = x.permute(0, 3, 1, 2)
 
         # create weights map
@@ -79,8 +83,8 @@ class TokenLearnerModule(nn.Module):
         weights_maps = F.softmax(x, dim=-1)
 
         # create tokens
-        bs, c, h, w = inputs.shape
-        inputs = inputs.permute(0, 2, 3, 1).view(bs, h * w, c)
+        bs, h, w, c = inputs.shape
+        inputs = inputs.view(bs, h * w, c)
 
         tokens = torch.bmm(weights_maps, inputs)
         # weighs_maps: [bs, n_token, h*w]
