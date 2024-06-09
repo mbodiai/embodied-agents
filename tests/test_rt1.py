@@ -24,7 +24,7 @@ def rt1_agent_config():
         "layer_size": 128,
         "observation_history_size": 6,
         "future_prediction": 6,
-        "token_embedding_dim": 512,
+        "token_embedding_dim": 768,
         "causal_attention": True,
     }
 

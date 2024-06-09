@@ -32,7 +32,7 @@ from transformers import BertModel, BertTokenizer
 observation_space = spaces.Dict(
     {
         "image_primary": spaces.Box(low=0.0, high=1.0, shape=(3, 224, 224), dtype=np.float32),
-        "natural_language_embedding": spaces.Box(low=-np.inf, high=np.inf, shape=[512], dtype=np.float32),
+        "natural_language_embedding": spaces.Box(low=-np.inf, high=np.inf, shape=[768], dtype=np.float32),
     },
 )
 action_space_dict = OrderedDict(
@@ -157,7 +157,7 @@ class RT1Agent(MotorAgent):
         Example:
             >>> instruction = "Pick up the apple"
             >>> image = np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
-            >>> agent = RT1Agent(config={'observation_history_size': 6, 'future_prediction': 6, 'token_embedding_dim': 512, 'causal_attention': True, 'num_layers': 6, 'layer_size': 512})
+            >>> agent = RT1Agent(config={'observation_history_size': 6, 'future_prediction': 6, 'token_embedding_dim': 768, 'causal_attention': True, 'num_layers': 6, 'layer_size': 512})
             >>> actions = agent.act(instruction, image)
             >>> all(isinstance(action, HandControl) for action in actions)
             True
