@@ -64,8 +64,6 @@ class TokenLearnerModule(nn.Module):
         else:
             self.dropout2 = nn.Identity()
 
-    # inputs: [bs, c, h, w] or [bs * seq, c, h, w]
-    # seq is time-series length such as frame
     def forward(self, inputs: torch.Tensor):
         # layer norm
         x = self.layerNorm(inputs.permute(0, 2, 3, 1))

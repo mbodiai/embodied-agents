@@ -85,8 +85,8 @@ class FilmLayer(nn.Module):
         beta = self.beta(context)
         gamma = self.gamma(context)
 
-        beta = rearrange(beta, 'b c -> b c 1 1')
-        gamma = rearrange(gamma, 'b c -> b c 1 1')
+        beta = rearrange(beta, 'b d -> b 1 d')
+        gamma = rearrange(gamma, 'b d -> b 1 d')
 
         # Initialize to identity op.
         result = (1 + gamma) * x + beta

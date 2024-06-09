@@ -63,7 +63,5 @@ class VisionTransformerB16(nn.Module):
                         x = film_layer(x, context)
             else:
                 x = encoder_child(x)
-
-        x = self.encoder.norm(x)
-        x = self.heads(x[:, 0])
+                
         return x
