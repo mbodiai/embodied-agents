@@ -16,24 +16,25 @@ from abc import abstractmethod
 from typing import List
 
 from mbodied_agents.base.agent import Agent
+from mbodied_agents.types.world import SceneObject
 
 
 class WorldAgent(Agent):
     """Represents an agent that acts in the context of a world.
 
     Methods:
-        act(**kwargs) -> World:
-            Abstract method to perform actions and return the resulting world state.
+        act(**kwargs) -> SceneObject:
+            Abstract method to perform actions and return the resulting world/scene state.
     """
     
     @abstractmethod
-    def act(self, **kwargs) -> List['World']:
-        """Perform actions in the world context and return the resulting world state.
+    def act(self, **kwargs) -> List['SceneObject']:
+        """Perform actions in the world context and return the resulting scene object state.
 
         Args:
             **kwargs: Additional parameters for the action.
 
         Returns:
-            World: The resulting state of the world after the action.
+            SceneObject: The resulting state of the world after the action.
         """
         pass

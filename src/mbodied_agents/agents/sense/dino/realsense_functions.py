@@ -1,10 +1,8 @@
-import os
-
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import pyrealsense2 as rs
 from cv2 import aruco
+
 
 def capture_realsense_images():
     
@@ -147,11 +145,6 @@ def pose_detector(centroids):
 
             for coord in world_coords_object.values():
                 imaxis = cv2.drawFrameAxes(imaxis, mtx, dist, new_rvecs, coord, 0.1)
-
-            plt.figure()
-            plt.imshow(imaxis)
-            plt.grid()
-            plt.show()
 
             # Save the difference values
             np.save("differences.npy", differences)
