@@ -85,7 +85,7 @@ class RT1ImageTokenizer(nn.Module):
             return tokens  # [b, t, num_token, 512]
         else:
             # Unflatten the time axis, which was previously flattened into the batch.
-            tokens = tokens.view(b, t, 768, -1)  # [b, t, 512 , 10 * 10]
+            tokens = tokens.view(b, t, 768, -1)  # [b, t, 768 , 10 * 10]
             # If you don't use token learner, the number of token is 100.
             tokens = tokens.transpose(2, 3)  # [b, t, 10 * 10, 512]
             return tokens
