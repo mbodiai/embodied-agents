@@ -14,7 +14,7 @@
 
 import torch
 import pytest
-from mbodied_agents.agents.motor.rt1.rt1_agent import RT1Agent
+from mbodied_agents.agents.motion.rt1.rt1_agent import RT1Agent
 from mbodied_agents.types.controls import Motion
 
 @pytest.fixture

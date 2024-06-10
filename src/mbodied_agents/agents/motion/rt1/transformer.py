@@ -27,6 +27,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
+
 # This implementation is similar to tf.keras.layers.MultiHeadAttention, not torch.nn.MultiheadAttention.
 # This can be used in the situation where query = key = value.
 # In RT-1 we don't set value_dim. Therefore, values_dim = key_dim.

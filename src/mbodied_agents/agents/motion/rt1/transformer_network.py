@@ -27,9 +27,9 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 from gym import spaces
-from mbodied_agents.agents.motor.rt1.tokenizers.action_tokenizer import RT1ActionTokenizer
-from mbodied_agents.agents.motor.rt1.tokenizers.image_tokenizer import RT1ImageTokenizer
-from mbodied_agents.agents.motor.rt1.transformer import Transformer
+from mbodied_agents.agents.motion.rt1.tokenizers.action_tokenizer import RT1ActionTokenizer
+from mbodied_agents.agents.motion.rt1.tokenizers.image_tokenizer import RT1ImageTokenizer
+from mbodied_agents.agents.motion.rt1.transformer import Transformer
 
 
 class TransformerNetwork(nn.Module):

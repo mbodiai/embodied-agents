@@ -12,19 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List
 
+from mbodied_agents.base.agent import Agent
 from mbodied_agents.types.controls import Motion
 
 
-class MotorAgent(ABC):
-    """Abstract base class for a Motion Agent.
-
-    Subclasses must implement the `act` method, which generates a list of
-    Motion objects based on given parameters.
-    """
-
+class MotorAgent(Agent):
     @abstractmethod
     def act(self, **kwargs) -> List['Motion']:
         """Generate a list of Motion objects based on given parameters.

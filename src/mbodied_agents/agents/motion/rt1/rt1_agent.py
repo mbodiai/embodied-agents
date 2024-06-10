@@ -20,10 +20,10 @@ import numpy as np
 import torch
 from einops import rearrange, repeat
 from gym import spaces
-from mbodied_agents.agents.motor.motor_agent import MotorAgent
-from mbodied_agents.agents.motor.rt1.tokenizers.action_tokenizer import RT1ActionTokenizer
-from mbodied_agents.agents.motor.rt1.tokenizers.utils import batched_space_sampler, np_to_tensor
-from mbodied_agents.agents.motor.rt1.transformer_network import TransformerNetwork
+from mbodied_agents.agents.motion.motor_agent import MotorAgent
+from mbodied_agents.agents.motion.rt1.tokenizers.action_tokenizer import RT1ActionTokenizer
+from mbodied_agents.agents.motion.rt1.tokenizers.utils import batched_space_sampler, np_to_tensor
+from mbodied_agents.agents.motion.rt1.transformer_network import TransformerNetwork
 from mbodied_agents.base.motion import Motion
 from mbodied_agents.types.controls import HandControl, JointControl, Pose
 from mbodied_agents.types.vision import SupportsImage
@@ -35,22 +35,28 @@ observation_space = spaces.Dict(
         "natural_language_embedding": spaces.Box(low=-np.inf, high=np.inf, shape=[768], dtype=np.float32),
     },
 )
-action_space_dict = OrderedDict(
-    [
-        (
-            "xyz",
-            spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
-        ),
-        (
-            "rpy",
-            spaces.Box(low=-np.pi, high=np.pi, shape=(3,), dtype=np.float32),
-        ),
-        (
-            "grasp",
-            spaces.Box(low=0, high=1.0, shape=(1,), dtype=np.float32),
-        ),
-    ],
+action_space = spaces.Dict(
+    OrderedDict(
+        [
+            (
+                "xyz",
+                spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
+            ),
+            (
+                "rpy",
+                spaces.Box(low=-np.pi, high=np.pi,
+                           shape=(3,), dtype=np.float32),
+            ),
+            (
+                "grasp",
+                spaces.Box(low=0, high=1.0, shape=(1,), dtype=np.float32),
+            ),
+        ],
+    ),
 )
+
+IMAGE_HISTORY_BUFFER_SIZE = 6
+IMAGE_SIZE = (224, 224, 3)
 
 
 class RT1Agent(MotorAgent):
@@ -85,6 +91,10 @@ class RT1Agent(MotorAgent):
                 "causal_attention": True,
                 "num_layers": 6,
                 "layer_size": 512,
+                "observation_space": observation_space,
+                "action_space": action_space,
+                "history_size": IMAGE_HISTORY_BUFFER_SIZE,
+                "image_size": IMAGE_SIZE
             }
             agent = RT1Agent(config, weights_path="path/to/weights.pth")
         """
@@ -103,28 +113,34 @@ class RT1Agent(MotorAgent):
             causal_attention=config["causal_attention"],
             num_layers=config["num_layers"],
             layer_size=config["layer_size"],
-            observation_space=observation_space,
-            action_space=spaces.Dict(action_space_dict),
+            observation_space=config.get(
+                "observation_space", observation_space),
+            action_space=config.get("action_space", action_space),
             image_keys=["image_primary"],
             context_key="natural_language_embedding",
         ).to(self.device).eval()
 
         self.policy_state = None
         self.action_tokenizer = RT1ActionTokenizer(
-            action_space=action_space_dict)
+            action_space=action_space,
+        )
 
         if weights_path:
             self.model.load_state_dict(torch.load(
                 weights_path, map_location=self.device))
+
         self.image_history = []
-        for _i in range(6):
+        history_size = self.config.get(
+            'history_size', IMAGE_HISTORY_BUFFER_SIZE)
+        image_size = self.config.get('image_size', IMAGE_SIZE)
+        for _i in range(history_size):
             self.image_history.append(torch.zeros(
-                size=(224, 224, 3), dtype=torch.float, device=self.device))
+                size=image_size, dtype=torch.float, device=self.device))
 
         self.step_num: int = 0
-    
+
     def get_text_embedding(self, text):
-        
+
         # Tokenize the input text
         inputs = self.tokenizer(text, return_tensors='pt')
 

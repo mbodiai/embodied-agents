@@ -280,7 +280,7 @@ response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 
 ### Motor Agent
 
-The [Motor Agent](src/mbodied_agents/agents/motor/motor_agent.py) serves as the base class for various motor control models that dictate robotic actions. Each subclass implements the `act` method, tailoring it to produce specific action types based on the output of respective models.
+The [Motor Agent](src/mbodied_agents/agents/motion/motor_agent.py) serves as the base class for various motor control models that dictate robotic actions. Each subclass implements the `act` method, tailoring it to produce specific action types based on the output of respective models.
 
 For example, `RT1Agent` uses the Robotics Transformer 1 model to generate actions in its `act` method.
 
