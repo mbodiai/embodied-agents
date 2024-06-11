@@ -10,6 +10,8 @@ Welcome to Mbodied Agents's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   mbodied_agents
+
 
 
 Indices and tables

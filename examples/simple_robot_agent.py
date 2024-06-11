@@ -16,7 +16,7 @@ import os
 import logging
 
 import click
-from pydantic import Field
+from pydantic import BaseModel, Field
 from pydantic_core import from_json
 from gym import spaces
 
@@ -29,14 +29,23 @@ from mbodied_agents.types.vision import Image
 from mbodied_agents.data.recording import Recorder
 
 
-# This can be customized to be anything you like.
-# In this example, we have an answer field, which is what the robot speaks to you,
-# and a list of hand controls (X,Y,Z,R,P,Y) which is the end effector delta for robot's hand.
 class AnswerAndActionsList(Sample):
-    """A customized pydantic type for robot's reply and actions."""
+    """A customized pydantic type for the robot's reply and actions.
+
+    Attributes:
+        answer: A short, one sentence answer to the user's question or request.
+        actions: A list of actions (HandControl objects) to be taken by the robot.
+
+    Example:
+        >>> from mbodied_agents.types.controls import HandControl
+        >>> data = {"answer": "Hello, world!", "actions": [{"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0}]}
+        >>> response = AnswerAndActionsList.model_validate(data)
+        >>> response.answer
+        'Hello, world!'
+    """
     answer: str | None = Field(
         default="",
-        description="Short, one sentence answer to user's question or request.",
+        description="Short, one sentence answer to the user's question or request.",
     )
     actions: list[HandControl] | None = Field(
         default=[],
@@ -44,8 +53,9 @@ class AnswerAndActionsList(Sample):
     )
 
 
+# This prompt is used to provide context to the CognitiveAgent.
 SYSTEM_PROMPT = f"""
-    You are robot with vision capabilities. 
+    You are a robot with vision capabilities. 
     For each task given, you respond in JSON format. Here's the JSON schema:
     {AnswerAndActionsList.model_json_schema()}
     """
@@ -55,54 +65,58 @@ SYSTEM_PROMPT = f"""
 @click.option("--backend", default="openai", help="The backend to use", type=click.Choice(["anthropic", "openai", "mbodi"]))
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
 @click.option("--record_dataset", default=True, help="Record dataset for training automatically.")
-def main(backend, disable_audio, record_dataset) -> None:
+def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
+    """Main function to initialize and run the robot interaction.
+
+    Args:
+        backend: The backend to use for the CognitiveAgent (e.g., "openai").
+        disable_audio: If True, disables audio input/output.
+        record_dataset: If True, enables recording of the interaction data for training.
+
+    Example:
+        To run the script with OpenAI backend and disable audio:
+        python script.py --backend openai --disable_audio
+    """
     # Initialize the intelligent Robot Agent.
-    # For this example, we use OpenAI by default as the backend.
-    # Cognitive Agent is the entry point for your intelligent robot.
-    # It's responsible of handling the planning, reasoning, or action output.
-    # You may even have multiple Cognitive Agent in parallel handling different aspect for your robot,i.e. planning, motion control, sensory, etc.
-    # For the simplest example, we can use OpenAI's GPT for the cognitive Agent here. Anthropic is also supported here.
-    # Mbodi's backend and HuggingFace backend is also upcoming.
-    # The system prompt is minimal. You can provide more context if you like.
     robot_agent = CognitiveAgent(context=SYSTEM_PROMPT, api_service=backend)
 
     # Use a mock robot interface for movement visualization.
     robot_interface = SimInterface()
 
-    # Enable audio input/output capabilities.
+    # Enable or disable audio input/output capabilities.
     if disable_audio:
         os.environ["NO_AUDIO"] = "1"
-    audio = AudioHandler(
-        use_pyaudio=False)  # For MAC, prefer to use use_pyaudio=False.
+    audio = AudioHandler(use_pyaudio=False)  # Prefer to use use_pyaudio=False for MAC.
 
-    # Data recorder for every conversation and every action.
-    # A new dataset is created each time you interact, teach or train the robot.
-    # Available for further augmentation finetuning and model training.
+    # Data recorder for every conversation and action.
     if record_dataset:
         observation_space = spaces.Dict({
             'image': Image(size=(224, 224)).space(),
             'instruction': spaces.Text(1000)
         })
         action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
-        recorder = Recorder('example_recorder',
-                            out_dir='saved_datasets',
-                            observation_space=observation_space,
-                            action_space=action_space)
+        recorder = Recorder(
+            'example_recorder',
+            out_dir='saved_datasets',
+            observation_space=observation_space,
+            action_space=action_space
+        )
 
     while True:
+        # Listen for instructions.
         instruction = audio.listen()
         print("Instruction:", instruction)
 
         # Note: This is just an example vision image.
-        # Customize this for your robot's observation.
         image = Image("resources/xarm.jpeg", size=(224, 224))
 
+        # Get the robot's response and actions based on the instruction and image.
         response = robot_agent.act(instruction, image)[0]
         response = response.replace("```json", "").replace("```", "")
         print("Response:", response)
+
         # Validate the response to the pydantic object.
-        answer_actions = AnswerAndActionsList.model_validate(
-            from_json(response))
+        answer_actions = AnswerAndActionsList.model_validate(from_json(response))
 
         # Let the robot speak.
         if answer_actions.answer:
@@ -113,13 +127,15 @@ def main(backend, disable_audio, record_dataset) -> None:
             for action in answer_actions.actions:
                 robot_interface.do(action)
 
+        # Record the dataset for training.
         if record_dataset:
-            # Record the dataset for training.
-            recorder.record(observation={
-                'image': image,
-                'instruction': instruction,
-            },
-                            action=answer_actions)
+            recorder.record(
+                observation={
+                    'image': image,
+                    'instruction': instruction,
+                },
+                action=answer_actions
+            )
 
 
 if __name__ == "__main__":
