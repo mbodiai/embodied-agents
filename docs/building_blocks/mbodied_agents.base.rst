@@ -1,9 +1,3 @@
-mbodied\_agents.base package
-============================
-
-Submodules
-----------
-
 mbodied\_agents.base.agent module
 ---------------------------------
 
