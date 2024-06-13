@@ -31,10 +31,6 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 
-html_sidebars = {
-  "**": ["sidebar_main_nav_links.html", "sidebar_toc.html"]
-}
-
 # Select theme for both light and dark mode
 pygments_style = "default"
 # Select a different theme for dark mode

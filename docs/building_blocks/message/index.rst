@@ -9,6 +9,8 @@ The `Message <https://github.com/MbodiAI/mbodied-agents/blob/main/src/mbodied_ag
 You can create a ``Message`` in versatile ways. They can all be understood by mbodi's backend.
 
 .. code-block:: python
+    
     Message(role="user", content="example text")
     Message(role="user", content=["example text", Image("example.jpg"), Image("example2.jpg")])
     Message(role="user", content=[Sample("Hello")])
+

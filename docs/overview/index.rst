@@ -1,6 +1,16 @@
 Overview
 ================
 
+**mbodied agents** offers the following features:
+
+- Configurability : Define your desired Observation and Action spaces and read data into the format that works best for your system.
+
+- Natural Language Control : Use verbal prompts to correct a cognitive agent's actions and calibrate its behavior to a new environment.
+
+- Modularity : Easily swap out different backends, transformers, and hardware interfaces. For even better results, run multiple agents in separate threads.
+
+- Validation : Ensure that your data is in the correct format and that your actions are within the correct bounds before sending them to the robot.
+
 Support Matrix
 ^^^^^^^^^^^^^^^
 
@@ -28,4 +38,4 @@ For access (or just to say hey 😊), don't hesitate to fill out this `form <htt
 Idea
 ^^^^^^
 
-The core idea behind Mbodied Agents is end-to-end continual learning. We believe that the best way to train a robot is to have it learn from its own experiences.
+The core idea behind **mbodied agents** is end-to-end continual learning. We believe that the best way to train a robot is to have it learn from its own experiences.

@@ -1,0 +1,117 @@
+{#- Template file for the header -#}
+
+<header
+    class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur">
+
+    {#- Extra block at the top of the header #}
+    {%- block header_before %}{% endblock header_before -%}
+
+    <div class="container flex items-center h-14">
+        {#- show logo and extra header links on the left side of the header -#}
+        {%- block header_left %}
+        <div class="hidden mr-4 md:flex">
+            {%- block header_logo %}
+            <a href="{{ pathto(master_doc) }}" class="flex items-center mr-6">
+                <!-- Custom logo integration -->
+                <img height="40" width="40" class="mr-2"
+                    src="https://media.licdn.com/dms/image/D560BAQF3dP-0cK87IA/company-logo_200_200/0/1714428625453/mbodi_logo?e=1726099200&v=beta&t=ksnP5utcxZpUJ_XakulrPEjkEpJEe15bu1s5zVY8Psc"
+                    alt="Custom Logo" />
+
+                <!-- Optional: Display the document title next to the logo -->
+                <span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">Mbodi</span>
+            </a>
+            {%- endblock header_logo %}
+
+            {%- block header_main_nav %}
+            {%- if theme_main_nav_links|tobool -%}
+            <nav class="flex items-center space-x-6 text-sm font-medium">
+                {%- for text,url in theme_main_nav_links.items() %}
+                {%- set _active = "text-foreground" if pagename in url else "text-foreground/60" -%}
+                {%- if url.startswith("http") %}
+                <a href="{{ url }}" class="transition-colors hover:text-foreground/80 {{ _active }}"
+                    rel="noopener nofollow">{{
+                    text }}</a>
+                {%- else %}
+                <a href="{{ pathto(url) }}" class="transition-colors hover:text-foreground/80 {{ _active }}">{{ text
+                    }}</a>
+                {%- endif %}
+                {%- endfor %}
+            </nav>
+            {%- endif %}
+            {%- endblock header_main_nav %}
+        </div>
+        {%- endblock header_left %}
+
+        {%- block mobile_menu %}
+        {%- if sidebars|length >0 -%}
+        <button
+            class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden"
+            type="button" @click="showSidebar = true">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" aria-hidden="true"
+                fill="currentColor">
+                <path
+                    d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z" />
+            </svg>
+            <span class="sr-only">Toggle navigation menu</span>
+        </button>
+        {%- endif -%}
+        {%- endblock mobile_menu %}
+
+        {%- block header_right %}
+        <div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
+            {%- if docsearch or hasdoc('search') %}
+            <div class="flex-1 w-full md:w-auto md:flex-none">
+                {%- include "searchbox.html" %}
+            </div>
+            {%- endif %}
+
+            {%- block extra_header_link_icons %}
+            <nav class="flex items-center space-x-1">
+                {%- if theme_extra_header_link_icons|tobool %}
+                {%- for text,url in theme_extra_header_link_icons.items() %}
+                {%- if url is mapping %}
+                <a href="{{ url.link }}" title="Visit {{ text }}" rel="noopener nofollow">
+                    <div
+                        class="inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md disabled:opacity-50 disabled:pointer-events-none hover:bg-accent hover:text-accent-foreground h-9 w-9">
+                        {{ url.icon }}
+                    </div>
+                </a>
+                {% endif %}
+                {%- endfor %}
+                {%- endif %}
+            
+                <!-- GitHub icon and link -->
+                <a href="https://github.com/MbodiAI/mbodied-agents" title="GitHub Repository" target="_blank"
+                    rel="noopener nofollow">
+                    <div
+                        class="inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9">
+                        <!-- GitHub SVG Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0.297C5.373 0.297 0 5.67 0 12.297c0 5.283 3.438 9.77 8.207 11.366.6.111.82-.26.82-.577 0-.285-.011-1.043-.017-2.048-3.338.724-4.042-1.612-4.042-1.612-.545-1.386-1.333-1.756-1.333-1.756-1.09-.744.083-.729.083-.729 1.203.084 1.837 1.237 1.837 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.774.419-1.304.763-1.604-2.666-.303-5.466-1.333-5.466-5.931 0-1.31.467-2.381 1.235-3.221-.124-.304-.536-1.524.117-3.176 0 0 1.008-.323 3.303 1.23.957-.266 1.984-.399 3.005-.404 1.02.005 2.048.138 3.005.404 2.292-1.554 3.298-1.23 3.298-1.23.656 1.652.244 2.872.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.476 5.921.43.371.815 1.103.815 2.222 0 1.604-.015 2.897-.015 3.293 0 .32.218.694.825.576C20.565 22.063 24 17.577 24 12.297 24 5.67 18.627.297 12 .297z" />
+                        </svg>
+                    </div>
+                </a>
+                {%- block theme_switcher %}
+                <button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'"
+                    class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                    type="button" aria-label="Color theme switcher">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" fill="currentColor"
+                        class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0">
+                        <path
+                            d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z" />
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" fill="currentColor"
+                        class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100">
+                        <path
+                            d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z" />
+                    </svg>
+                </button>
+                {%- endblock theme_switcher %}
+            </nav>
+            {%- endblock extra_header_link_icons %}
+        </div>
+        {%- endblock header_right %}
+    </div>
+    {%- block header_after %}{%- endblock header_after %}
+</header>

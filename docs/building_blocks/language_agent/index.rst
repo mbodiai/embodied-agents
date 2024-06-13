@@ -1,10 +1,10 @@
-Cognitive Agent
+Language Agent
 =================
 
 Overview
 ^^^^^^^^^^^^
 
-The `Cognitive Agent <https://github.com/MbodiAI/mbodied-agents/blob/main/src/mbodied_agents/agents/language/cognitive_agent.py>`_ is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
+The `Language Agent <https://github.com/MbodiAI/mbodied-agents/blob/main/src/mbodied_agents/agents/language/cognitive_agent.py>`_ is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
 Currently supported API services are OpenAI and Anthropic. Upcoming API services include Mbodi, Ollama, and HuggingFace. Stay tuned for our Mbodi backend service!
 
