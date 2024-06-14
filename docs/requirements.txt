@@ -39,3 +39,6 @@ tqdm==4.66.4
 typing_extensions==4.12.2
 urllib3==2.2.1
 zipp==3.19.2
+
+# Conditionally install PyAudio only if not in ReadTheDocs
+pyaudio==0.2.14; sys_platform != 'linux' or 'READTHEDOCS' not in os.environ
