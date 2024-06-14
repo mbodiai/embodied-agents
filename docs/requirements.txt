@@ -20,6 +20,7 @@ Jinja2==3.1.4
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 -e git+https://github.com/mbodiai/mbodied-agents@main#egg=mbodied_agents
+mdurl==0.1.2
 more-itertools==10.3.0
 packaging==24.1
 pathspec==0.12.1
