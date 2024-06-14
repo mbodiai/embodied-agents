@@ -1,0 +1,195 @@
+/* custom.css */
+
+/* Hide header link */
+h1 .headerlink {
+    display: none;
+}
+
+/* Hide table of contents wrapper */
+.toctree-wrapper.compound {
+    display: none;
+}
+
+/* Lead text styling */
+.lead {
+    color: hsl(var(--muted-foreground));
+    font-size: 1.125rem;
+}
+
+/* Code block styling */
+.docutils.literal.notranslate {
+    background-color: #e0e0e0;
+    /* Light grey background */
+    color: #000000;
+    /* Black text */
+}
+
+/* Base styles common to both modes */
+.quickstart-guide {
+    display: flex;
+    padding: 20px;
+    border-radius: 10px;
+    align-items: flex-start;
+    gap: 20px;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 40px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quickstart-text {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.quickstart-text h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.quickstart-text p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.quickstart-text .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.quickstart-code {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    font-family: monospace;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.quickstart-code pre {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.quickstart-code code {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Light mode styles */
+@media (prefers-color-scheme: light) {
+    .quickstart-guide {
+        background-color: #e0e0e0;
+        /* Light grey background */
+        color: #000000;
+        /* Black text */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .quickstart-text .btn {
+        background-color: #f4f4f4;
+        /* Slightly darker grey */
+        color: #000000;
+        /* Black text */
+        border-color: #b0b0b0;
+    }
+
+    .quickstart-text .btn:hover {
+        background-color: #c0c0c0;
+        /* Slightly darker grey on hover */
+    }
+
+    .quickstart-code {
+        background-color: #f0f0f0;
+        /* Grey background for code window */
+        color: #000000;
+        /* Black text */
+    }
+
+    .quickstart-code code {
+        color: #000000;
+        /* Black text for code */
+    }
+
+    .quickstart-code code.python .keyword {
+        color: #795da3;
+        /* Purple for keywords */
+    }
+
+    .quickstart-code code.python .function {
+        color: #007acc;
+        /* Blue for functions */
+    }
+
+    .quickstart-code code.python .string {
+        color: #008000;
+        /* Green for strings */
+    }
+
+    code {
+        background-color: #e0e0e0;
+        /* Light grey background for inline code */
+        color: #000000;
+        /* Black text */
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    .quickstart-guide {
+        background-color: #2e2e2e;
+        color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .quickstart-text .btn {
+        background-color: #444444;
+        color: #ffffff;
+        border-color: #555555;
+    }
+
+    .quickstart-text .btn:hover {
+        background-color: #666666;
+    }
+
+    .quickstart-code {
+        background-color: #1e1e1e;
+        color: #abb2bf;
+    }
+
+    .quickstart-code code {
+        color: #abb2bf;
+    }
+
+    .quickstart-code code.python .keyword {
+        color: #c678dd;
+    }
+
+    .quickstart-code code.python .function {
+        color: #61dafb;
+    }
+
+    .quickstart-code code.python .string {
+        color: #98c379;
+    }
+
+    code {
+        background-color: #2e2e2e;
+        color: #abb2bf;
+    }
+}
+
+code {
+    background-color: #e0e0e0;
+    /* Light grey background */
+    color: #000000;
+    /* Black text */
+    padding: 2px 4px;
+    border-radius: 4px;
+}
