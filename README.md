@@ -1,5 +1,3 @@
-# Mbodied Agents
-
 <img src="assets/logo.jpeg" alt="Mbodied Agents Logo" style="width: 200px;">
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -8,34 +6,37 @@
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
+# mbodied agents
+Welcome to **mbodied agents**, a toolkit for integrating state-of-the-art transformers into robotics systems. The goals for this repo are to minimize the ambiguouty, heterogeneity, and data scarcity currently holding generative AI back from wide-spread adoption in robotics. It provides strong type hints for the various types of robot actions and provides a unified interface for:
+
+- Streaming to and from vision models such as Yolo and GPT4-o
+- Handling multimodal data pipelines for setting up continual learning
+- Automatically recording observations and actions to hdf5
+- Exporting to the most popular ML formats such as [Gym Spaces](https://gymnasium.farama.org/index.html) and [Huggingface Datasets](https://huggingface.co/docs/datasets/en/index)
+  
+And most importantly, the entire library is __100% configurable to any observation and action space__. That's right. With **mbodied agents**, the days of wasting precious engineering time on tedious formatting and post-processing are over. Jump to [Getting Started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing) or a [mujoco simulation](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
+
+
 ## Updates
 
-**June 2, 2024**
-
-mbodied-agents v0.0.5: Fixed PyPI project dependency. Added dataset Replayer. Updated README.
+- **June 2, 2024** mbodied-agents v0.0.5: Fixed PyPI project dependency. Added dataset Replayer. Updated README.
 
 ##
 
-Welcome to **Mbodied Agents**, a toolkit for integrating various state-of-the-art transformers into robotics stacks. Mbodied Agents is designed to provide a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and work for arbitrary observation and action spaces. It can be seamlessly integrated into real hardware or simulation. See [Getting Started](#getting-started).
-
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
-Each time you interact with a robot, the data is automatically recorded into a dataset, which can be augmented and used for model training. We are actively developing tools for processing the dataset, augmenting the data, and finetuning foundation models. If you'd like to learn more or provide feedback, please fill out this [form](https://forms.gle/rv5rovK93dLucma37).◊
 
 <img src="assets/demo_gif.gif" alt="Demo GIF" style="width: 625px;">
+
 
 We welcome any questions, issues, or PRs!
 
 Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discussions! **⭐ Give us a star on GitHub if you like us!**
 
 - [Mbodied Agents](#mbodied-agents)
-  - [What is Mbodied Agents for](#what-is-mbodied-agents-for)
   - [Overview](#overview)
     - [Support Matrix](#support-matrix)
-    - [In Beta](#in-beta)
-    - [Idea](#idea)
   - [Installation](#installation)
-  - [Dev Environment Setup](#dev-environment-setup)
   - [Getting Started](#getting-started)
   - [Glossary](#glossary)
   - [Building Blocks](#building-blocks)
@@ -49,13 +50,12 @@ Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discuss
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
-## What is Mbodied Agents for
-
-Mbodied Agents simplifies the integration of advanced AI models in robotics. It offers a unified platform for controlling various robots using state-of-the-art transformers and multimodal data processing. This toolkit enables experimentation with AI models, dataset collection and augmentation, and model training or finetuning for specific tasks. The goal is to develop intelligent, adaptable robots that learn from interactions and perform complex tasks in dynamic environments.
 
 ## Overview
 
-Mbodied Agents offers the following features:
+## Why mbodied agents?
+
+Each time you interact with your robot, precious, feature-rich data enters your system and needs to be routed to the right place for later retrieval and processing. **mbodied agents** simplify this process with explicit types and easy conversion to various ML-consumable formats. Our hope is to aid in the creation of intelligent, adaptable robots that learn from interactions and perform complex tasks in dynamic environments. Current features include:
 
 - **Configurability** : Define your desired Observation and Action spaces and read data into the format that works best for your system.
 - **Natural Language Control** : Use verbal prompts to correct a cognitive agent's actions and calibrate its behavior to a new environment.
@@ -68,46 +68,18 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 
 - OpenAI
 - Anthropic
-- Mbodi (Coming Soon)
-- HuggingFace (Coming Soon)
-- Gemini (Coming Soon)
+- OpenVLA (Coming Soon)
+- More Open Source Models (Coming Soon)
 
-### In Beta
+### Roadmap
 
-For access (or just to say hey 😊), don't hesitate to fill out this [form](https://forms.gle/rv5rovK93dLucma37) or reach out to us at <info@mbodi.ai>.
-
-- **Conductor**: A service for processing and managing datasets, and automatically training your models on your own data.
-- **Conductor Dashboard**: See how GPT-4o, Claude Opus, or your custom models are performing on your datasets and open benchmarks.
-- **Data Augmentation**: Build invariance to different environments by augmenting your dataset with Mbodi's diffusion-based data augmentation to achieve better generalization.
-- **Mbodied SVLM**: A new Spatial Vision Language Model trained specifically for spatial reasoning and robotics control.
-
-### Idea
-
-The core idea behind Mbodied Agents is end-to-end continual learning. We believe that the best way to train a robot is to have it learn from its own experiences.
+- [ ] Asynchronous and Remote Agent Execution
+- [ ] More Support for In-context Learning from Natural Language
+- [ ] Diffusion-based Data Augmentation
 
 ## Installation
 
 `pip install mbodied-agents`
-
-## Dev Environment Setup
-
-1. Clone this repo:
-
-   ```console
-   git clone https://github.com/MbodiAI/mbodied-agents.git
-   ```
-
-2. Install system dependencies:
-
-   ```console
-   source install.bash
-   ```
-
-3. Then for each new terminal, run:
-
-   ```console
-   hatch shell
-   ```
 
 ## Getting Started
 
@@ -148,16 +120,17 @@ To learn more about **SimplerEnv**, please visit [![GitHub](https://img.shields.
 
 ### The [Sample](src/mbodied_agents/base/sample.py) class
 
-The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](src/mbodied_agents/base/sample.py) class, you'll be able to convert to and from the following with ease:
+The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extendable, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](src/mbodied_agents/base/sample.py) class, you'll be able to convert to and from the following with ease:
 
-- a Gym space for creating a new Gym environment
-- a flattened list, array, or tensor for plugging into an ML model
-- a HuggingFace dataset with semantic search capabilities
-- a Pydantic BaseModel for reliable and quick json serialization/deserialization.
+- A Gym space for creating a new Gym environment.
+- A flattened list, array, or tensor for plugging into an ML model.
+- A HuggingFace dataset with semantic search capabilities.
+- A Pydantic BaseModel for reliable and quick json serialization/deserialization.
+
 
 #### Creating a Sample
 
-Here is an example of creating a Sample and using its methods:
+Creating a sample just requires subclassing or passing keyword arguments to the base Sample class:
 
 ```python
 # Creating a Sample instance
@@ -177,6 +150,8 @@ unflattened_sample = Sample.unflatten(flat_list, schema)
 print(unflattened_sample) # Output: Sample(observation=[1, 2, 3], action=[4, 5, 6])
 ```
 
+
+
 #### Serialization and Deserialization with Pydantic
 
 The Sample class leverages Pydantic's powerful features for serialization and deserialization, allowing you to easily convert between Sample instances and JSON.
@@ -195,7 +170,11 @@ sample = Sample.model_validate(from_json(json_data))
 print(sample) # Output: Sample(observation=[1, 2, 3], action=[4, 5, 6])
 ```
 
+
 #### Converting to Different Containers
+
+<details> <summary>
+Here is an example of converting to different containers: </summary>
 
 ```python
 # Converting to a dictionary
@@ -217,7 +196,11 @@ print(sample_hf)
 #     features: ['observation', 'action'],
 #     num_rows: 3
 # })
+
 ```
+</details>
+
+
 
 #### Gym Space Integration
 
@@ -284,15 +267,12 @@ The [controls](src/mbodied_agents/types/controls.py) module defines various moti
 
 ### Hardware Interface
 
-Mapping robot actions from any model to any embodiment is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](src/mbodied_agents/hardware/xarm_interface.py) as an example.
+Mapping robot actions from a model to an action is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](src/mbodied_agents/hardware/xarm_interface.py) as an example.
 
-Upcoming: a remote hardware interface with a communication protocol. This will be very convenient for controlling robots that have a computer attached, e.g., LoCoBot.
 
 ### Recorder
 
-Dataset [Recorder](src/mbodied_agents/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
-
-Here's an example of recording observation, instruction, and the output HandControl (x, y, z, r, p, y, grasp).
+Dataset [Recorder](src/mbodied_agents/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder:
 
 ```python
 observation_space = spaces.Dict({
@@ -306,13 +286,13 @@ recorder = Recorder('example_recorder', out_dir='saved_datasets', observation_sp
 recorder.record(observation={'image': image, 'instruction': instruction,}, action=hand_control)
 ```
 
-The dataset is saved to `./saved_datasets`. Learn more about augmenting, and finetuning with this dataset by filling out this [form](https://forms.gle/rv5rovK93dLucma37).
+The dataset is saved to `./saved_datasets`. Learn more about augmenting, and fine-tuning with this dataset by filling out this [form](https://forms.gle/rv5rovK93dLucma37).
 
 ### Dataset Replayer
 
 The [Replayer](src/mbodied_agents/data/replaying.py) class is designed to process and manage data stored in HDF5 files generated by `Recorder`. It provides a variety of functionalities, including reading samples, generating statistics, extracting unique items, and converting datasets for use with HuggingFace. The Replayer also supports saving specific images during processing and offers a command-line interface for various operations.
 
-Here's a simple example on iterating through a dataset from Recorder with Replayer:
+Example for iterating through a dataset from Recorder with Replayer:
 
 ```python
 replayer = Replayer(path=str("path/to/dataset.h5"))
@@ -321,7 +301,7 @@ for observation, action in replayer:
 ```
 
 ## Directory Structure
-
+```
 ```shell
 ├─ assets/ ............. Images, icons, and other static assets
 ├─ examples/ ........... Example scripts and usage demonstrations
@@ -339,8 +319,10 @@ for observation, action in replayer:
 └─ tests/ .............. Unit tests
 ```
 
+
 ## Contributing
 
-We believe in the power of collaboration and open-source development. This platform is designed to be shared, extended, and improved by the community. See the [contributing guide](CONTRIBUTING.md) for more information.
+ See the [contributing guide](CONTRIBUTING.md) for more information.
 
 Feel free to report any issues, ask questions, ask for features, or submit PRs.
+
