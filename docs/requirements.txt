@@ -47,7 +47,7 @@ keyring==25.2.1
 lz4==4.3.3
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
--e git+https://github.com/mbodiai/agents-corp@17e461477ebdfd115c3e5209464a8b6e2065ea0d#egg=mbodied_agents
+-e git+https://github.com/mbodiai/mbodied-agents@main#egg=mbodied_agents
 mdurl==0.1.2
 more-itertools==10.3.0
 mpmath==1.3.0
