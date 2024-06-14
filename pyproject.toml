@@ -42,6 +42,7 @@ dependencies = [
   "xarm-python-sdk",
   "jsonref",
   "art",
+  "tensorflow_hub"
 ]
 
 [project.urls]
