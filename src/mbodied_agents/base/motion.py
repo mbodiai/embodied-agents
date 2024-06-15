@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import logging
+
 import numpy as np
+from mbodied_agents.base.sample import Sample
+from mbodied_agents.types.ndarray import NumpyArray
 from pydantic import ConfigDict, Field
 from typing_extensions import Literal, get_origin
-
-from mbodied_agents.types.ndarray import NumpyArray
-from mbodied_agents.base.sample import Sample
 
 MotionSubtype = Literal[
     "unspecified",
@@ -51,6 +51,8 @@ def MotionField(
     Returns:
         Field: Configured Pydantic Field for motion.
     """
+    # TODO: Bounds is currently being explicitly set to NONE. Handle that
+    
     ge = bounds[0] if bounds is not None else None
     le = bounds[1] if bounds is not None else None
 
