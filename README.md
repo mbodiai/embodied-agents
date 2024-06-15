@@ -4,7 +4,10 @@
 [![MacOS | Python 3.12|3.11|3.10](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml)
 [![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
+[![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/?badge=latest)
 [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
+
+Documentation: [mbodied agents docs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en)
 
 # mbodied agents
 Welcome to **mbodied agents**, a toolkit for integrating state-of-the-art transformers into robotics systems. The goals for this repo are to minimize the ambiguouty, heterogeneity, and data scarcity currently holding generative AI back from wide-spread adoption in robotics. It provides strong type hints for the various types of robot actions and provides a unified interface for:
@@ -68,6 +71,7 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 
 - OpenAI
 - Anthropic
+- RT1 (Coming Soon)
 - OpenVLA (Coming Soon)
 - More Open Source Models (Coming Soon)
 

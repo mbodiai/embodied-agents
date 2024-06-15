@@ -25,22 +25,8 @@ mbodied agents
    <div class="quickstart-guide">
      <div class="quickstart-text">
        <h2>Quickstart Guide</h2>
-       <p>Start your path to understanding the Embodied Agents package with our quickstart guide.</p>
+       <p>Start your path to understanding the mbodied agents package with our quickstart guide.</p>
        <a class="btn" href="getting_started/index.html">Get started</a>
-     </div>
-     <div class="quickstart-code">
-       <pre>
-   <code class="python">
-   
-   SYSTEM_PROMPT = f"""
-    You are robot with vision capabilities.
-    For each task given, you respond in JSON format. Here's the JSON schema:
-    {AnswerAndActionsList.model_json_schema()}
-    """
-
-   robot_agent = CognitiveAgent(context=SYSTEM_PROMPT, api_service="openai", api_key=openai_api_key)
-   </code>
-       </pre>
      </div>
    </div>
 
