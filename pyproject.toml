@@ -1,3 +1,5 @@
+# pyproject.toml
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -38,7 +40,7 @@ dependencies = [
   "click",
   "datasets",
   "playsound",
-  "pyaudio",
+  "pyaudio; 'READTHEDOCS' not in os.environ",
   "xarm-python-sdk",
   "jsonref",
   "art",
@@ -57,22 +59,17 @@ path = "src/mbodied_agents/__about__.py"
 [tool.hatch.metadata]
 allow-direct-references = true
 
-
 [tool.hatch.envs.default]
-
 python = "3.11"
 path = ".mbodied_agents/envs/mbodied_agents"
 
-[tool.hatch.envs.default.env-vars]
-
-
 [tool.hatch.envs.conda]
 type = "conda"
-python = "310"                       # Python version 3.10
-command = "conda"                    # Options: conda, mamba, micromamba
-conda-forge = false                  # Use conda-forge index
-environment-file = "environment.yml" # Specify environment file
-prefix = ".venv/"                    # Create environment in .venv/ folder
+python = "310"
+command = "conda"
+conda-forge = false
+environment-file = "environment.yml"
+prefix = ".venv/"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest -vv --ignore third_party {args:tests}"
@@ -108,101 +105,20 @@ target-version = "py310"
 
 [tool.ruff.lint]
 extend-unsafe-fixes = ["ALL"]
-# List of rules: https://docs.astral.sh/ruff/rules
 select = [
-  # flake8-builtins
-  "A",
-  # flake8-commas
-  "COM812",
-  # flake8-comprehensions
-  "C4",
-  # pydocstyle
-  "D",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # pyupgrade
-  "UP",
-  # flake8-bugbear
-  "B",
-  # flake8-simplify
-  "SIM",
-  # flake8-implicit-str-concat
-  "ISC",
-  # pep8-naming
-  "N",
-  # flake8-annotations
-  "ANN",
-  # flake8-async
-  "ASYNC",
-  # flake8-bandid selected
-  "S",
-  # flake8-print
-  "T20",
-  # flake8-return
-  "RET",
-  # flake8-simplify
-  "SIM",
-  # flake8-unused-arguments
-  "ARG",
-  # flake8-use-pathlib
-  "PTH",
-  # eradicate
-  "ERA",
-  # pandas-vet
-  "PD",
-  # Import sort
-  "I",
-  # avoid shadowing
-  "PLW",
+  "A", "COM812", "C4", "D", "E", "F", "UP", "B", "SIM", "ISC", "N", "ANN", "ASYNC", "S", "T20", "RET", "SIM", "ARG", "PTH", "ERA", "PD", "I", "PLW",
 ]
 ignore = [
-  "D100",
-  "D101",
-  "D104",
-  "D106",
-  # missing-type-self
-  "ANN101",
-  # missing-type-cls
-  "ANN102",
-  # missing-type-kwargs
-  "ANN003",
-  # utf-8 encoding skip
-  "UP009",
-  # Missing return type annotation for special method `__init__`
-  "ANN204",
-  # Star-arg unpacking after a keyword argument is strongly discouraged
-  "B026",
-  # Missing type annotation for function argument `self`
-  "ANN001",
-  # Dynamically typed expressions (typing.Any) are disallowed in `wrapper`
-  "ANN401",
-  # We don't need docstrings for every method
-  "ANN202",
-  "D107",
-  "D102",
-  "D103",
-  # Inline lambdas
-  "E731",
-  # Sometimes we need List and Tuple
-  "UP006",
-  "UP035",
-  "ANN002",
+  "D100", "D101", "D104", "D106", "ANN101", "ANN102", "ANN003", "UP009", "ANN204", "B026", "ANN001", "ANN401", "ANN202", "D107", "D102", "D103", "E731", "UP006", "UP035", "ANN002",
 ]
-
-# Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
 
 [tool.ruff.format]
 docstring-code-format = true
 quote-style = "double"
-# Like Black, indent with spaces, rather than tabs.
 indent-style = "space"
-# Like Black, respect magic trailing commas.
 skip-magic-trailing-comma = false
-# Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
 [tool.ruff.lint.pydocstyle]
