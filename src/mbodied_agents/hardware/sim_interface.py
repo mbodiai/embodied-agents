@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from mbodied_agents.types.controls import HandControl
 from mbodied_agents.hardware.interface import HardwareInterface
+from mbodied_agents.types.controls import HandControl
 
 
 class SimInterface(HardwareInterface):

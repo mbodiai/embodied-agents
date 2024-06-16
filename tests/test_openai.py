@@ -15,8 +15,8 @@
 import pytest
 from mbodied_agents.agents.backends.openai_backend import OpenAIBackend
 from mbodied_agents.types.message import Message
-from mbodied_agents.agents.language import CognitiveAgent
-from mbodied_agents.types.vision import Image
+from mbodied_agents.agents.language import LanguageAgent
+from mbodied_agents.types.sense.vision import Image
 
 # Mock responses for the API callss
 mock_openai_response = "OpenAI response text"
@@ -63,17 +63,17 @@ def test_openai_backend_create_completion(openai_backend):
     assert response == mock_openai_response
 
 
-# Test the CognitiveAgent act method with OpenAI backend
-def test_language_backend_cognitive_agent_act_openai(openai_api_key):
-    agent = CognitiveAgent(api_key=openai_api_key,
+# Test the LanguageAgent act method with OpenAI backend
+def test_language_backend_language_agent_act_openai(openai_api_key):
+    agent = LanguageAgent(api_key=openai_api_key,
                             api_service="openai", client=FakeOpenAI())
     response = agent.act("Hello, OpenAI!", context=[])[0]
     assert response == mock_openai_response
 
 
-# Test the CognitiveAgent act method with an image input
-def test_language_backend_cognitive_agent_act_with_image(openai_api_key):
-    agent = CognitiveAgent(api_key=openai_api_key,
+# Test the LanguageAgent act method with an image input
+def test_language_backend_language_agent_act_with_image(openai_api_key):
+    agent = LanguageAgent(api_key=openai_api_key,
                             api_service="openai", client=FakeOpenAI())
     test_image = Image(path="resources/xarm.jpeg")
     response = agent.act("Hi", test_image, context=[])[0]

@@ -13,13 +13,12 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional, List
+from typing import Any, List, Optional
 
 import backoff
 from anthropic import RateLimitError as AnthropicRateLimitError
-from openai._exceptions import RateLimitError as OpenAIRateLimitError
-
 from mbodied_agents.types.message import Message
+from openai._exceptions import RateLimitError as OpenAIRateLimitError
 
 ERRORS = (
     OpenAIRateLimitError,
@@ -35,7 +34,7 @@ class Backend(ABC):
         client (Optional[Any]): The client instance used for API calls.
     """
 
-    def __init__(self, api_key: Optional[str] = None, client: Optional[Any] = None):
+    def __init__(self, api_key: str | None = None, client: Any | None = None):
         """Initializes the Backend instance.
 
         Args:

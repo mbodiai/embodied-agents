@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-from gym import spaces
+from gymnasium import spaces
 import numpy as np
 import h5py
 import os
@@ -41,10 +41,10 @@ def test_from_space():
         }
     )
     sample = Sample.from_space(space)
-    assert isinstance(sample.key1, int)
+    assert isinstance(sample.key1, int | np.int64)
     assert isinstance(sample.key2, np.ndarray)
     assert (sample.key2 >= 0).all() and (sample.key2 <= 1).all()
-    assert isinstance(sample.key3["nested_key"], int)
+    assert isinstance(sample.key3["nested_key"], int | np.int64)
 
 
 def test_to_dict():

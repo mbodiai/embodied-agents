@@ -14,6 +14,7 @@
 
 import json
 import logging
+from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
@@ -22,12 +23,14 @@ import jsonref
 import numpy as np
 import torch
 from datasets import Dataset
-from gym import spaces
-from mbodied_agents.types.ndarray import NumpyArray
+from gymnasium import spaces
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import from_json
 from typing_extensions import Annotated
+
+from mbodied_agents.data.utils import to_features
+from mbodied_agents.types.ndarray import NumpyArray
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 
@@ -293,8 +296,8 @@ class Sample(BaseModel):
             return self.model_dump_json()
         if container == "hf":
             return Dataset.from_dict(self.dict())
-        if container == "action":
-            return 
+        if container == "features":
+            return to_features(self.dict())
         raise ValueError(f"Unsupported container type: {container}")
 
     @classmethod
@@ -417,7 +420,7 @@ class Sample(BaseModel):
     def from_space(cls, space: spaces.Space) -> "Sample":
         """Generate a Sample instance from a Gym space."""
         sampled = space.sample()
-        if isinstance(sampled, dict):
+        if isinstance(sampled, dict | OrderedDict):
             return cls(**sampled)
         if isinstance(sampled, np.ndarray | torch.Tensor | list | tuple):
             sampled = np.asarray(sampled)

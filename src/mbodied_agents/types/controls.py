@@ -15,159 +15,25 @@
 from typing import Sequence
 
 import numpy as np
-from gym import spaces
-from mbodied_agents.base.motion import AbsoluteMotionField, Motion, MotionField, RelativeMotionField
+from gymnasium import spaces
 from pydantic import Field
+
+from mbodied_agents.base.motion import Motion, MotionField
+from mbodied_agents.types.geometry import LocationAngle, Pose, Pose6D
 
 """Motions to control a robot.
 
 This module defines the motions to control a robot as pydantic models.
 Examples:
-    LocationAngle: A 2D+1 space representing x, y, and theta.
-    Pose: A 6D space representing x, y, z, roll, pitch, and yaw.
     JointControl: A joint value, typically an angle.
     FullJointControl: Full joint control.
     HandControl: A 7D space representing x, y, z, roll, pitch, yaw, and oppenness of the hand.
     HeadControl: Head control. Tilt and pan.
     MobileSingleArmControl: Control for a robot that can move in 2D space with a single arm.
+    BimanualArmControl: Control for a robot that can move in 2D space with two arms.
+    HumanoidControl: Control for a robot with two arms and two legs.
 """
 
-
-class Pose3D(Motion):
-    """Action for a 2D+1 space representing x, y, and theta."""
-
-    x: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Movement of X position in 2D space. +x is forward; -x is backward.",
-    )
-    y: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Movement of Y position in 2D space. +y is left; -y is right.",
-    )
-    theta: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Rotation (radians) about the z axis. Positive is counter-clockwise.",
-    )
-
-
-class LocationAngle(Pose3D):
-    """Alias for Pose3D. A 2D+1 space representing x, y, and theta."""
-
-    pass
-
-
-class Pose6D(Motion):
-    """Movement for a 6D space representing x, y, z, roll, pitch, and yaw."""
-
-    x: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Movement of X position in 3D space. +x is forward; -x is backward.",
-    )
-    y: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Movement of Y position in 3D space. +y is left; -y is right.",
-    )
-    z: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Movement of Z position in 3D space. +z is up; -z is down.",
-    )
-    roll: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Roll about the X-axis in radians. Positive roll is clockwise.",
-    )
-    pitch: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Pitch about the Y-axis in radians. Positive pitch is down.",
-    )
-    yaw: float = MotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Yaw about the Z-axis in radians. Positive yaw is left.",
-    )
-
-
-class Pose(Pose6D):
-    """Alias for Pose6D. A movement for a 6D space representing x, y, z, roll, pitch, and yaw."""
-
-    pass
-
-
-class AbsolutePose(Pose):
-    """Absolute pose of the robot in 3D space."""
-
-    x: float = AbsoluteMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="X position in 3D space. +x is forward, -x is backward.",
-    )
-    y: float = AbsoluteMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Y position in 3D space. +y is left, -y is right.",
-    )
-    z: float = AbsoluteMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Z position in 3D space. +z is up, -z is down.",
-    )
-    roll: float = AbsoluteMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Roll in 3D space. Positive roll is clockwise.",
-    )
-    pitch: float = AbsoluteMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Pitch in 3D space. Positive pitch is down.",
-    )
-    yaw: float = AbsoluteMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Yaw in 3D space. Positive yaw is left.",
-    )
-
-
-class RelativePose(Pose6D):
-    """Relative pose displacement."""
-
-    x: float = RelativeMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="X position delta in 3D space. +x is forward; -x is backward.",
-    )
-    y: float = RelativeMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Y position delta in 3D space. +y is left; -y is right.",
-    )
-    z: float = RelativeMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-1, 1],
-        description="Z position delta in 3D space. +z is up; -z is down.",
-    )
-    roll: float = RelativeMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Roll delta in radians. Positive roll is clockwise.",
-    )
-    pitch: float = RelativeMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Pitch delta in radians. Positive pitch is down.",
-    )
-    yaw: float = RelativeMotionField(
-        default_factory=lambda: 0.0,
-        bounds=[-3.14, 3.14],
-        description="Yaw delta in radians. Positive yaw is left.",
-    )
 
 
 class JointControl(Motion):

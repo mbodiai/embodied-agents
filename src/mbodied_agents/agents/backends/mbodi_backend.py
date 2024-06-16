@@ -19,7 +19,7 @@ from typing import Any, List
 from mbodied_agents.base.backend import Backend
 from mbodied_agents.base.serializer import Serializer
 from mbodied_agents.types.message import Message
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
 import requests
 import logging
 import json
@@ -80,7 +80,7 @@ class MbodiBackend(Backend):
         self.url = url
         self.serializer = MbodiSerializer()
 
-    def _create_completion(self, messages: List[Message], model: str = "mbodi", stream: bool = False, **kwargs) -> str:
+    def _create_completion(self, messages: List[Message], model: str = "phi3v-spatial", stream: bool = False, **kwargs) -> str:
         """Creates a completion for the given messages using the Mbodi API.
 
         Args:

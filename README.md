@@ -5,9 +5,11 @@
 [![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/?badge=latest)
-[![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
+
 
 Documentation: [mbodied agents docs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en)
+
+Example colab: [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing)
 
 # mbodied agents
 Welcome to **mbodied agents**, a toolkit for integrating state-of-the-art transformers into robotics systems. The goals for this repo are to minimize the ambiguouty, heterogeneity, and data scarcity currently holding generative AI back from wide-spread adoption in robotics. It provides strong type hints for the various types of robot actions and provides a unified interface for:
@@ -17,7 +19,7 @@ Welcome to **mbodied agents**, a toolkit for integrating state-of-the-art transf
 - Automatically recording observations and actions to hdf5
 - Exporting to the most popular ML formats such as [Gym Spaces](https://gymnasium.farama.org/index.html) and [Huggingface Datasets](https://huggingface.co/docs/datasets/en/index)
   
-And most importantly, the entire library is __100% configurable to any observation and action space__. That's right. With **mbodied agents**, the days of wasting precious engineering time on tedious formatting and post-processing are over. Jump to [Getting Started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing) or a [mujoco simulation](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
+And most importantly, the entire library is __100% configurable to any observation and action space__. That's right. With **mbodied agents**, the days of wasting precious engineering time on tedious formatting and post-processing are over. Jump to [Getting Started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing) or a [mujoco simulation](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
 
 
 ## Updates
@@ -38,18 +40,11 @@ Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discuss
 
 - [Mbodied Agents](#mbodied-agents)
   - [Overview](#overview)
-    - [Support Matrix](#support-matrix)
   - [Installation](#installation)
+  - [Dev Environment Setup](#dev-environment-setup)
   - [Getting Started](#getting-started)
   - [Glossary](#glossary)
   - [Building Blocks](#building-blocks)
-    - [The Sample class](#the-sample-class)
-    - [Message](#message)
-    - [Backend](#backend)
-    - [Cognitive Agent](#cognitive-agent)
-    - [Controls](#controls)
-    - [Hardware Interface](#hardware-interface)
-    - [Recorder](#recorder)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
@@ -84,6 +79,26 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 ## Installation
 
 `pip install mbodied-agents`
+
+## Dev Environment Setup
+
+1. Clone this repo:
+
+   ```console
+   git clone https://github.com/MbodiAI/mbodied-agents.git
+   ```
+
+2. Install system dependencies:
+
+   ```console
+   source install.bash
+   ```
+
+3. Then for each new terminal, run:
+
+   ```console
+   hatch shell
+   ```
 
 ## Getting Started
 

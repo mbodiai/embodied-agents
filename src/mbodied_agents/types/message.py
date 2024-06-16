@@ -14,10 +14,9 @@
 
 from typing import Any, Literal
 
-from pydantic import Field
-
 from mbodied_agents.base.sample import Sample
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
+from pydantic import Field
 
 Role = Literal["user", "assistant", "system"]
 

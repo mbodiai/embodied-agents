@@ -14,11 +14,10 @@
 
 from typing import Any
 
-from pydantic import ConfigDict, model_serializer, model_validator
-
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.types.message import Message
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
+from pydantic import ConfigDict, model_serializer, model_validator
 
 
 class Serializer(Sample):

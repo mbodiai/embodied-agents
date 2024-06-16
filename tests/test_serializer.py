@@ -17,7 +17,7 @@ import pytest
 from pydantic import ValidationError
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.types.message import Message
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
 from mbodied_agents.base.serializer import Serializer
 
 

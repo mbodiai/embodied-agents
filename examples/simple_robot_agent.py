@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,14 @@ import logging
 import click
 from pydantic import BaseModel, Field
 from pydantic_core import from_json
-from gym import spaces
+from gymnasium import spaces
 
-from mbodied_agents.agents.language import CognitiveAgent
-from mbodied_agents.agents.sense.audio_handler import AudioHandler
+from mbodied_agents.agents.language import LanguageAgent
+from mbodied_agents.agents.sense.audio.audio_handler import AudioHandler
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.hardware.sim_interface import SimInterface
 from mbodied_agents.types.controls import HandControl
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
 from mbodied_agents.data.recording import Recorder
 
 
@@ -53,9 +53,9 @@ class AnswerAndActionsList(Sample):
     )
 
 
-# This prompt is used to provide context to the CognitiveAgent.
+# This prompt is used to provide context to the LanguageAgent.
 SYSTEM_PROMPT = f"""
-    You are a robot with vision capabilities. 
+    You are a robot with vision capabilities.
     For each task given, you respond in JSON format. Here's the JSON schema:
     {AnswerAndActionsList.model_json_schema()}
     """
@@ -69,7 +69,7 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
     """Main function to initialize and run the robot interaction.
 
     Args:
-        backend: The backend to use for the CognitiveAgent (e.g., "openai").
+        backend: The backend to use for the LanguageAgent (e.g., "openai").
         disable_audio: If True, disables audio input/output.
         record_dataset: If True, enables recording of the interaction data for training.
 
@@ -77,8 +77,8 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
         To run the script with OpenAI backend and disable audio:
         python script.py --backend openai --disable_audio
     """
-    # Initialize the intelligent Robot Agent.
-    robot_agent = CognitiveAgent(context=SYSTEM_PROMPT, api_service=backend)
+    # Initialize the intelligent Robot Agent with language interface.
+    robot_agent = LanguageAgent(context=SYSTEM_PROMPT, api_service=backend)
 
     # Use a mock robot interface for movement visualization.
     robot_interface = SimInterface()
@@ -86,7 +86,8 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
     # Enable or disable audio input/output capabilities.
     if disable_audio:
         os.environ["NO_AUDIO"] = "1"
-    audio = AudioHandler(use_pyaudio=False)  # Prefer to use use_pyaudio=False for MAC.
+    # Prefer to use use_pyaudio=False for MAC.
+    audio = AudioHandler(use_pyaudio=False)
 
     # Data recorder for every conversation and action.
     if record_dataset:
@@ -94,7 +95,8 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
             'image': Image(size=(224, 224)).space(),
             'instruction': spaces.Text(1000)
         })
-        action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
+        action_space = AnswerAndActionsList(
+            actions=[HandControl()] * 6).space()
         recorder = Recorder(
             'example_recorder',
             out_dir='saved_datasets',
@@ -116,7 +118,8 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
         print("Response:", response)
 
         # Validate the response to the pydantic object.
-        answer_actions = AnswerAndActionsList.model_validate(from_json(response))
+        answer_actions = AnswerAndActionsList.model_validate(
+            from_json(response))
 
         # Let the robot speak.
         if answer_actions.answer:

@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 import cv2
 from PIL import Image as PILImage
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
 import tempfile
 
 
