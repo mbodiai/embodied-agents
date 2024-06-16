@@ -19,7 +19,7 @@ import math
 from mbodied_agents.types.controls import HandControl, Pose6D
 from mbodied_agents.hardware.xarm_interface import XarmInterface
 
-
+@pytest.mark.extra
 @pytest.fixture
 def mock_xarm_api(mocker):
     # Mock the XArmAPI methods that are used in XarmInterface

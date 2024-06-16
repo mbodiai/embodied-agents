@@ -25,7 +25,7 @@ from h5py import string_dtype
 from huggingface_hub import login
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.data.utils import infer_features
-from mbodied_agents.types.vision import Image as MbImage
+from mbodied_agents.types.sense.vision import Image as MbImage
 from PIL import Image as PILImage
 
 
@@ -303,6 +303,8 @@ def to_dataset(folder: str, name: str, description: str = None) -> None:
 
     Args:
         folder (str): Path to the folder containing HDF5 files.
+        name (str): Name of the dataset.
+        description (str, optional): Description of the dataset. Defaults to None.
     """
     r = FolderReplayer(folder)
     data = list(r.__iter__())

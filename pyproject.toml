@@ -23,9 +23,9 @@ dependencies = [
   "toml",
   "pytest",
   "pytest-mock",
-  "gym",
+  "gymnasium",
   "pillow",
-  "numpy",
+  "numpy==1.26.4",
   "opencv-python",
   "anthropic",
   "openai",
@@ -42,6 +42,10 @@ dependencies = [
   "xarm-python-sdk",
   "jsonref",
   "art",
+  "transformers",
+  "gradio",
+  "gradio_client",
+  "open3d",
 ]
 
 [project.urls]

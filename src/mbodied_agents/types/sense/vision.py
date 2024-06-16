@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 
 import numpy as np
-from gym import spaces
+from gymnasium import spaces
 from PIL import Image as PILModule
 from PIL.Image import Image as PILImage
 from pydantic import AnyUrl, Base64Str, ConfigDict, Field, FilePath, InstanceOf, field_serializer, model_validator
@@ -31,7 +31,7 @@ from typing_extensions import Literal
 from mbodied_agents.base.sample import Sample
 from mbodied_agents.types.ndarray import NumpyArray
 
-SupportsImage = Union[np.ndarray, PILImage, Base64Str, AnyUrl, FilePath]
+SupportsImage = Union[np.ndarray, PILImage, Base64Str, AnyUrl, FilePath]  # noqa: UP007
 
 
 class Image(Sample):

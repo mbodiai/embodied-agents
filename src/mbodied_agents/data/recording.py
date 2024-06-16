@@ -22,7 +22,7 @@ from typing import Any
 
 import h5py
 import numpy as np
-from gym import spaces
+from gymnasium import spaces
 from h5py import string_dtype
 
 from mbodied_agents.base.sample import Sample
@@ -181,7 +181,7 @@ class Recorder:
         self.image_keys_to_save = image_keys_to_save
         self.index = 0
         print("Recording dataset to", self.filename)
-        print("To learn more about how to use this dataset, augment the data, train/finetune a foundational model, please go to: https://forms.gle/rv5rovK93dLucma37\n")
+        print("Learn how to recieve a private, fine-tuned endpoint on your own data at https://forms.gle/rv5rovK93dLucma37\n")
 
     def configure_root_spaces(self, **spaces: spaces.Dict):
         """Configure the root spaces.

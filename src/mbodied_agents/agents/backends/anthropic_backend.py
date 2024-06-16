@@ -19,7 +19,7 @@ import anthropic
 from mbodied_agents.base.backend import Backend
 from mbodied_agents.base.serializer import Serializer
 from mbodied_agents.types.message import Message
-from mbodied_agents.types.vision import Image
+from mbodied_agents.types.sense.vision import Image
 
 
 class AnthropicSerializer(Serializer):

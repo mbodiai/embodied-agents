@@ -16,8 +16,8 @@ import math
 
 from xarm.wrapper import XArmAPI
 
-from mbodied_agents.types.controls import HandControl
 from mbodied_agents.hardware.interface import HardwareInterface
+from mbodied_agents.types.controls import HandControl
 
 
 class XarmInterface(HardwareInterface):

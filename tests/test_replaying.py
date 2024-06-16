@@ -20,7 +20,7 @@ from pathlib import Path
 from mbodied_agents.data.replaying import Replayer, parse_slice
 from mbodied_agents.data.recording import Recorder
 from mbodied_agents.types.controls import LocobotActionOrAnswer as ActionOrAnswer
-from gym import spaces
+from gymnasium import spaces
 import sys
 import logging
 

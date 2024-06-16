@@ -18,8 +18,14 @@ import platform
 import threading
 import wave
 
-import playsound
-import pyaudio
+try:
+    import playsound
+    import pyaudio
+except ImportError:
+    logging.warning(
+        "playsound or pyaudio is not installed. Please install them to enable audio functionality."
+    )
+
 from openai import OpenAI
 from typing_extensions import Literal
 
