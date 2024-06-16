@@ -37,15 +37,15 @@ dependencies = [
   "h5py",
   "click",
   "datasets",
-  "playsound",
-  "pyaudio",
-  "xarm-python-sdk",
   "jsonref",
   "art",
   "transformers",
   "gradio",
   "gradio_client",
   "open3d",
+  "playsound",
+  "pyaudio",
+  "xarm-python-sdk",
 ]
 
 [project.urls]

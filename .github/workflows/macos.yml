@@ -31,7 +31,7 @@ jobs:
       - name: Run install script
         run: |
           chmod +x ./install.bash
-          ./install.bash
+          ./install.bash -y
 
       - name: Cache packages
         uses: actions/cache@v3

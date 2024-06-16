@@ -6,21 +6,24 @@
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/?badge=latest)
 
-
 Documentation: [mbodied agents docs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en)
 
-Example colab: [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing)
+Example Colab: [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing)
+
+Example Colab with [SimplerEnv](https://github.com/simpler-env/SimplerEnv): [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Fh6RNJ-eFOzzXBfyVC3wyqJfCI-t09ZJ?usp=sharing)
 
 # mbodied agents
-Welcome to **mbodied agents**, a toolkit for integrating state-of-the-art transformers into robotics systems. The goals for this repo are to minimize the ambiguouty, heterogeneity, and data scarcity currently holding generative AI back from wide-spread adoption in robotics. It provides strong type hints for the various types of robot actions and provides a unified interface for:
 
-- Streaming to and from vision models such as Yolo and GPT4-o
+Welcome to **mbodied agents**, a toolkit for integrating state-of-the-art transformers into robotics systems. mbodied agents is designed to provide a consistent interface for calling different AI models, handling multimodal data, using/creating datasets trained on different robots, and work for arbitrary observation and action spaces. It can be seamlessly integrated into real hardware or simulation.
+
+The goals for this repo are to minimize the ambiguouty, heterogeneity, and data scarcity currently holding generative AI back from wide-spread adoption in robotics. It provides strong type hints for the various types of robot actions and provides a unified interface for:
+
+- Streaming to and from vision models e.g. GPT4-o, OpenVLA, etc
 - Handling multimodal data pipelines for setting up continual learning
 - Automatically recording observations and actions to hdf5
 - Exporting to the most popular ML formats such as [Gym Spaces](https://gymnasium.farama.org/index.html) and [Huggingface Datasets](https://huggingface.co/docs/datasets/en/index)
-  
-And most importantly, the entire library is __100% configurable to any observation and action space__. That's right. With **mbodied agents**, the days of wasting precious engineering time on tedious formatting and post-processing are over. Jump to [Getting Started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing) or a [mujoco simulation](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
 
+And most importantly, the entire library is **100% configurable to any observation and action space**. With **mbodied agents**, the days of wasting precious engineering time on tedious formatting and post-processing are over. Jump to [Getting Started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing) or a [mujoco simulation](https://colab.research.google.com/drive/1Fh6RNJ-eFOzzXBfyVC3wyqJfCI-t09ZJ?usp=sharing)
 
 ## Updates
 
@@ -30,9 +33,7 @@ And most importantly, the entire library is __100% configurable to any observati
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 650px;">
 
-
 <img src="assets/demo_gif.gif" alt="Demo GIF" style="width: 625px;">
-
 
 We welcome any questions, issues, or PRs!
 
@@ -48,7 +49,6 @@ Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discuss
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
-
 ## Overview
 
 ## Why mbodied agents?
@@ -56,7 +56,7 @@ Please join our [Discord](https://discord.gg/RNzf3RCxRJ) for interesting discuss
 Each time you interact with your robot, precious, feature-rich data enters your system and needs to be routed to the right place for later retrieval and processing. **mbodied agents** simplify this process with explicit types and easy conversion to various ML-consumable formats. Our hope is to aid in the creation of intelligent, adaptable robots that learn from interactions and perform complex tasks in dynamic environments. Current features include:
 
 - **Configurability** : Define your desired Observation and Action spaces and read data into the format that works best for your system.
-- **Natural Language Control** : Use verbal prompts to correct a cognitive agent's actions and calibrate its behavior to a new environment.
+- **Natural Language Control** : Use verbal prompts to correct a language agent's actions and calibrate its behavior to a new environment.
 - **Modularity** : Easily swap out different backends, transformers, and hardware interfaces. For even better results, run multiple agents in separate threads.
 - **Validation** : Ensure that your data is in the correct format and that your actions are within the correct bounds before sending them to the robot.
 
@@ -66,19 +66,22 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 
 - OpenAI
 - Anthropic
+- OpenVLA (for motor agent)
 - RT1 (Coming Soon)
-- OpenVLA (Coming Soon)
+- HuggingFace (Coming Soon)
 - More Open Source Models (Coming Soon)
 
 ### Roadmap
 
-- [ ] Asynchronous and Remote Agent Execution
+- [ ] Asynchronous Agent Execution
 - [ ] More Support for In-context Learning from Natural Language
 - [ ] Diffusion-based Data Augmentation
 
 ## Installation
 
-`pip install mbodied-agents`
+```
+pip install mbodied-agents
+```
 
 ## Dev Environment Setup
 
@@ -104,7 +107,7 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 
 ### Real Robot Hardware
 
-To run the Cognitive Agent on real robot hardware, refer to our in-depth tutorial provided in the Colab link below:
+To run the Language Agent on real robot hardware, refer to our in-depth tutorial provided in the Colab link below:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing)
 
@@ -119,9 +122,9 @@ python examples/simple_robot_agent.py --backend=openai
 
 ### SimplerEnv Simulation
 
-To run the Cognitive Agent in simulation, i.e. SimplerEnv, click the following Colab to get started:
+To run the Language Agent in simulation, i.e. SimplerEnv, click the following Colab to get started:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Fh6RNJ-eFOzzXBfyVC3wyqJfCI-t09ZJ?usp=sharing)
 
 To learn more about **SimplerEnv**, please visit [![GitHub](https://img.shields.io/badge/GitHub-SimplerEnv-blue?logo=github)](https://github.com/simpler-env/SimplerEnv.git)
 
@@ -146,7 +149,6 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A HuggingFace dataset with semantic search capabilities.
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
 
-
 #### Creating a Sample
 
 Creating a sample just requires subclassing or passing keyword arguments to the base Sample class:
@@ -169,8 +171,6 @@ unflattened_sample = Sample.unflatten(flat_list, schema)
 print(unflattened_sample) # Output: Sample(observation=[1, 2, 3], action=[4, 5, 6])
 ```
 
-
-
 #### Serialization and Deserialization with Pydantic
 
 The Sample class leverages Pydantic's powerful features for serialization and deserialization, allowing you to easily convert between Sample instances and JSON.
@@ -188,7 +188,6 @@ json_data = '{"observation": [1, 2, 3], "action": [4, 5, 6]}'
 sample = Sample.model_validate(from_json(json_data))
 print(sample) # Output: Sample(observation=[1, 2, 3], action=[4, 5, 6])
 ```
-
 
 #### Converting to Different Containers
 
@@ -217,9 +216,8 @@ print(sample_hf)
 # })
 
 ```
+
 </details>
-
-
 
 #### Gym Space Integration
 
@@ -248,16 +246,16 @@ Message(role="user", content=[Sample("Hello")])
 
 The [Backend](src/mbodied_agents/base/backend.py) class is an abstract base class for Backend implementations. It provides the basic structure and methods required for interacting with different backend services, such as API calls for generating completions based on given messages. See [backend directory](src/mbodied_agents/agents/backends) on how various backends are implemented.
 
-### Cognitive Agent
+### Language Agent
 
-The [Cognitive Agent](src/mbodied_agents/agents/language/cognitive_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
+The [Language Agent](src/mbodied_agents/agents/language/language_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
 Currently supported API services are OpenAI and Anthropic. Upcoming API services include Mbodi, Ollama, and HuggingFace. Stay tuned for our Mbodi backend service!
 
 For example, to use OpenAI for your robot backend:
 
 ```python
-robot_agent = CognitiveAgent(context=context_prompt, api_service="openai")
+robot_agent = LanguageAgent(context=context_prompt, api_service="openai")
 ```
 
 `context` can be either a string or a list, for example:
@@ -280,6 +278,11 @@ response = robot_agent.act(instruction, image)[0]
 response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 ```
 
+### Motor Agent
+
+[Motor Agent](src/mbodied_agents/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a list of `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
+Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](src/mbodied_agents/agents/motion/openvla_agent.py) and an [example OpenVLA server](src/mbodied_agents/agents/motion/openvla_example_server.py)
+
 ### Controls
 
 The [controls](src/mbodied_agents/types/controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
@@ -287,7 +290,6 @@ The [controls](src/mbodied_agents/types/controls.py) module defines various moti
 ### Hardware Interface
 
 Mapping robot actions from a model to an action is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](src/mbodied_agents/hardware/xarm_interface.py) as an example.
-
 
 ### Recorder
 
@@ -320,7 +322,7 @@ for observation, action in replayer:
 ```
 
 ## Directory Structure
-```
+
 ```shell
 ├─ assets/ ............. Images, icons, and other static assets
 ├─ examples/ ........... Example scripts and usage demonstrations
@@ -338,10 +340,8 @@ for observation, action in replayer:
 └─ tests/ .............. Unit tests
 ```
 
-
 ## Contributing
 
- See the [contributing guide](CONTRIBUTING.md) for more information.
+See the [contributing guide](CONTRIBUTING.md) for more information.
 
 Feel free to report any issues, ask questions, ask for features, or submit PRs.
-
