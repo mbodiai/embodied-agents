@@ -32,7 +32,7 @@ dependencies = [
   "anthropic",
   "backoff",
   "pydantic",
-  "pydantic_numpy",
+  "pydantic_numpy==5.0.2",
   "torch",
   "h5py",
   "click",
