@@ -44,4 +44,5 @@ jobs:
             ${{ runner.os }}-${{ env.cache-name }}-
       - name: Run tests
         run: |
+          pip install '.[extras]'
           hatch run test

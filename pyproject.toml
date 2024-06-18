@@ -47,7 +47,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-extra = [
+extras = [
+  "playsound",
+  "pyaudio",
+]
+
+all = [
   "open3d",
   "playsound",
   "pyaudio",
