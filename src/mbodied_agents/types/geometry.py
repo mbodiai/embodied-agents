@@ -6,10 +6,10 @@ class Pose3D(Motion):
     """Action for a 2D+1 space representing x, y, and theta."""
 
     x: float = MotionField(0.0,
-        description="Movement of X position in 2D space. +x is forward; -x is backward.",
+        description="X position in 2D space. +x is forward; -x is backward.",
     )
     y: float = MotionField(0.0,
-        description="Movement of Y position in 2D space. +y is left; -y is right.",
+        description="Y position in 2D space. +y is left; -y is right.",
     )
     theta: float = MotionField(
         default_factory=lambda: 0.0,
@@ -28,13 +28,13 @@ class Pose6D(Motion):
 
     x: float = MotionField(
         default=0,
-        description="Movement of X position in 3D space. +x is forward; -x is backward.",
+        description="X position in 3D space. +x is forward; -x is backward.",
     )
     y: float = MotionField(0,
-        description="Movement of Y position in 3D space. +y is left; -y is right.",
+        description="Y position in 3D space. +y is left; -y is right.",
     )
     z: float = MotionField(0,
-        description="Movement of Z position in 3D space. +z is up; -z is down.",
+        description="Z position in 3D space. +z is up; -z is down.",
     )
     roll: float = MotionField(0,
         description="Roll about the X-axis in radians. Positive roll is clockwise.",

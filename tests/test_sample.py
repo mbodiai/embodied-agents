@@ -246,7 +246,7 @@ def test_unflatten_torch_tensor():
 # Sample unit test for the schema method
 def test_schema():
     sample_instance = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
-    schema = sample_instance.schema()
+    schema = sample_instance.schema(include_descriptions=True)
     expected_schema = {
         "description": "A base model class for serializing, recording, and manipulating arbitray data.",
         "properties": {

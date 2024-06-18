@@ -19,7 +19,7 @@ from mbodied_agents.base.backend import Backend
 from mbodied_agents.base.serializer import Serializer
 from mbodied_agents.types.message import Message
 from mbodied_agents.types.sense.vision import Image
-from openai import OpenAI
+
 
 
 class OpenAISerializer(Serializer):
@@ -64,7 +64,7 @@ class OpenAIBackend(Backend):
     ]
     DEFAULT_MODEL = "gpt-4o"
 
-    def __init__(self, api_key: str | None, client: OpenAI | None = None, response_format: str = None, **kwargs):
+    def __init__(self, api_key: str | None, client: Any | None = None, response_format: str = None, **kwargs):
         """Initializes the OpenAIBackend with the given API key and client.
 
         Args:
@@ -75,6 +75,7 @@ class OpenAIBackend(Backend):
         """
         super().__init__(api_key or os.getenv("OPENAI_API_KEY"), client=client)
         if self.client is None:
+            from openai import OpenAI
             self.client = OpenAI(api_key=self.api_key)
         self.serialized = OpenAISerializer
         self.response_format = response_format
