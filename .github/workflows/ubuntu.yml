@@ -58,5 +58,5 @@ jobs:
 
       - name: Run tests
         run: |
-          pip install '.[extras]'
+          hatch run pip install '.[extras]'
           hatch run test
