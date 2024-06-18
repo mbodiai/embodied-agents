@@ -79,10 +79,15 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 
 ## Installation
 
+### Base Installation
 ```
 pip install mbodied-agents
 ```
+### Optional Dependencies
+```
+pip install mbodied-agents[extra]
 
+```
 ## Dev Environment Setup
 
 1. Clone this repo:
@@ -95,6 +100,7 @@ pip install mbodied-agents
 
    ```console
    source install.bash
+   hatch run pip install '.[extras]'
    ```
 
 3. Then for each new terminal, run:

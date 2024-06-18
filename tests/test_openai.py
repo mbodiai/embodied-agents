@@ -17,6 +17,8 @@ from mbodied_agents.agents.backends.openai_backend import OpenAIBackend
 from mbodied_agents.types.message import Message
 from mbodied_agents.agents.language import LanguageAgent
 from mbodied_agents.types.sense.vision import Image
+from pathlib import Path
+from importlib_resources import files
 
 # Mock responses for the API callss
 mock_openai_response = "OpenAI response text"
@@ -75,7 +77,8 @@ def test_language_backend_language_agent_act_openai(openai_api_key):
 def test_language_backend_language_agent_act_with_image(openai_api_key):
     agent = LanguageAgent(api_key=openai_api_key,
                             api_service="openai", client=FakeOpenAI())
-    test_image = Image(path="resources/xarm.jpeg")
+    resource = Path(files("mbodied_agents")) / "resources" / "xarm.jpeg"
+    test_image = Image(path=resource)
     response = agent.act("Hi", test_image, context=[])[0]
     assert response == mock_openai_response
 

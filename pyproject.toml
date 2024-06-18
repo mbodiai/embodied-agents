@@ -18,6 +18,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
 dependencies = [
   "coverage[toml]",
   "toml",
@@ -42,10 +43,19 @@ dependencies = [
   "transformers",
   "gradio",
   "gradio_client",
+  "xarm-python-sdk",
+]
+
+[project.optional-dependencies]
+extras = [
+  "playsound",
+  "pyaudio",
+]
+
+all = [
   "open3d",
   "playsound",
   "pyaudio",
-  "xarm-python-sdk",
 ]
 
 [project.urls]
@@ -61,9 +71,10 @@ path = "src/mbodied_agents/__about__.py"
 [tool.hatch.metadata]
 allow-direct-references = true
 
+[tool.hatch.build.targets.wheel.force-include]
+"resources" = "mbodied_agents/resources"
 
 [tool.hatch.envs.default]
-
 python = "3.11"
 path = ".mbodied_agents/envs/mbodied_agents"
 

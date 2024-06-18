@@ -194,7 +194,7 @@ class Sample(BaseModel):
         if isinstance(value, dict):
             return {"type": "object", "properties": {k: Sample.to_schema(v) for k, v in value.items()}}
         if isinstance(value, list | tuple | np.ndarray):
-            if value:
+            if len(value) > 0:
                 return {"type": "array", "items": Sample.to_schema(value[0])}
             return {"type": "array", "items": {}}
         if isinstance(value, str):
@@ -207,7 +207,7 @@ class Sample(BaseModel):
             return {"type": "boolean"}
         return {}
 
-    def schema(self, resolve_refs: bool = True) -> dict:
+    def schema(self, resolve_refs: bool = True, include_descriptions=False) -> dict:
         """Returns a simplified json schema.
 
         Removing additionalProperties,
@@ -221,7 +221,10 @@ class Sample(BaseModel):
         Returns:
             dict: A simplified JSON schema.
         """
-        schema = self.model_json_schema()
+        if include_descriptions:
+            schema = self.model_json_schema()
+        else:
+            schema = self.to_schema(self.dict())
         if resolve_refs:
             schema = jsonref.replace_refs(schema)
         if schema.get("additionalProperties", False):

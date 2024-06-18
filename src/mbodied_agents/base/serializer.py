@@ -95,7 +95,7 @@ class Serializer(Sample):
             return self.serialize_text(str(sample))
 
     @model_serializer(when_used="always")
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> dict[str, Any] | list[Any]:
         """Serializes the wrapped content of the Serializer instance.
 
         Returns:
