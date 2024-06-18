@@ -44,10 +44,10 @@ def create_interface():
     gr_interface = gr.Interface(
         fn=vla_interface.predict_action,
         inputs=[
-            gr.Textbox(label="Base64 Image (using API) or upload image below."),
+            gr.Textbox(label="Base64 Image (using API) or upload image below.", visible=False),
             gr.Textbox(label="Instruction"),
             gr.Textbox(label="Unnorm Key", placeholder="bridge_orig"),
-            gr.Image(label="Upload Image (optional)", type="filepath"),
+            gr.Image(label="Upload Image", type="filepath"),
         ],
         outputs=gr.Textbox(label="Robot Action"),
         title="OpenVLA Robot Action Prediction",
