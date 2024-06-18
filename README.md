@@ -6,11 +6,11 @@
 [![PyPI Version](https://img.shields.io/pypi/v/mbodied-agents.svg)](https://pypi.python.org/pypi/mbodied-agents)
 [![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/?badge=latest)
 
-Documentation: [mbodied agents docs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en)
+Documentation: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en)
 
-Example Colab: [![Example Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing)
+Minimal Example Colab: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing)
 
-Example Colab with [SimplerEnv](https://github.com/simpler-env/SimplerEnv): [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Fh6RNJ-eFOzzXBfyVC3wyqJfCI-t09ZJ?usp=sharing)
+Simulation Colab with [SimplerEnv](https://github.com/simpler-env/SimplerEnv): [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1Fh6RNJ-eFOzzXBfyVC3wyqJfCI-t09ZJ?usp=sharing)
 
 # mbodied agents
 
