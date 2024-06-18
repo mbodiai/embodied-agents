@@ -72,7 +72,7 @@ path = "src/mbodied_agents/__about__.py"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel.force-include]
-"resources" = "mbodied-agents/resources"
+"resources" = "mbodied_agents/resources"
 
 [tool.hatch.envs.default]
 python = "3.11"

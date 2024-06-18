@@ -77,7 +77,7 @@ def test_language_backend_language_agent_act_openai(openai_api_key):
 def test_language_backend_language_agent_act_with_image(openai_api_key):
     agent = LanguageAgent(api_key=openai_api_key,
                             api_service="openai", client=FakeOpenAI())
-    resource = Path(files("mbodied_agents")).parent.parent / "resources" / "xarm.jpeg"
+    resource = Path(files("mbodied_agents")) / "resources" / "xarm.jpeg"
     test_image = Image(path=resource)
     response = agent.act("Hi", test_image, context=[])[0]
     assert response == mock_openai_response
