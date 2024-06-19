@@ -1,3 +1,17 @@
+# Copyright 2024 Mbodi AI
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import Tuple
 
 import matplotlib
@@ -49,7 +63,10 @@ class PointCloud(Sample):
 
 
 class DepthImage(Sample):
-    array: NumpyArray | None = Field(None, repr=False, description="The depth image represented as a NumPy array.")
+    array: NumpyArray | None = Field(
+        None,
+        repr=False,
+        description="The depth image represented as a NumPy array.")
     size: Tuple[int, int] = Field(default_factory=lambda: (480, 640))
 
     def __init__(self, **data):
@@ -61,11 +78,16 @@ class DepthImage(Sample):
         plt.show()
 
     @classmethod
-    def init_from(cls, point_cloud, intrinsic_matrix, image_size=(480, 640), depth_scale=1000.0):
+    def init_from(cls,
+                  point_cloud,
+                  intrinsic_matrix,
+                  image_size=(480, 640),
+                  depth_scale=1000.0):
         points = np.asarray(point_cloud.points)
 
         # Assume intrinsic_matrix is [fx, 0, cx, 0, fy, cy, 0, 0, 1]
-        fx, fy, cx, cy = intrinsic_matrix[0, 0], intrinsic_matrix[1, 1], intrinsic_matrix[0, 2], intrinsic_matrix[1, 2]
+        fx, fy, cx, cy = intrinsic_matrix[0, 0], intrinsic_matrix[
+            1, 1], intrinsic_matrix[0, 2], intrinsic_matrix[1, 2]
 
         # Project points to 2D plane
         zs = points[:, 2]
@@ -78,11 +100,8 @@ class DepthImage(Sample):
         # Assign depth values to the depth image, choosing the nearest point for each pixel
         for i in range(len(points)):
             x, y, z = xs[i], ys[i], zs[i]
-            if (
-                0 <= x < image_size[1]
-                and 0 <= y < image_size[0]
-                and (pixel_depths[y, x] == 0 or pixel_depths[y, x] > z)
-            ):
+            if (0 <= x < image_size[1] and 0 <= y < image_size[0]
+                    and (pixel_depths[y, x] == 0 or pixel_depths[y, x] > z)):
                 pixel_depths[y, x] = z
 
         # Optionally, scale the depth values
