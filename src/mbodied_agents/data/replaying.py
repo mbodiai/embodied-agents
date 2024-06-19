@@ -79,8 +79,7 @@ class Replayer:
                     key = list(self.file[key].keys())[0]
                 size = len(self.file[key])
             except Exception:
-                logging.warning(
-                    "No size attribute and empty dataset found. Setting size to 0.")
+                logging.warning("No size attribute and empty dataset found. Setting size to 0.")
                 size = 0
         return size
 
@@ -108,8 +107,7 @@ class Replayer:
 
         result = {}
         for sub_key in keys:
-            result[sub_key] = self.recursive_do(
-                do, key=sub_key, prefix=full_key, **kwargs)
+            result[sub_key] = self.recursive_do(do, key=sub_key, prefix=full_key, **kwargs)
         return result
 
     def get_unique_items(self, key: str) -> List[str]:
@@ -319,8 +317,10 @@ def to_dataset(folder: str, name: str, description: str = None) -> None:
         return columnar_data
 
     features = Features(
-        {"observation": {"image": Image(), "subtask": Value("string"), "task": Value(
-            "string")}, "action": infer_features(data[0]["action"])},
+        {
+            "observation": {"image": Image(), "subtask": Value("string"), "task": Value("string")},
+            "action": infer_features(data[0]["action"]),
+        },
     )
 
     data = list_of_dicts_to_dict(data)

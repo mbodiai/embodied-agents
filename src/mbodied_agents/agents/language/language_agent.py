@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,188 +13,179 @@
 # limitations under the License.
 
 import logging
-from typing import List, Union
+import os
+from dataclasses import dataclass
+from typing import List, Literal, Optional, TypeAlias, Union
 
 from art import text2art
-from mbodied_agents.agents.backends import (
-    AnthropicBackend,
-    HuggingFaceBackend,
-    MbodiBackend,
-    OllamaBackend,
-    OpenAIBackend,
-)
+from gradio_client import Client as GradioClient
+from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
+
+from mbodied_agents.agents.backends import AnthropicBackend, HuggingFaceBackend, OpenAIBackend
+from mbodied_agents.base.agent import Agent
 from mbodied_agents.base.sample import Sample
-from mbodied_agents.data.recording import Recorder
 from mbodied_agents.types.message import Message
 from mbodied_agents.types.sense.vision import Image
-from mbodied_agents.base.agent import Agent
+
+SupportsOpenAI: TypeAlias = OpenAIBackend
 
 
-class LanguageAction(Sample):
-    """A sample representing a language action.
+@dataclass
+class Reminder:
+    """A reminder to show the agent a prompt every n messages."""
 
-    Attributes:
-        actions: A list of actions in string format.
-    """
-    actions: List[str]
+    prompt: Union[str, Image, Message]
+    n: int
+
+
+def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
+    """Convert the context to a list of messages."""
+    if isinstance(context, list):
+        return [Message(content=c) if not isinstance(c, Message) else c for c in context]
+    if isinstance(context, Message):
+        return [context]
+    if isinstance(context, str | Image):
+        return [Message(content=[context])]
+    return []
 
 
 class LanguageAgent(Agent):
-    """The entry point for the Embodied Agents.
-    
-    This language-based Agent has the capability to connect to different backend services.
+    """An agent that can interact with users using natural language. act() always returns a string.
 
-    This class extends `LanguageAgent` and includes methods for recording conversations,
-    managing context, looking up messages, forgetting messages, storing context, and acting
-    based on an instruction and an image.
+    Manages memory, dataset-recording, and asynchronous remote inference via OpenAI, Anthropic, or Gradio.
+
+    Similar to act(), remote_act() always returns a Future holding a string.
     """
+
     _art_printed = False
-    def __init__(
+
+    def __init__(  # noqa
         self,
-        model: str = None,
-        temperature: float = 0,
-        context: Union[list, str, Message] = None,
-        api_key: str | None = None,
-        api_service: str = "openai",  # 'openai' or 'anthropic' or 'ollama'
-        # 'default' or 'vision' or Recorder
-        recorder: Union[str, Recorder] = None,
-        client=None,
-        backend=None,
-        **kwargs,
+        model_src: Literal["openai", "anthropic"]
+        | SupportsOpenAI
+        | AnyUrl
+        | FilePath
+        | DirectoryPath
+        | NewPath = "openai",
+        context: list | Image | str | Message = None,
+        api_key: str | None = os.getenv("OPENAI_API_KEY"),
+        model_kwargs: dict = None,  # noqa
+        recorder: Literal["default", "omit"] | str = "omit",
+        recorder_kwargs: dict = None,  # noqa
+        local_only: bool = False,  # noqa
     ) -> None:
-        """Initializes the LanguageAgent with the given parameters.
+        """LanguageAgent with memory, dataset-recording, and remote infererence support. Always returns a string.
+
+        Supported datasets: HDF5, Datasets, JSON, CSV, Parquet.
+        Supported inference backends: OpenAI, Anthropic, Gradio.
+
+        Methods:
+            - act(instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs) -> str
+            - remote_act(instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs) -> Job[str]
+            - forget_last() -> Message
+            - forget(everything=False, last_n: int = -1) -> None
+            - remind_every(prompt: str | Image | Message, n: int) -> None
 
         Args:
-            model: The model name to be used.
-            temperature: The temperature setting for the language model.
-            context: Initial context which can be a list, a string, or a Message.
-            api_key: The API key for the backend service.
-            api_service: The backend service to use ('openai' or 'anthropic').
-            recorder: The recorder to use for recording conversations.
-            client: The client to use for API requests.
-            backend: An optional backend instance.
-            **kwargs: Additional keyword arguments.
+            model: The model or weights path to setup and preload if applicable.
+            context: The starting context to use for the conversation. Can be a list of messages, an image, a string,
+                or a message. If a string is provided, it will be interpreted as a user message.
+            api_key: The API key to use for the remote actor (if applicable).
+            model_src: Any of:
+                1. A path to a model's weights.
+                2. A string or mbodied_agents.agents.backends.openai_backend.OpenAIBackendMixin subclass representing a backend API.
+                3. Any huggingface spaces path (mbodiai/openvla-quantized) or URL hosting a gradio server. See https://www.gradio.app/guides/getting-started-with-the-python-client for more details.
+            model_kwargs: Additional keyword arguments to pass to the model source. See mbodied_agents.agents.backends.
+            recorder: The recorder config or name to use for the agent to record observations and actions.
+            recorder_kwargs: Additional keyword arguments to pass to the recorder such as push_to_cloud.
+            local_only: Whether to use the local model only. If True, the agent will not use a remote actor for inference.
         """
         if not LanguageAgent._art_printed:
-            print("Welcome to")
-            print(text2art("Mbodi"))
-            print("A platform for intelligent embodied agents.\n\n")
-            LanguageAgent._art_printed = True        
-        print(f"Initializing language agent for robot using backend: {api_service}")
+            print("Welcome to")  # noqa: T201
+            print(text2art("mbodi"))  # noqa: T201
+            print("A platform for intelligent embodied agents.\n\n")  # noqa: T201
+            LanguageAgent._art_printed = True
+        self.reminders: List[Reminder] = []
+        print(f"Initializing language agent for robot using : {model_src}")  # noqa: T201
 
-        super().__init__(recorder=recorder, **kwargs)
-        if backend is not None:
-            self.backend = backend
-        elif api_service == "openai":
-            self.starting_context = OpenAIBackend.INITIAL_CONTEXT
-            self.backend = OpenAIBackend(api_key, client=client, **kwargs)
-            self.model = OpenAIBackend.DEFAULT_MODEL if model is None else model
-        elif api_service == "anthropic":
-            self.starting_context = AnthropicBackend.INITIAL_CONTEXT
-            self.backend = AnthropicBackend(api_key, client=client, **kwargs)
-            self.model = AnthropicBackend.DEFAULT_MODEL if model is None else model
-        # # Upcoming backends:
-        elif api_service == "mbodi":
-            self.starting_context = MbodiBackend.INITIAL_CONTEXT
-            self.backend = MbodiBackend(url=MbodiBackend.API_URL)
-            self.model = MbodiBackend.DEFAULT_MODEL if model is None else model
-        # elif api_service == "huggingface":
-        #     self.starting_context = HuggingFaceBackend.INITIAL_CONTEXT
-        #     self.backend = HuggingFaceBackend()
-        #     self.model = HuggingFaceBackend.DEFAULT_MODEL if model is None else model
-        # Upcoming:
-        # elif api_service == "mbodi":
-        #     self.starting_context = MbodiBackend.INITIAL_CONTEXT
-        #     self.backend = MbodiBackend(url=MbodiBackend.API_URL)
-        #     self.model = MbodiBackend.DEFAULT_MODEL if model is None else model
-        # elif api_service == "ollama":
-        #     self.starting_context = OllamaBackend.INITIAL_CONTEXT
-        #     self.backend = OllamaBackend(api_key, client=client, **kwargs)
-        #     self.model = OllamaBackend.DEFAULT_MODEL if model is None else model
-        else:
-            raise ValueError(f"Unsupported API service {api_service}")
-        self.temperature = temperature
+        super().__init__(
+            recorder=recorder,
+            recorder_kwargs=recorder_kwargs,
+            model_src=model_src,
+            model_kwargs=model_kwargs,
+            api_key=api_key,
+            local_only=local_only,
+        )
 
-        self.context = []
-        if isinstance(context, list):
-            self.context = context
-        elif isinstance(context, Message):
-            self.context.append(context)
-        elif isinstance(context, str):
-            self.context.append(
-                Message(role="user", content=[Sample(context)]))
-            self.context.append(
-                Message(role="assistant", content=[Sample("Got it!")]))
-        else:
-            self.context = self.starting_context
+        self.context = make_context_list(context)
 
-    def on_completion_response(self, response: str) -> List[str]:
-        """Processes the response from the completion API.
+    def forget_last(self) -> Message:
+        """Forget the last message in the context."""
+        try:
+            return self.context.pop(-1)
+        except IndexError:
+            logging.warning("No message to forget in the context")
+
+    def forget(self, everything=False, last_n: int = -1) -> None:
+        """Forget the last n messages in the context."""
+        if everything:
+            self.context = []
+            return
+        for _ in range(last_n):
+            self.forget_last()
+
+    def remind_every(self, prompt: str | Image | Message, n: int) -> None:
+        """Remind the agent of the prompt every n messages."""
+        message = Message([prompt]) if not isinstance(prompt, Message) else prompt
+        self.reminders.append(Reminder(message, n))
+
+    def _check_for_reminders(self) -> None:
+        """Check if there are any reminders to show."""
+        for reminder, n in self.reminders:
+            if len(self.context) % n == 0:
+                self.context.append(reminder)
+
+    def act(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+    ) -> str:
+        """Responds to the given instruction, image, and context.
+
+        Uses the given instruction and image to perform an action.
 
         Args:
-            response: The response from the completion API.
-
-        Returns:
-            List[str]: The processed response as a list of strings.
-        """
-        return [response]
-
-    def act(self, text_or_inputs: Union[str, list] = None, image: Image = None, context=None, **kwargs) -> List[str]:
-        """Performs an action based on the given instruction.
-
-        This method allows the option to use accumulated context or start from scratch with new context.
-
-        Args:
-            text_or_inputs: The instruction to be processed.
-            image: The image associated with the instruction, can be a NumPy array, Pillow Image, or file path.
-            context: The accumulated context. Defaults to None.
+            instruction: The instruction to be processed.
+            image: The image to be processed.
+            context: Additonal context to include in the response. If context is a list of messages, it will be interpreted
+                as new memory.
+            model: The model to use for the response.
             **kwargs: Additional keyword arguments.
 
         Returns:
-            List[str]: A list containing the response text and the updated context.
-        """
-        if context is None:
-            context = self.context
-            logging.info("Using internal context")
+            str: The response to the instruction.
 
-        inputs = []
-        if text_or_inputs is not None:
-            if isinstance(text_or_inputs, list):
-                inputs = text_or_inputs
-            else:
-                inputs.append(text_or_inputs)
+        Example:
+            >>> agent.act("Hello, world!", Image("scene.jpeg"))
+            "Hello! What can I do for you today?"
+            >>> agent.act("Return a plan to pickup the object as a python list.", Image("scene.jpeg"))
+            "['Move left arm to the object', 'Move right arm to the object']"
+        """
+        self._check_for_reminders()
+        memory = self.context
+        if context and all(isinstance(c, Message) for c in context):
+            memory += context
+            context = []
+
+        # Prepare the inputs
+        inputs = [instruction]
         if image is not None:
-            inputs.append(Image(image))
+            inputs.append(image)
+        if context:
+            inputs.extend(context if isinstance(context, list) else [context])
         message = Message(role="user", content=inputs)
-        response = self.backend.create_completion(
-            message, context, model=self.model, **kwargs)
 
-        logging.log(2, f"Response: {response}")
-        context.append(Message(role="assistant", content=[Sample(response)]))
+        model = model or kwargs.pop("model", None)
+        response = self._act(message, memory, model=model, **kwargs)
 
-        return self.on_completion_response(response)
-
-    def forget(self, observation=None, action=None, num_msgs: int = -1) -> list:
-        """Removes messages from the context.
-
-        Args:
-            observation: The observation to use for looking up messages to forget.
-            action: The action to use for looking up messages to forget.
-            num_msgs: The number of messages to forget. Defaults to -1 (all).
-
-        Returns:
-            list: The list of targets removed from the context.
-        """
-        targets = self.rag_lookup(observation, action, num_msgs)
-        for target in targets:
-            self.context.remove(target)
-
-    def store_context(self, input, response) -> None:
-        """Stores the input and response in the context.
-
-        Args:
-            input: The input to store.
-            response: The response to store.
-        """
-        self.context.append(Message(role="user", content=input))
+        self.context.append(message)
         self.context.append(Message(role="assistant", content=response))
+        return response

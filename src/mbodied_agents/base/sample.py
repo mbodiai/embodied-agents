@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import OrderedDict
 import json
 import logging
 from collections import OrderedDict
@@ -46,7 +47,7 @@ class Sample(BaseModel):
     Methods:
         schema: Get a simplified json schema of your data.
         to: Convert the Sample instance to a different container type:
-            - 
+            -
         default_value: Get the default value for the Sample instance.
         unflatten: Unflatten a one-dimensional array or dictionary into a Sample instance.
         flatten: Flatten the Sample instance into a one-dimensional array or dictionary.
@@ -367,7 +368,7 @@ class Sample(BaseModel):
                         [spaces.Dict(cls.space_for(v, max_text_length, info)) for v in value],
                     )
                 return spaces.Tuple(
-                    [spaces.Dict(cls.space_for(value[0], max_text_length, info)) for value in value[:1]],
+                    [cls.space_for(value[0], max_text_length, info) for value in value[:1]],
                 )
         raise ValueError(f"Unsupported object {value} of type: {type(value)} for space generation")
 
@@ -445,7 +446,12 @@ class Sample(BaseModel):
             return cls()
 
         first_sample = samples[0]
-        attributes = list(first_sample.keys()) if isinstance(first_sample, dict) else list(first_sample.__dict__.keys())
+        if isinstance(first_sample, dict):
+            attributes = list(first_sample.keys())
+        elif hasattr(first_sample, "__dict__"):
+            attributes = list(first_sample.__dict__.keys())
+        else:
+            attributes = ["item" + str(i) for i in range(len(samples))]
 
         aggregated = {attr: [] for attr in attributes}
         for sample in samples:
@@ -507,10 +513,11 @@ class Sample(BaseModel):
         Override this method in subclasses to customize the space generation.
         """
         space_dict = {}
-        for key, value in self.model_dump(exclude_none=True).items():
+        for key, value in self.dict().items():
             logging.debug("Generating space for key: '%s', value: %s", key, value)
             info = self.model_field_info(key)
-            space_dict[key] = self.space_for(value, info=info)
+            value = getattr(self, key) if hasattr(self, key) else value  # noqa: PLW2901
+            space_dict[key] = value.space() if isinstance(value, Sample) else self.space_for(value, info=info)
         return spaces.Dict(space_dict)
 
     def random_sample(self) -> "Sample":
@@ -524,4 +531,3 @@ class Sample(BaseModel):
 class SampleList(Sample):
     values: List[Sample] = Field(..., min_length=2, max_length=10)
     numpy: NumpyArray | None = None
-

@@ -1,4 +1,3 @@
-
 from typing import Any
 
 from mbodied_agents.base.sample import Sample
@@ -7,7 +6,7 @@ from pydantic_core import PydanticUndefined
 from typing_extensions import Literal
 
 MotionType = Literal[
-   "UNSPECIFIED",
+    "UNSPECIFIED",
     "OTHER",
     "ABSOLUTE",
     "RELATIVE",
@@ -16,8 +15,8 @@ MotionType = Literal[
 ]
 
 
-def MotionField( # noqa: N802 
-    default: Any = PydanticUndefined,  # noqa: N805 
+def MotionField(  # noqa: N802
+    default: Any = PydanticUndefined,  # noqa: N805
     bounds: list[float] | None = None,  # noqa: N802, D417
     shape: tuple[int] | None = None,
     description: str | None = None,
@@ -25,7 +24,7 @@ def MotionField( # noqa: N802
     **kwargs,
 ) -> Any:
     """Field for a motion.
-    
+
     Args:
         default: Default value for the field.
         bounds: Bounds of the motion.
@@ -42,9 +41,12 @@ def MotionField( # noqa: N802
     if motion_type != "unspecified":
         description += f" Motion type: {motion_type}"
 
-    return Field(default=default,
+    return Field(
+        default=default,
         description=description,
-        json_schema_extra={"bounds": bounds, "motion_type": motion_type, "shape": shape}, **kwargs) # type: ignore
+        json_schema_extra={"bounds": bounds, "motion_type": motion_type, "shape": shape},
+        **kwargs,
+    )  # type: ignore
 
 
 def AbsoluteMotionField(
@@ -98,6 +100,7 @@ def RelativeMotionField(
         **kwargs,
     )
 
+
 def VelocityMotionField(
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
@@ -122,7 +125,8 @@ def VelocityMotionField(
         motion_type="VELOCITY",
         **kwargs,
     )
-    
+
+
 def TorqueMotionField(
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
@@ -148,6 +152,7 @@ def TorqueMotionField(
         **kwargs,
     )
 
+
 def OtherMotionField(
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
@@ -172,11 +177,9 @@ def OtherMotionField(
         motion_type="OTHER",
         **kwargs,
     )
-    
-    
+
+
 class Motion(Sample):
     """Base class for a motion."""
 
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True, extra="forbid")
-
-

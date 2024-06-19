@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,22 +15,20 @@
 # Imports for the tests
 import pytest
 from unittest.mock import patch
-from mbodied_agents.agents.backends.openai_backend import OpenAIBackend
+from mbodied_agents.agents.backends import OpenAIBackend
 from mbodied_agents.types.message import Message
 
 # Mock response for the API call
-mock_openai_response = {"choices": [
-    {"message": {"content": "Mocked OpenAI response"}}]}
+mock_openai_response = {"choices": [{"message": {"content": "Mocked OpenAI response"}}]}
 
 mock_return_value = "test"
 
 
-@patch("mbodied_agents.agents.backends.openai_backend.OpenAIBackend._create_completion", return_value=mock_return_value)
+@patch("mbodied_agents.agents.backends.OpenAIBackend._create_completion", return_value=mock_return_value)
 def test_openai_backend_create_completion_success(mock_create):
     api_key = "test"
     backend = OpenAIBackend(api_key=api_key)
-    result = backend.create_completion(Message(content="test"), [
-                                       Message(content="Test message")])
+    result = backend.act(Message(content="test"), [Message(content="Test message")])
     assert result == mock_return_value
     mock_create.assert_called_once()
 

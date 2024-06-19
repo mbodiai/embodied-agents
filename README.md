@@ -8,9 +8,11 @@
 
 Documentation: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en)
 
-Minimal Example Colab: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/16liQspSIzRazWb_qa_6Z0MRKmMTr2s1s?usp=sharing)
+Minimal Example Colab: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing)
 
 Simulation Colab with [SimplerEnv](https://github.com/simpler-env/SimplerEnv): [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1Fh6RNJ-eFOzzXBfyVC3wyqJfCI-t09ZJ?usp=sharing)
+
+MotorAgent Example Colab with OpenVLA: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1anbOd4snFw84Zf0AvLrWReVdx61TfAIC?usp=sharing)
 
 # mbodied agents
 
@@ -80,14 +82,18 @@ If you would like to integrate a new backend, sense, or motion control, it is ve
 ## Installation
 
 ### Base Installation
+
 ```
 pip install mbodied-agents
 ```
+
 ### Optional Dependencies
+
 ```
 pip install mbodied-agents[extra]
 
 ```
+
 ## Dev Environment Setup
 
 1. Clone this repo:

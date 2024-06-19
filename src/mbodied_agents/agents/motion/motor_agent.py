@@ -13,19 +13,19 @@
 # limitations under the License.
 
 from abc import abstractmethod
-from typing import List
 
 from mbodied_agents.base.agent import Agent
-from mbodied_agents.types.controls import Motion
+from mbodied_agents.types.motion_controls import Motion
 
 
 class MotorAgent(Agent):
     @abstractmethod
-    def act(self, **kwargs) -> List['Motion']:
+    def act(self, **kwargs) -> Motion:
         """Generate a list of Motion objects based on given parameters.
 
         Args:
             **kwargs: Arbitrary keyword arguments that will be used to determine the Motion objects.
+
         Returns:
             List[Motion]: A list of Motion objects based on the provided arguments.
         """

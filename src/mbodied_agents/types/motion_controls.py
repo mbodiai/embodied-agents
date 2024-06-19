@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,12 +35,10 @@ Examples:
 """
 
 
-
 class JointControl(Motion):
     """Motion for joint control."""
 
-    value: float = MotionField(default_factory=lambda: 0.0,
-                               bounds=[-3.14, 3.14], description="Joint value in radians.")
+    value: float = MotionField(default_factory=lambda: 0.0, bounds=[-3.14, 3.14], description="Joint value in radians.")
 
     def space(self):  # noqa: ANN201
         return spaces.Box(low=-3.14, high=3.14, shape=(), dtype=np.float32)
@@ -53,8 +51,7 @@ class FullJointControl(Motion):
         default_factory=list,
         description="List of joint values in radians.",
     )
-    names: Sequence[str] | list[float] | None = MotionField(
-        default=None, description="List of joint names.")
+    names: Sequence[str] | list[float] | None = MotionField(default=None, description="List of joint names.")
 
     def space(self):  # noqa: ANN201
         space = dict(super().space())
@@ -68,8 +65,7 @@ class FullJointControl(Motion):
 class HandControl(Motion):
     """Action for a 7D space representing x, y, z, roll, pitch, yaw, and oppenness of the hand."""
 
-    pose: Pose6D = MotionField(default_factory=Pose,
-                               description="Pose of the robot hand.")
+    pose: Pose6D = MotionField(default_factory=Pose, description="Pose of the robot hand.")
     grasp: JointControl = MotionField(
         default_factory=JointControl,
         description="Openness of the robot hand. 0 is closed, 1 is open.",
@@ -78,12 +74,10 @@ class HandControl(Motion):
 
 class HeadControl(Motion):
     tilt: JointControl = MotionField(
-        default_factory=lambda: JointControl(),
-        description="Tilt of the robot head in radians (down is negative)."
+        default_factory=lambda: JointControl(), description="Tilt of the robot head in radians (down is negative)."
     )
     pan: JointControl = MotionField(
-        default_factory=lambda: JointControl(),
-        description="Pan of the robot head in radians (left is negative)."
+        default_factory=lambda: JointControl(), description="Pan of the robot head in radians (left is negative)."
     )
 
 
@@ -95,10 +89,8 @@ class MobileSingleHandControl(Motion):
         default_factory=LocationAngle,
         description="Location of the robot on the ground.",
     )
-    hand: HandControl | None = MotionField(
-        default_factory=HandControl, description="Control for the robot hand.")
-    head: HeadControl | None = MotionField(
-        default=None, description="Control for the robot head.")
+    hand: HandControl | None = MotionField(default_factory=HandControl, description="Control for the robot hand.")
+    head: HeadControl | None = MotionField(default=None, description="Control for the robot head.")
 
 
 class MobileSingleArmControl(Motion):
@@ -112,8 +104,7 @@ class MobileSingleArmControl(Motion):
         default_factory=FullJointControl,
         description="Control for the robot arm.",
     )
-    head: HeadControl | None = MotionField(
-        default=None, description="Control for the robot head.")
+    head: HeadControl | None = MotionField(default=None, description="Control for the robot head.")
 
 
 class MobileBimanualArmControl(Motion):
@@ -131,8 +122,7 @@ class MobileBimanualArmControl(Motion):
         default_factory=FullJointControl,
         description="Control for the right robot arm.",
     )
-    head: HeadControl | None = MotionField(
-        default=None, description="Control for the robot head.")
+    head: HeadControl | None = MotionField(default=None, description="Control for the robot head.")
 
 
 class HumanoidControl(Motion):
@@ -154,8 +144,7 @@ class HumanoidControl(Motion):
         default_factory=FullJointControl,
         description="Control for the right robot leg.",
     )
-    head: HeadControl | None = MotionField(
-        default=None, description="Control for the robot head.")
+    head: HeadControl | None = MotionField(default=None, description="Control for the robot head.")
 
 
 class LocobotActionOrAnswer(MobileSingleHandControl):

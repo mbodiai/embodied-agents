@@ -5,12 +5,12 @@ import torch
 from io import BytesIO
 import base64
 
+
 class OpenVLAInterface:
     """This class encapsulates the OpenVLA Agent's capabilities for remote action prediction."""
 
     def __init__(self, model_name="openvla/openvla-7b", device="cuda"):
-        self.processor = AutoProcessor.from_pretrained(
-            model_name, trust_remote_code=True)
+        self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
         self.model = AutoModelForVision2Seq.from_pretrained(
             model_name,
             attn_implementation="flash_attention_2",
@@ -28,13 +28,11 @@ class OpenVLAInterface:
             # Assume it's an uploaded image
             image = Image.open(image_path)
         else:
-            raise ValueError(
-                "Either an uploaded image or a base64 image must be provided.")
+            raise ValueError("Either an uploaded image or a base64 image must be provided.")
 
         prompt = f"In: What action should the robot take to {instruction}?\nOut:"
         inputs = self.processor(prompt, image).to("cuda", dtype=torch.bfloat16)
-        action = self.model.predict_action(
-            **inputs, unnorm_key=unnorm_key, do_sample=False)
+        action = self.model.predict_action(**inputs, unnorm_key=unnorm_key, do_sample=False)
         return action
 
 
@@ -51,7 +49,7 @@ def create_interface():
         ],
         outputs=gr.Textbox(label="Robot Action"),
         title="OpenVLA Robot Action Prediction",
-        description="Provide an image of the robot workspace and an instruction to predict the robot's action. You can either upload an image or provide a base64-encoded image with API."
+        description="Provide an image of the robot workspace and an instruction to predict the robot's action. You can either upload an image or provide a base64-encoded image with API.",
     )
     return gr_interface
 

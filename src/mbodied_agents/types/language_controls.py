@@ -48,8 +48,7 @@ def get_command_from_string(command_str) -> Enum:
         return None
 
 
-CommandControl = ["start", "stop", "restart",
-                  "pause", "resume", "sleep", "go home"]
+CommandControl = ["start", "stop", "restart", "pause", "resume", "sleep", "go home"]
 
 MobileControl = ["move forward", "move backward", "turn left", "turn right"]
 
@@ -139,8 +138,6 @@ MobileSingleArmControl = [
     "sleep",
 ]
 
-LangControl: Enum = create_enum_from_list(
-    "LangControl", CommandControl + MobileControl + HeadControl + HandControl)
+LangControl: Enum = create_enum_from_list("LangControl", CommandControl + MobileControl + HeadControl + HandControl)
 
-MobileSingleArmLangControl: Enum = create_enum_from_list(
-    "MobileSingleArmLangControl", MobileSingleArmControl)
+MobileSingleArmLangControl: Enum = create_enum_from_list("MobileSingleArmLangControl", MobileSingleArmControl)

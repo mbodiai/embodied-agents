@@ -22,9 +22,7 @@ try:
     import playsound
     import pyaudio
 except ImportError:
-    logging.warning(
-        "playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install."
-    )
+    logging.warning("playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install.")
 
 from openai import OpenAI
 from typing_extensions import Literal
@@ -74,8 +72,7 @@ class AudioHandler:
         else:
             self.client = client
         if self.client is None:
-            self.client = OpenAI(
-                api_key=api_key or os.getenv("OPENAI_API_KEY"))
+            self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
             logging.info("OpenAI API key fetched from the environment key.")
 
     def listen(self, keep_audio: bool = False, mode: str = "speak") -> str:
@@ -90,8 +87,7 @@ class AudioHandler:
         """
         logging.debug(f"Listening with mode: {mode}")
         if os.getenv("NO_AUDIO") or mode in ["type", "speak_or_type"]:
-            user_input = input(
-                "Please type your input [Type 'exit' to exit]: ") + "\n##\n"
+            user_input = input("Please type your input [Type 'exit' to exit]: ") + "\n##\n"
             if os.getenv("NO_AUDIO") or mode == "type":
                 return user_input
         else:
@@ -113,8 +109,7 @@ class AudioHandler:
         transcription = None
         try:
             with open(self.listen_filename, "rb") as audio_file:
-                transcription = self.client.audio.transcriptions.create(
-                    model="whisper-1", file=audio_file)
+                transcription = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file)
                 return typed_input + transcription.text
         except Exception as e:
             logging.error(f"Failed to read or transcribe audio file: {e}")
@@ -131,8 +126,7 @@ class AudioHandler:
         channels = 1
         fs = 44100
         p = pyaudio.PyAudio()
-        stream = p.open(format=sample_format, channels=channels,
-                        rate=fs, frames_per_buffer=chunk, input=True)
+        stream = p.open(format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
         frames = []
 
         try:
@@ -164,21 +158,22 @@ class AudioHandler:
         if os.environ.get("NO_AUDIO"):
             return
         try:
-            client = self.client or OpenAI(
-                api_key=api_key or os.environ.get("OPENAI_API_KEY"))
-            with client.with_streaming_response.audio.speech.create(
-                model="tts-1",
-                voice=voice,
-                input=message,
-            ) as response, open(self.speak_filename, "wb") as out_file:
+            client = self.client or OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
+            with (
+                client.with_streaming_response.audio.speech.create(
+                    model="tts-1",
+                    voice=voice,
+                    input=message,
+                ) as response,
+                open(self.speak_filename, "wb") as out_file,
+            ):
                 for chunk in response.iter_bytes():
                     out_file.write(chunk)
         except Exception as e:
             logging.error(f"Failed to create or save speech: {e}")
             return
 
-        self.playback_thread = threading.Thread(
-            target=self.play_audio, args=(self.speak_filename,))
+        self.playback_thread = threading.Thread(target=self.play_audio, args=(self.speak_filename,))
         self.playback_thread.start()
 
     def play_audio(self, filename: str) -> None:

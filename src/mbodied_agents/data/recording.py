@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,8 +14,8 @@
 
 """Module for recording data to an h5 file."""
 
+import logging
 import shutil
-from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -26,7 +26,7 @@ from gymnasium import spaces
 from h5py import string_dtype
 
 from mbodied_agents.base.sample import Sample
-import logging
+from mbodied_agents.types.sense.vision import Image
 
 
 def add_space_metadata(space, group) -> None:
@@ -44,8 +44,7 @@ def add_space_metadata(space, group) -> None:
         group.attrs["shape"] = space.shape
     elif isinstance(space, spaces.Discrete):
         group.attrs["n"] = space.n
-        group.attrs["string_values"] = [
-            v for _, v in space.__dict__.items() if isinstance(v, str)]
+        group.attrs["string_values"] = [v for _, v in space.__dict__.items() if isinstance(v, str)]
     elif isinstance(space, spaces.MultiDiscrete):
         group.attrs["nvec"] = space.nvec
     elif isinstance(space, spaces.MultiBinary):
@@ -73,12 +72,10 @@ def create_dataset_for_space_dict(space_dict: spaces.Dict, group: h5py.Group) ->
             subgroup = group.create_group(key)
             create_dataset_for_space_dict(space, subgroup)
         else:
-            shape = space.shape if hasattr(
-                space, "shape") and space.shape is not None else ()
+            shape = space.shape if hasattr(space, "shape") and space.shape is not None else ()
             dtype = space.dtype if space.dtype is not None and space.dtype != str else string_dtype()
             logging.debug(f"creating dataset: {key, shape, dtype}")
-            group.create_dataset(
-                key, (1, *shape), dtype=dtype, maxshape=(None, *shape))
+            group.create_dataset(key, (1, *shape), dtype=dtype, maxshape=(None, *shape))
         add_space_metadata(space, group[key])
 
 
@@ -181,7 +178,6 @@ class Recorder:
         self.image_keys_to_save = image_keys_to_save
         self.index = 0
         print("Recording dataset to", self.filename)
-        print("Learn how to recieve a private, fine-tuned endpoint on your own data at https://forms.gle/rv5rovK93dLucma37\n")
 
     def configure_root_spaces(self, **spaces: spaces.Dict):
         """Configure the root spaces.
@@ -199,13 +195,12 @@ class Recorder:
 
             root_keys.append(name)
             root_spaces.append(space)
-            self.file.create_group(name)
+            group = self.file.create_group(name)
             logging.debug("creating group %s", name)
-            create_dataset_for_space_dict(space, self.file[name])
+            create_dataset_for_space_dict(space, group)
         return root_keys, root_spaces
 
-    def record_timestep(self, group: h5py.Group, sample: Any,
-                        index: int) -> None:
+    def record_timestep(self, group: h5py.Group, sample: Any, index: int) -> None:
         """Record a timestep.
 
         Args:
@@ -213,9 +208,16 @@ class Recorder:
           sample (Any): Sample to record.
           index (int): Index to record at.
         """
+        if isinstance(group, h5py.Dataset):
+            if index >= group.shape[0]:
+                group.resize((2 * index, *group.shape[1:]))
+            if hasattr(sample, "value"):
+                sample = sample.value
+            group[index] = sample
+            return
         logging.debug("group keys: %s", str(group.keys()))
         if not hasattr(sample, "dict"):
-            sample = Sample(**sample)
+            sample = Sample(sample)
         for key, value in sample:
             if value is None:
                 continue
@@ -223,16 +225,14 @@ class Recorder:
                 dataset = group[key]
                 if index >= dataset.shape[0]:
                     dataset.resize((2 * index, *dataset.shape[1:]))
-                array = value.array
-                dataset[index] = array
+                dataset[index] = value.array
                 if key in self.image_keys_to_save and hasattr(value, "save"):
                     value.save(self.frames_dir / f"{self.index}.png")
                 continue
             logging.debug(" key: %s, value: %s", key, value)
 
             if key not in group:
-                logging.warning("key %s not in group %s. Skipping key", key,
-                                group)
+                logging.warning("key %s not in group %s. Skipping key", key, group)
                 continue
             if isinstance(value, dict | Sample):
                 subgroup = group[key]
@@ -240,18 +240,14 @@ class Recorder:
                 continue
 
             if group[key].attrs.get("tuple_length") is not None:
-                value = Sample.pack_from(value).model_dump_json(
-                    round_trip=True)  # noqa: PLW2901
+                value = Sample.pack_from(value).model_dump_json(round_trip=True)  # noqa: PLW2901
 
             dataset = group[key]
             if index >= dataset.shape[0]:
                 dataset.resize((2 * index, *dataset.shape[1:]))
             dataset[index] = value
 
-    def record(self,
-               observation: Any | None = None,
-               action: Any | None = None,
-               supervision: Any | None = None) -> None:
+    def record(self, observation: Any | None = None, action: Any | None = None, supervision: Any | None = None) -> None:
         """Record a timestep.
 
         Args:
@@ -259,38 +255,47 @@ class Recorder:
           action (Any): Action to record.
           supervision (Any): Supervision to record.
         """
+
+        def recursive_setarray(sample):
+            if not hasattr(sample, "dict"):
+                sample = Sample(sample)
+            for key, value in sample:
+                if isinstance(value, Image):
+                    setattr(sample, key, value.array)
+                elif isinstance(value, dict | Sample):
+                    setattr(sample, key, recursive_setarray(value))
+            return sample
+
         if observation:
             if not hasattr(observation, "dict"):
-                observation = Sample(**observation)
+                observation = Sample(observation)
+                observation = recursive_setarray(observation)  # Bug hacky fix for Image recording.
             if "observation" not in self.file:
                 logging.warning("observation not in file, creating new group")
-                new_root_keys, new_root_spaces = self.configure_root_spaces(
-                    observation=observation.space())
+                new_root_keys, new_root_spaces = self.configure_root_spaces(observation=observation.space())
                 self.root_keys += new_root_keys
                 self.root_spaces += new_root_spaces
-            self.record_timestep(self.file["observation"], observation,
-                                 self.index)
+            self.record_timestep(self.file["observation"], observation, self.index)
         if action:
             if not hasattr(action, "dict"):
-                action = Sample(**action)
+                action = Sample(action)
+                action = recursive_setarray(action)  # Bug hacky fix for Image recording.
             if "action" not in self.file:
                 logging.warning("action not in file, creating new group")
-                new_root_keys, new_root_spaces = self.configure_root_spaces(
-                    action=action.space())
+                new_root_keys, new_root_spaces = self.configure_root_spaces(action=action.space())
                 self.root_keys += new_root_keys
                 self.root_spaces += new_root_spaces
             self.record_timestep(self.file["action"], action, self.index)
         if supervision:
             if not hasattr(supervision, "dict"):
-                supervision = Sample(**supervision)
+                supervision = Sample(supervision)
+                supervision = recursive_setarray(supervision)  # Bug hacky fix for Image recording.
             if "supervision" not in self.file:
                 logging.warning("supervision not in file, creating new group")
-                new_root_keys, new_root_spaces = self.configure_root_spaces(
-                    supervision=supervision.space())
+                new_root_keys, new_root_spaces = self.configure_root_spaces(supervision=supervision.space())
                 self.root_keys += new_root_keys
                 self.root_spaces += new_root_spaces
-            self.record_timestep(self.file["supervision"], supervision,
-                                 self.index)
+            self.record_timestep(self.file["supervision"], supervision, self.index)
 
         self.index += 1
         self.file.attrs["size"] = self.index

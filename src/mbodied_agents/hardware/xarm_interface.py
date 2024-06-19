@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import math
 import logging
+import math
+
 from xarm.wrapper import XArmAPI
 
 from mbodied_agents.hardware.interface import HardwareInterface
-from mbodied_agents.types.controls import HandControl
+from mbodied_agents.types.motion_controls import HandControl
 
 
 class XarmInterface(HardwareInterface):

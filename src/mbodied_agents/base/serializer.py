@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,9 +64,13 @@ class Serializer(Sample):
             ValueError: If the 'wrapped' field contains an invalid type.
 
         """
-        if "wrapped" in values and values["wrapped"] is not None and not isinstance(
-            values["wrapped"],
-            (Message, Sample, list, str, Image),
+        if (
+            "wrapped" in values
+            and values["wrapped"] is not None
+            and not isinstance(
+                values["wrapped"],
+                (Message, Sample, list, str, Image),
+            )
         ):
             raise ValueError(
                 f"Invalid wrapped type {type(values['wrapped'])}",
@@ -83,16 +87,18 @@ class Serializer(Sample):
             A dictionary representing the serialized sample.
 
         """
+        if isinstance(sample, Message):
+            return self.serialize_msg(sample)
         if not isinstance(sample, Sample):
             sample = Sample(sample)
         if isinstance(sample, Image):
             return self.serialize_image(sample)
-        elif Image.supports(sample):
+        if Image.supports(sample):
             return self.serialize_image(Image(sample))
-        elif isinstance(sample.datum, str):
+        if hasattr(sample, "datum") and isinstance(sample.datum, str):
             return self.serialize_text(sample.datum)
-        else:
-            return self.serialize_text(str(sample))
+
+        return self.serialize_text(str(sample))
 
     @model_serializer(when_used="always")
     def serialize(self) -> dict[str, Any] | list[Any]:
@@ -104,13 +110,12 @@ class Serializer(Sample):
         """
         if isinstance(self.wrapped, Message):
             return self.serialize_msg(self.wrapped)
-        elif isinstance(self.wrapped, list):
+        if isinstance(self.wrapped, list):
             if all(isinstance(m, Message) for m in self.wrapped):
                 return [self.serialize_msg(m) for m in self.wrapped]
-            else:
-                return [self.serialize_sample(m) for m in self.wrapped]
-        else:
-            return self.serialize_sample(self.wrapped)
+            return [self.serialize_sample(m) for m in self.wrapped]
+
+        return self.serialize_sample(self.wrapped)
 
     def serialize_msg(self, message: Message) -> dict[str, Any]:
         """Serializes a Message instance.

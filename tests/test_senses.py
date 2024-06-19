@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,8 +36,6 @@ def test_create_image_with_array():
     img = Image(array=array)
     assert img.size == (640, 480)
     assert img.base64 != ""
-
-
 
 
 def test_create_image_with_path(temp_file):
@@ -97,8 +95,7 @@ def test_encode_decode_array():
     array = np.random.randint(0, 256, (480, 640, 3), dtype=np.uint8)
     img = Image(array, encoding="png")
     encoded_base64 = img.base64
-    decoded_array_bgr = cv2.imdecode(np.frombuffer(
-        base64.b64decode(encoded_base64), np.uint8), cv2.IMREAD_COLOR)
+    decoded_array_bgr = cv2.imdecode(np.frombuffer(base64.b64decode(encoded_base64), np.uint8), cv2.IMREAD_COLOR)
     decoded_array = cv2.cvtColor(decoded_array_bgr, cv2.COLOR_BGR2RGB)
     assert decoded_array.shape == (480, 640, 3)
     assert np.array_equal(decoded_array, array)

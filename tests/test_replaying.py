@@ -19,7 +19,7 @@ import h5py
 from pathlib import Path
 from mbodied_agents.data.replaying import Replayer, parse_slice
 from mbodied_agents.data.recording import Recorder
-from mbodied_agents.types.controls import LocobotActionOrAnswer as ActionOrAnswer
+from mbodied_agents.types.motion_controls import LocobotActionOrAnswer as ActionOrAnswer
 from gymnasium import spaces
 import sys
 import logging
@@ -72,8 +72,7 @@ def test_replayer_iteration(mock_hdf5_file):
 
 def test_image_saving(mock_hdf5_file):
     filepath, _ = mock_hdf5_file
-    replayer = Replayer(path=str(filepath), image_keys_to_save=[
-                        'observation/image'])
+    replayer = Replayer(path=str(filepath), image_keys_to_save=["observation/image"])
     frames_path = replayer.get_frames_path()
 
     for _ in replayer:
@@ -129,26 +128,33 @@ def test_record_and_replay_basic(recorder_and_path):
         assert ActionOrAnswer(action).dict() == dummy_action.dict()
 
 
+logging.basicConfig(level=logging.DEBUG)
+
+
 def test_record_multiple_entries(recorder_and_path):
     recorder, recorder_path = recorder_and_path
-    entries = [(
-        {
-            "image": recorder.root_spaces[0]["image"].sample(),
-            "instruction": f"Entry {i}",
-            "system_prompt": "Please respond.",
-        },
-        ActionOrAnswer.default_sample(),
-    ) for i in range(5)]
-
+    entries = [
+        (
+            {
+                "image": recorder.root_spaces[0]["image"].sample(),
+                "instruction": f"Entry {i}",
+                "system_prompt": "Please respond.",
+            },
+            ActionOrAnswer.default_sample(),
+        )
+        for i in range(5)
+    ]
+    logging.basicConfig(level=logging.DEBUG, force=True)
     for obs, act in entries:
         recorder.record(obs, act)
 
     replayer = Replayer(str(recorder_path))
+    from pprint import pprint
+
+    pprint(replayer.get_structure())
     replayed_entries = list(replayer)
     assert len(replayed_entries) == len(entries)
-    for (replayed_obs,
-         replayed_act), (original_obs,
-                         original_act) in zip(replayed_entries, entries):
+    for (replayed_obs, replayed_act), (original_obs, original_act) in zip(replayed_entries, entries):
         assert replayed_obs["instruction"] == original_obs["instruction"]
         assert ActionOrAnswer(replayed_act).dict() == original_act.dict()
 

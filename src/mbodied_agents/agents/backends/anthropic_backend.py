@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,8 @@ import os
 from typing import Any
 
 import anthropic
-from mbodied_agents.base.backend import Backend
+
+from mbodied_agents.agents.backends.openai_backend import OpenAIBackendMixin
 from mbodied_agents.base.serializer import Serializer
 from mbodied_agents.types.message import Message
 from mbodied_agents.types.sense.vision import Image
@@ -57,13 +58,12 @@ class AnthropicSerializer(Serializer):
         return {"type": "text", "text": text}
 
 
-class AnthropicBackend(Backend):
+class AnthropicBackend(OpenAIBackendMixin):
     """Backend for interacting with Anthropic's API."""
 
     DEFAULT_MODEL = "claude-3-opus-20240229"
     INITIAL_CONTEXT = [
-        Message(
-            role="user", content="Imagine you are a robot with advanced spatial reasoning."),
+        Message(role="user", content="Imagine you are a robot with advanced spatial reasoning."),
         Message(role="assistant", content="Got it!"),
     ]
 
@@ -93,6 +93,9 @@ class AnthropicBackend(Backend):
         if model is None:
             model = self.DEFAULT_MODEL
         completion = self.client.messages.create(
-            model=model, max_tokens=1024, messages=self.serialialized(messages), **kwargs,
+            model=model,
+            max_tokens=1024,
+            messages=self.serialialized(messages),
+            **kwargs,
         )
         return completion.content[0].text
