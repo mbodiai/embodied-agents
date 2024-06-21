@@ -14,7 +14,7 @@ class OpenVlaAgent(MotorAgent):
     Remote is a gradio server taking: image, instruction, and unnorm_key as input.
 
     Example:
-        >>> openvla_agent = OpenVlaAgent(model_src="http://1.2.3.4:1234")
+        >>> openvla_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
         >>> hand_control = openvla_agent.remote_act("move forward", image)  # xyzrpyg
     """
 

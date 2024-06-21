@@ -83,8 +83,12 @@ class Agent:
 
         self.recorder = None
         if recorder == "default":
+            if recorder_kwargs is None:
+                recorder_kwargs = {}
             self.recorder = Recorder("base_agent", out_dir="outs", **recorder_kwargs)
         elif recorder != "omit":
+            if recorder_kwargs is None:
+                recorder_kwargs = {}
             self.recorder = Recorder(recorder, out_dir="outs", **recorder_kwargs)
 
         model_kwargs = model_kwargs or {}
@@ -95,9 +99,7 @@ class Agent:
             raise ValueError("'local_only' requested yet model source not found.")
         else:
             actor_class = self.REMOTE_ACTOR_MAP.get(model_src, GradioClient)
-            # If the model source is a gradio endpoint, pass it as the src.
-            # Note that isinstance() does not work here. Thus, we use the class name Client for GradioClient.
-            if actor_class.__name__ == "Client":
+            if issubclass(actor_class, GradioClient):
                 model_kwargs.update({"src": model_src})
             if api_key is not None:
                 model_kwargs["api_key"] = api_key

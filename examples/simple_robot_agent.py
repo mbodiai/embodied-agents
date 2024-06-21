@@ -12,6 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+For dataset recording, you can pass in the "default" argument to the agent to record the dataset automatically.
+
+For example:
+    >>> LanguageAgent(context=SYSTEM_PROMPT, model_src=backend, recorder="default")
+
+Alternatively, you can define the recorder separately to record the space you want.
+For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action:
+    >>> observation_space = spaces.Dict({"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)})
+    >>> action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
+    >>> recorder = Recorder(
+    ...     'example_recorder',
+    ...     out_dir='saved_datasets',
+    ...     observation_space=observation_space,
+    ...     action_space=action_space
+
+To record:
+    >>> recorder.record(
+    ...     observation={
+    ...         "image": image,
+    ...         "instruction": instruction,
+    ...     },
+    ...     action=answer_actions,
+    ... )
+"""
+
 import os
 from pathlib import Path
 
@@ -66,7 +92,7 @@ SYSTEM_PROMPT = f"""
 )
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
 @click.option(
-    "--record_dataset", default="omit", help="Recording action to take", type=click.Choice(["default", "omit"])
+    "--record_dataset", default="default", help="Recording action to take", type=click.Choice(["default", "omit"])
 )
 def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
     """Example for using LLMs for robot control. In this example, the language agent will perform double duty as both the cognitive and motor agent.
@@ -82,21 +108,6 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
     """
     # Pass in "default" to recorder to record the dataset automatically.
     cognitive_agent = LanguageAgent(context=SYSTEM_PROMPT, model_src=backend, recorder=record_dataset)
-
-    # Alternatively, you can define the recorder separately to record the space you want.
-    # For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action:
-    # observation_space = spaces.Dict({
-    #         'image': Image(size=(224, 224)).space(),
-    #         'instruction': spaces.Text(1000)
-    #     })
-    # action_space = AnswerAndActionsList(
-    #     actions=[HandControl()] * 6).space()
-    # recorder = Recorder(
-    #     'example_recorder',
-    #     out_dir='saved_datasets',
-    #     observation_space=observation_space,
-    #     action_space=action_space
-    # )
 
     hatdware_interface = SimInterface()
 
@@ -130,15 +141,6 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
         # Execute the actions with the robot interface.
         for action in answer_actions.actions:
             hatdware_interface.do(action)
-
-        # Record with the customized dataset recorder.
-        # recorder.record(
-        #     observation={
-        #         "image": example_image,
-        #         "instruction": instruction,
-        #     },
-        #     action=answer_actions,
-        # )
 
 
 if __name__ == "__main__":
