@@ -72,21 +72,16 @@ A call to `act` can perform local or remote inference, and can be asynchronous o
 
 ### Motivation
 
-<details>
-<summary>There is a signifcant barrier to entry for running SOTA models in robotics</summary>
-
+There is a signifcant barrier to entry for running SOTA models in robotics
 It is currently unrealistic to run state-of-the-art AI models on edge devices for responsive, real-time applications. Furthermore,
 the complexity of integrating multiple models across different modalities is a significant barrier to entry for many researchers,
 hobbyists, and developers. This library aims to address these challenges by providing a simple, extensible, and efficient way to
 integrate large models into existing robot stacks.
 
-</details>
 
 ### Goals
 
-<details>
-<summary>Facillitate data-collection and sharing among roboticists.</summary>
-
+Facillitate data-collection and sharing among roboticists.
 This requires reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
 
 We aim to achieve this by:
@@ -97,7 +92,6 @@ We aim to achieve this by:
 
 Beyond just improved robustness and consistency, this architecture makes asynchronous and remote agent execution exceedingly simple. In particular we demonstrate how responsive natural language interactions can be achieved in under 10 lines of Python code.
 
-</details>
 
 ### Limitations
 
