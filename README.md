@@ -72,14 +72,21 @@ Jump to [getting started](#getting-started) to get up and running on [real hardw
 
 ## Overview
 
-This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of a human's central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent type has an `act` method that can be overriden and always returns a `str`, `Motion`, and `SensorReading` respectively. A call to `act` can perform local or remote inference, and can be asynchronous or synchronous. Remote execution is performed with [Gradio](https://www.gradio.app/docs/python-client/introduction) or [httpx](https://www.python-httpx.org/) and validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
+This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of a human's central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent has an `act` method that can be overriden and satisfies:
+
+- **Language Agents** always return a string.
+- **Motor Agents** always return a `Motion`.
+- **Sensory Agents** always return a `SensorReading`.
+
+A call to `act` can perform local or remote inference, and can be asynchronous or synchronous. Remote execution is performed with [Gradio](https://www.gradio.app/docs/python-client/introduction) or [httpx](https://www.python-httpx.org/) and validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
 ### Motivation
 
 <details>
-<summary>Signifant barrier to entry for SOTA models in robotics</summary>
+<summary>There is a signifcant barrier to entry for running SOTA models in robotics</summary>
+
 
 It is currently unrealistic to run state-of-the-art AI models on edge devices for responsive, real-time applications. Furthermore,
 the complexity of integrating multiple models across different modalities is a significant barrier to entry for many researchers,
@@ -91,7 +98,9 @@ integrate large models into existing robot stacks.
 
 <details>
 <summary>Facillitate data-collection and sharing among roboticists.</summary>
-Reduce much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
+
+
+This requires reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
 
 We aim to achieve this by:
 
@@ -156,7 +165,6 @@ from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
 from mbodied.types.motion_controls import HandControl, FullJointControl
 import gymnasium as gym
 
-# Customize a  Motion by adding or overriding fields.
 class FineGrainedHandControl(HandControl):
     """Custom HandControl with an additional field."""
     comment: str = Field(None, description="A comment to voice aloud.")
@@ -165,7 +173,7 @@ class FineGrainedHandControl(HandControl):
     index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
     thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
 
-# Define the observation and action spaces.
+
 observation_space = spaces.Dict(
     {
         "image": Image(size=(224, 224)).space(),
@@ -181,7 +189,7 @@ cognition = LanguageAgent(context=planner_prompt, api_key=backend_api_key, model
 
 motor_prompt = f"""You control a robot's hand based on the instructions given and the image provided.
     You always respond with an action of the form: {FineGrainedHandControl.model_json_schema()}.
-""" # Descriptions are taken from the docstrings or MotionField arguments.
+"""
 
 # Use a language agent as a motor agent proxy. Record the conversation and the robot's actions.
 motion = LanguageAgent(
@@ -199,14 +207,12 @@ audio = AudioHandler(use_pyaudio=False) # PyAudio is buggy on Mac.
 image = Image(Path("resources") / "xarm.jpeg")
 instruction = audio.listen()
 
-# Get the plan.
+
 plan = cognition.act(instruction, image)
 
 for instruction in plan.strip("[]").split(","):
-    # Pydantic de-serializes and validates json under the hood.
     response = motion.act_and_parse(instruction, image, parse_target=FineGrainedHandControl)
 
-    # Listen to the robot's reasoning.
     if response.comment:
         audio.speak(response.comment)
     
