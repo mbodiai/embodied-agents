@@ -53,20 +53,8 @@ Jump to [getting started](#getting-started) to get up and running on [real hardw
   - [Installation](#installation)
   - [Getting Started](#getting-started)
     - [Notebooks](#notebooks)
-    - [The Sample class](#the-sample-class)
     - [Next Steps](#next-steps)
-      - [Creating a Sample](#creating-a-sample)
-      - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
-      - [Converting to Different Containers](#converting-to-different-containers)
-      - [Gym Space Integration](#gym-space-integration)
-    - [Message](#message)
-    - [Backend](#backend)
-    - [Language Agent](#language-agent)
-    - [Motor Agent](#motor-agent)
-    - [Controls](#controls)
-    - [Hardware Interface](#hardware-interface)
-    - [Recorder](#recorder)
-    - [Dataset Replayer](#dataset-replayer)
+  - [Building Blocks](#building-blocks)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
@@ -87,18 +75,17 @@ A call to `act` can perform local or remote inference, and can be asynchronous o
 <details>
 <summary>There is a signifcant barrier to entry for running SOTA models in robotics</summary>
 
-
 It is currently unrealistic to run state-of-the-art AI models on edge devices for responsive, real-time applications. Furthermore,
 the complexity of integrating multiple models across different modalities is a significant barrier to entry for many researchers,
 hobbyists, and developers. This library aims to address these challenges by providing a simple, extensible, and efficient way to
 integrate large models into existing robot stacks.
+
 </details>
 
 ### Goals
 
 <details>
 <summary>Facillitate data-collection and sharing among roboticists.</summary>
-
 
 This requires reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
 
@@ -109,6 +96,7 @@ We aim to achieve this by:
 3. Ensuring that this library is observation and action-space agnostic, allowing it to be used with any robot stack.
 
 Beyond just improved robustness and consistency, this architecture makes asynchronous and remote agent execution exceedingly simple. In particular we demonstrate how responsive natural language interactions can be achieved in under 10 lines of Python code.
+
 </details>
 
 ### Limitations
@@ -123,7 +111,6 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 
 - This library is intended to be used for research and prototyping.
 - This library is still experimental and under active development. Breaking changes may occur although they will be avoided as much as possible. Feel free to report issues!
-
 
 ### Features
 
@@ -152,72 +139,18 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 ## Installation
 
 ```shell
-pip install mbodied[agents]
+pip install mbodied
+```
+
+Install with audio packages:
+
+```
+pip install mbodied[audio]
 ```
 
 ## Getting Started
 
 Script: [examples/simple_robot_agent.py](examples/simple_robot_agent.py)
-
-```python
-from mbodied.agents import LanguageAgent, MotorAgent
-from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
-from mbodied.types.motion_controls import HandControl, FullJointControl
-import gymnasium as gym
-
-class FineGrainedHandControl(HandControl):
-    """Custom HandControl with an additional field."""
-    comment: str = Field(None, description="A comment to voice aloud.")
-    
-    # Any attempted validation will fail if the bounds are not satisfied.
-    index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
-    thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
-
-
-observation_space = spaces.Dict(
-    {
-        "image": Image(size=(224, 224)).space(),
-        "instruction": spaces.Text(1000),
-    },
-)
-action_space = FineGrainedHandControl().space()
-    
-planner_prompt = """You are a robot with vision capabilities. 
-For each task given, you respond with a plan of actions as a json list."""
-
-cognition = LanguageAgent(context=planner_prompt, api_key=backend_api_key, model_src=backend)
-
-motor_prompt = f"""You control a robot's hand based on the instructions given and the image provided.
-    You always respond with an action of the form: {FineGrainedHandControl.model_json_schema()}.
-"""
-
-# Use a language agent as a motor agent proxy. Record the conversation and the robot's actions.
-motion = LanguageAgent(
-    context=motor_prompt,
-    model_src=backend,
-    recorder="auto",
-    recorder_kwargs={"observation_space": observation_space, "action_space": action_space},
-)
-
-# Subclass HardwareInterface and implement the do() method for your specific hardware.
-hardware_interface = SimInterface() 
-audio = AudioHandler(use_pyaudio=False) # PyAudio is buggy on Mac.
-
-# Recieve inputs.
-image = Image(Path("resources") / "xarm.jpeg")
-instruction = audio.listen()
-
-
-plan = cognition.act(instruction, image)
-
-for instruction in plan.strip("[]").split(","):
-    response = motion.act_and_parse(instruction, image, parse_target=FineGrainedHandControl)
-
-    if response.comment:
-        audio.speak(response.comment)
-    
-    hardware_interface.do(response)
-```
 
 ### Notebooks
 
@@ -227,7 +160,13 @@ Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [
 
 MotorAgent with OpenVLA: [examples/motor_example_openvla.py](examples/motor_example_openvla.py)
 
-### The [Sample](mbodied/base/sample.py) class
+### Next Steps
+
+To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
+
+## Building Blocks
+
+<details> <summary><h3 style="display: inline-block;">The Sample class</h3></summary>
 
 The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extendable, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](mbodied/base/sample.py) class, you'll be able to convert to and from the following with ease:
 
@@ -235,14 +174,6 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A flattened list, array, or tensor for plugging into an ML model.
 - A HuggingFace dataset with semantic search capabilities.
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
-
-### Next Steps
-
-To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
-
-<details><summary>
-More tutorials and examples
-</summary>
 
 #### Creating a Sample
 
@@ -311,6 +242,7 @@ print(sample_pt) # Output: tensor([1, 2, 3, 4, 5, 6])
 
 # Converting to a HuggingFace Dataset
 sample_hf = sample.to("hf")
+print(sample_hf)
 # Output: Dataset({
 #     features: ['observation', 'action'],
 #     num_rows: 3
@@ -334,14 +266,13 @@ print(gym_space)
 </details>
 See [sample.py](mbodied/base/sample.py) for more details.
 
-### Message
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Message</h3></summary>
 
 The [Message](mbodied/types/message.py) class represents a single completion sample space. It can be text, image, a list of text/images, Sample, or other modality. The Message class is designed to handle various types of content and supports different roles such as user, assistant, or system.
 
 You can create a `Message` in versatile ways. They can all be understood by mbodi's backend.
-
-<details>
-<summary>Examples:</summary>
 
 ```python
 Message(role="user", content="example text")
@@ -351,18 +282,23 @@ Message(role="user", content=[Sample("Hello")])
 
 </details>
 
-### Backend
+<details> <summary><h3 style="display: inline-block;">Backend</h3></summary>
 
 The [Backend](mbodied/base/backend.py) class is an abstract base class for Backend implementations. It provides the basic structure and methods required for interacting with different backend services, such as API calls for generating completions based on given messages. See [backend directory](mbodied/agents/backends) on how various backends are implemented.
 
-### Language Agent
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Agent</h3></summary>
+
+[Agent](mbodied/base/agent.py) is the base class for various agents listed below. It provides a template for creating agents that can talk to a remote backend/server and optionally record their actions and observations.
+
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Language Agent</h3></summary>
 
 The [Language Agent](mbodied/agents/language/language_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
-Currently supported API services are OpenAI and Anthropic. Upcoming API services include Mbodi, Ollama, and HuggingFace. Stay tuned for our Mbodi backend service!
-
-<details>
-<summary>For example:</summary>
+Currently supported API services are OpenAI and Anthropic. Upcoming API services includes Gemini, Ollama, and HuggingFace.
 
 To use OpenAI for your robot backend:
 
@@ -392,25 +328,36 @@ response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 
 </details>
 
-### Motor Agent
+<details> <summary><h3 style="display: inline-block;">Motor Agent</h3></summary>
 
 [Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
 Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](mbodied/agents/motion/openvla_example_server.py)
 
-### Controls
+</details>
 
-The [controls](mbodied/types/controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
+<details> <summary><h3 style="display: inline-block;">Sensory Agent</h3></summary>
 
-### Hardware Interface
+These agents interact with the environment to collect sensory data. They always return a `SensorReading`, which can be various forms of processed sensory input such as images, depth data, or audio signals.
+
+For example, [object_pose_estimator_3d](mbodied/agents/sense/object_pose_estimator_3d.py) is a sensory agent that senses objects' 3d coordinates as the robot sees.
+
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Motion Controls</h3></summary>
+
+The [motion_controls](mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
+
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Hardware Interface</h3></summary>
 
 Mapping robot actions from a model to an action is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](mbodied/hardware/xarm_interface.py) as an example.
 
-### Recorder
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Recorder</h3></summary>
 
 Dataset [Recorder](mbodied/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
-
-<details>
-<summary>Example:</summary>
 
 ```python
 observation_space = spaces.Dict({
@@ -424,16 +371,15 @@ recorder = Recorder('example_recorder', out_dir='saved_datasets', observation_sp
 recorder.record(observation={'image': image, 'instruction': instruction,}, action=hand_control)
 ```
 
-</details>
-
 The dataset is saved to `./saved_datasets`. Learn more about augmenting, and fine-tuning with this dataset by filling out this [form](https://forms.gle/rv5rovK93dLucma37).
 
-### Dataset Replayer
+</details>
+
+<details> <summary><h3 style="display: inline-block;">Dataset Replayer</h3></summary>
 
 The [Replayer](mbodied/data/replaying.py) class is designed to process and manage data stored in HDF5 files generated by `Recorder`. It provides a variety of functionalities, including reading samples, generating statistics, extracting unique items, and converting datasets for use with HuggingFace. The Replayer also supports saving specific images during processing and offers a command-line interface for various operations.
 
-<details>
-<summary>Example for iterating through a dataset from Recorder with Replayer:</summary>
+Example for iterating through a dataset from Recorder with Replayer:
 
 ```python
 replayer = Replayer(path=str("path/to/dataset.h5"))
@@ -441,7 +387,6 @@ for observation, action in replayer:
    ...
 ```
 
-</details>
 </details>
 
 ## Directory Structure

@@ -12,7 +12,7 @@ Each building block represents a distinct function or service within the Mbodied
    backend/index
    language_agent/index
    motor_agent/index
-   controls/index
+   sensory_agent/index
+   motion_controls/index
    hardware_interface/index
    recorder/index
-   

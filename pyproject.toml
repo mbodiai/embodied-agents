@@ -48,10 +48,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-agents = [
-  "playsound",
-  "pyaudio",
-]
+
 audio = [
   "playsound",
   "pyaudio",

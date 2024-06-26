@@ -58,5 +58,5 @@ jobs:
 
       - name: Run tests
         run: |
-          hatch run pip install '.[agents]'
+          hatch run pip install '.[audio]'
           hatch run test
