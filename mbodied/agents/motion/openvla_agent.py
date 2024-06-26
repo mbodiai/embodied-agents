@@ -42,10 +42,7 @@ class OpenVlaAgent(MotorAgent):
         response = self.actor.act(image.base64, instruction, unnorm_key)
         items = response.strip("[]").split()
         action = [float(item) for item in items]
-        return HandControl(
-            pose=Pose6D(x=action[0], y=action[1], z=action[2], roll=action[3], pitch=action[4], yaw=action[5]),
-            grasp=JointControl(value=action[6]),
-        )
+        return HandControl.unflatten(action)
 
 
 # Example usage:
@@ -53,4 +50,4 @@ if __name__ == "__main__":
     openvla_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
     image = Image("resources/xarm.jpeg")
     response = openvla_agent.act("move forward", image)
-    print(response)
+    print(response) # noqa

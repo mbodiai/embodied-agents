@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,10 +31,20 @@ class HardwareInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def do(self, **kwargs) -> None:
+    def do(self, *args, **kwargs) -> None: # noqa
         """Executes motion.
 
         Args:
+            args: Arguments to pass to the hardware interface.
+            kwargs: Additional arguments to pass to the hardware interface.
+        """
+        raise NotImplementedError
+    
+    def fetch(self, *args, **kwargs) -> None:
+        """Fetches data from the hardware.
+
+        Args:
+            args: Arguments to pass to the hardware interface.
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError

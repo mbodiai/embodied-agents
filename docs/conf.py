@@ -12,8 +12,8 @@ import sys
 sys.path.insert(0, os.path.abspath("../mbodied"))
 
 project = "Mbodied Agents"
-copyright = "2024, Mbodi AI team"
-author = "Mbodi AI team"
+copyright = "2024, mbodi ai team"
+author = "mbodi ai team"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

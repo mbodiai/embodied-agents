@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class Agent:
 
     def __init__(
         self,
-        recorder: Literal["omit", "default"] | str = "omit",
+        recorder: Literal["omit", "auto"] | str = "omit",
         recorder_kwargs=None,
         api_key: str = None,
         model_src=None,
@@ -67,7 +67,7 @@ class Agent:
 
         self.recorder = None
         recorder_kwargs = recorder_kwargs or {}
-        if recorder == "default":
+        if recorder == "auto":
             self.recorder = Recorder("base_agent", out_dir="outs", **recorder_kwargs)
         elif recorder != "omit":
             self.recorder = Recorder(recorder, out_dir="outs", **recorder_kwargs)

@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,17 +34,16 @@ from pydantic import (
     InstanceOf,
     field_serializer,
     model_validator,
-    WithJsonSchema,
-    BaseModel,
 )
-from typing_extensions import Literal, Annotated
-from mbodied.base.sample import Sample
+from typing_extensions import Literal
+
 from mbodied.types.ndarray import NumpyArray
+from mbodied.types.sense.sensor_reading import SensorReading
 
 SupportsImage = Union[np.ndarray, PILImage, Base64Str, AnyUrl, FilePath]  # noqa: UP007
 
 
-class Image(Sample):
+class Image(SensorReading):
     """An image sample that can be represented in various formats.
 
     The image can be represented as a NumPy array, a base64 encoded string, a file path, a PIL Image object,
@@ -378,5 +377,3 @@ class Image(Sample):
             raise ValueError("Image size is not defined.")
         return spaces.Box(low=0, high=255, shape=(*self.size, 3), dtype=np.uint8)
 
-
-# Image = Annotated[_Image, WithJsonSchema(_Image.schema()), _Image.__doc__]

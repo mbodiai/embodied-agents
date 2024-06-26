@@ -97,8 +97,8 @@ import sys
 sys.path.insert(0, os.path.abspath('../src'))  # Set path to the directory containing docstrings
 
 project = 'Mbodied Agents'
-copyright = '2024, Mbodi AI team'
-author = 'Mbodi AI team'
+copyright = '2024, mbodi ai team'
+author = 'mbodi ai team'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

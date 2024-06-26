@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class GradioBackend:
         """
         return self.client.predict(*args, **kwargs)
 
-    def async_act(self, *args, api_name="/predict", result_callbacks=None, blocking=False, timeout=10, **kwargs) -> Job:
+    def async_act(self, *args, api_name="/predict", result_callbacks=None, blocking=False, blocking_timeout=10, **kwargs) -> Job:
         """Asynchronous submit queries to the gradio api endpoint.
 
         Args:
@@ -53,6 +53,7 @@ class GradioBackend:
         job = self.client.submit(api_name=api_name, result_callbacks=result_callbacks, *args, **kwargs)
         tic = time.time()
         if blocking:
-            while not job.done() and time.time() - tic < timeout:
-                pass
+            while not job.done:
+                if time.time() - tic > blocking_timeout:
+                    raise TimeoutError("Job did not finish in time.")
         return job

@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,4 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: Upcoming. Implement the remote interface with the communication protocol
+from mbodied.base.sample import Sample
+
+
+class SensorReading(Sample):
+    pass

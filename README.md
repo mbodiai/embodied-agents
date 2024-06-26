@@ -32,7 +32,7 @@
 
 # mbodied agents
 
-**mbodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides a consistent interface for calling different AI models, handling multimodal data, and is configurable to any observation and action space.
+**mbodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides consistency, reliability, scalability and is configurable to any observation and action space.
 
 <img src="assets/new_demo.gif" alt="Demo GIF" style="width: 550px;">
 
@@ -42,26 +42,60 @@ Jump to [getting started](#getting-started) to get up and running on [real hardw
 
 - [mbodied agents](#mbodied-agents)
   - [Overview](#overview)
+    - [Motivation](#motivation)
+    - [Goals](#goals)
+    - [Limitations](#limitations)
+    - [Scope](#scope)
+    - [Features](#features)
+    - [Example Use Case:](#example-use-case)
+    - [Endpoints](#endpoints)
+    - [Support Matrix](#support-matrix)
+    - [To Do](#to-do)
   - [Installation](#installation)
   - [Getting Started](#getting-started)
-  - [Building Blocks](#building-blocks)
+    - [Real Robot Hardware](#real-robot-hardware)
+    - [Simulation](#simulation)
+    - [Motor Agent example using OpenVLA](#motor-agent-example-using-openvla)
+  - [The Sample class](#the-sample-class)
+    - [The Sample class](#the-sample-class-1)
+    - [Next Steps](#next-steps)
+      - [Creating a Sample](#creating-a-sample)
+      - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
+      - [Converting to Different Containers](#converting-to-different-containers)
+      - [Gym Space Integration](#gym-space-integration)
+    - [Message](#message)
+    - [Backend](#backend)
+    - [Language Agent](#language-agent)
+    - [Motor Agent](#motor-agent)
+    - [Controls](#controls)
+    - [Hardware Interface](#hardware-interface)
+    - [Recorder](#recorder)
+    - [Dataset Replayer](#dataset-replayer)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
 ## Overview
 
+This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of a human's central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent type has an `act` method that can be overriden and always returns a `str`, `Motion`, and `SensorReading` respectively. A call to `act` can perform local or remote inference, and can be asynchronous or synchronous. Remote execution is performed with [Gradio](https://www.gradio.app/docs/python-client/introduction) or [httpx](https://www.python-httpx.org/) and validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
+
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
 ### Motivation
+
+<details>
+<summary>Signifant barrier to entry for SOTA models in robotics</summary>
 
 It is currently unrealistic to run state-of-the-art AI models on edge devices for responsive, real-time applications. Furthermore,
 the complexity of integrating multiple models across different modalities is a significant barrier to entry for many researchers,
 hobbyists, and developers. This library aims to address these challenges by providing a simple, extensible, and efficient way to
 integrate large models into existing robot stacks.
+</details>
 
 ### Goals
 
-Facillitate data-collection and sharing among roboticists by reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
+<details>
+<summary>Facillitate data-collection and sharing among roboticists.</summary>
+Reduce much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
 
 We aim to achieve this by:
 
@@ -70,23 +104,25 @@ We aim to achieve this by:
 3. Ensuring that this library is observation and action-space agnostic, allowing it to be used with any robot stack.
 
 Beyond just improved robustness and consistency, this architecture makes asynchronous and remote agent execution exceedingly simple. In particular we demonstrate how responsive natural language interactions can be achieved in under 10 lines of Python code.
+</details>
+
+### Limitations
+
+_Embodied Agents are not yet capable of learning from in-context experience_:
+
+- Frameworks for advanced RAG techniques are clumsy at best for OOD embodied applications however that may improve.
+- Amount of data required for fine-tuning is still prohibitively large and expensive to collect.
+- Online RL is still in its infancy and not yet practical for most applications.
 
 ### Scope
 
 - This library is intended to be used for research and prototyping.
 - This library is still experimental and under active development. Breaking changes may occur although they will be avoided as much as possible. Feel free to report issues!
 
-### Limitations
-
-_Agents are not yet capable of learning from experience_:
-
-- Frameworks for advanced RAG techniques are clumsy at best for OOD embodied applications however that may improve.
-- Amount of data required for fine-tuning is still prohibitively large and expensive to collect.
-- Online RL is still in its infancy and not yet practical for most applications.
 
 ### Features
 
-- User-friendly python SDK with explicit typing and modularity
+- Extensible, user-friendly python SDK with explicit typing and modularity
 - Asynchronous and remote thread-safe agent execution for maximal responsiveness and scalability.
 - Full-compatiblity with HuggingFace Spaces, Datasets, Gymnasium Spaces, Ollama, and any OpenAI-compatible api.
 - Automatic dataset-recording and optionally uploads dataset to huggingface hub.
@@ -116,8 +152,8 @@ _Agents are not yet capable of learning from experience_:
 
 ### Support Matrix
 
-- Open Weights: OpenVLA, Idefics2, Llava-1.6-Mistral, Phi-3-vision-128k-instruct
 - Closed: OpenAI, Anthropic
+- Open Weights: OpenVLA, Idefics2, Llava-1.6-Mistral, Phi-3-vision-128k-instruct
 - All gradio endpoints hosted on HuggingFace spaces.
 
 ### To Do
@@ -129,13 +165,7 @@ _Agents are not yet capable of learning from experience_:
 ## Installation
 
 ```shell
-pip install mbodied
-```
-
-Optional Dependencies
-
-```shell
-pip install mbodied[extras]
+pip install mbodied[agents]
 ```
 
 ## Getting Started
@@ -146,9 +176,67 @@ Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/co
 
 Script: [examples/simple_robot_agent.py](examples/simple_robot_agent.py)
 
-```shell
-export OPENAI_API_KEY=your_api_key
-python examples/simple_robot_agent.py --backend=openai
+```python
+from mbodied.agents import LanguageAgent, MotorAgent
+from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
+from mbodied.types.motion_controls import HandControl, FullJointControl
+import gymnasium as gym
+
+# Customize a  Motion by adding or overriding fields.
+class FineGrainedHandControl(HandControl):
+    """Custom HandControl with an additional field."""
+    comment: str = Field(None, description="A comment to voice aloud.")
+    
+    # Any attempted validation will fail if the bounds are not satisfied.
+    index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+    thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+
+# Define the observation and action spaces.
+observation_space = spaces.Dict(
+    {
+        "image": Image(size=(224, 224)).space(),
+        "instruction": spaces.Text(1000),
+    },
+)
+action_space = FineGrainedHandControl().space()
+    
+planner_prompt = """You are a robot with vision capabilities. 
+For each task given, you respond with a plan of actions as a json list."""
+
+cognition = LanguageAgent(context=planner_prompt, api_key=backend_api_key, model_src=backend)
+
+motor_prompt = f"""You control a robot's hand based on the instructions given and the image provided.
+    You always respond with an action of the form: {FineGrainedHandControl.model_json_schema()}.
+""" # Descriptions are taken from the docstrings or MotionField arguments.
+
+# Use a language agent as a motor agent proxy. Record the conversation and the robot's actions.
+motion = LanguageAgent(
+    context=motor_prompt,
+    model_src=backend,
+    recorder="auto",
+    recorder_kwargs={"observation_space": observation_space, "action_space": action_space},
+)
+
+# Subclass HardwareInterface and implement the do() method for your specific hardware.
+hardware_interface = SimInterface() 
+audio = AudioHandler(use_pyaudio=False) # PyAudio is buggy on Mac.
+
+# Recieve inputs.
+image = Image(Path("resources") / "xarm.jpeg")
+instruction = audio.listen()
+
+# Get the plan.
+plan = cognition.act(instruction, image)
+
+for instruction in plan.strip("[]").split(","):
+    # Pydantic de-serializes and validates json under the hood.
+    response = motion.act_and_parse(instruction, image, parse_target=FineGrainedHandControl)
+
+    # Listen to the robot's reasoning.
+    if response.comment:
+        audio.speak(response.comment)
+    
+    hardware_interface.do(response)
 ```
 
 ### Simulation
@@ -157,11 +245,11 @@ Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/co
 
 To learn more about **SimplerEnv**, please visit [![GitHub](https://img.shields.io/badge/GitHub-SimplerEnv-blue?logo=github)](https://github.com/simpler-env/SimplerEnv.git)
 
-### Minimal Robotic Transformer Example using OpenVLA
+### Motor Agent example using OpenVLA
 
 Run OpenVLA as Motor Agent on robot in several lines: [examples/minimal_openvla_agent.py](examples/minimal_openvla_agent.py)
 
-## Building Blocks
+## The Sample class
 
 ### The [Sample](mbodied/base/sample.py) class
 
@@ -171,6 +259,11 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A flattened list, array, or tensor for plugging into an ML model.
 - A HuggingFace dataset with semantic search capabilities.
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
+
+### Next Steps
+<details><summary>
+To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest/).
+</summary>
 
 #### Creating a Sample
 
@@ -239,7 +332,6 @@ print(sample_pt) # Output: tensor([1, 2, 3, 4, 5, 6])
 
 # Converting to a HuggingFace Dataset
 sample_hf = sample.to("hf")
-print(sample_hf)
 # Output: Dataset({
 #     features: ['observation', 'action'],
 #     num_rows: 3
@@ -371,6 +463,7 @@ for observation, action in replayer:
 ```
 
 </details>
+</details>
 
 ## Directory Structure
 
@@ -395,24 +488,3 @@ for observation, action in replayer:
 ## Contributing
 
 We welcome issues, questions and PRs. See the [contributing guide](CONTRIBUTING.md) for more information.
-
-### Dev Environment Setup
-
-1. Clone this repo:
-
-   ```console
-   git clone https://github.com/MbodiAI/mbodied-agents.git
-   ```
-
-2. Install system dependencies:
-
-   ```console
-   source install.bash
-   hatch run pip install '.[extras]'
-   ```
-
-3. Then for each new terminal, run:
-
-   ```console
-   hatch shell
-   ```

@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class Serializer(Sample):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_model(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def validate_model(cls, values: dict[str, Any]) -> dict[str, Any] | list[Any]:
         """Validates the 'wrapped' field of the model.
 
         Args:

@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,30 +14,25 @@
 
 from pathlib import Path
 
+from mbodied.agents.motion.openvla_agent import OpenVlaAgent
 from mbodied.hardware.sim_interface import SimInterface
 from mbodied.types.sense.vision import Image
-from mbodied.agents.motion.openvla_agent import OpenVlaAgent
-
-
-def get_image_from_camera() -> Image:
-    """Get an image from the camera. Using a static example here."""
-    resource = Path("resources") / "xarm.jpeg"
-    return Image(resource, size=(224, 224))
 
 
 def main() -> None:
-    """Minimal exmaple running a motor agent, i.e. OpenVLA on your robot."""
-    # Initialize the OpenVLA agent (currently pointing to mbodi's gradio endpoint for OpenVLA).
     motor_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
-    hardware_interface = SimInterface()  # SimInterface is a placeholder for hardware interface.
-
-    instruction = input("Your instruction to OpenVLA:")
+    # Subclass HardwareInterface and implement the do() method for your specific hardware.
+    hardware_interface = SimInterface()
+    
+    # Use the same instruction throughout.
+    instruction = input("Your instruction:")
 
     while True:
-        hand_control = motor_agent.act(instruction, get_image_from_camera())
+        # Image can be initialized with most image types, including file paths.
+        image = Image(Path("resources") / "xarm.jpeg")
+        hand_control = motor_agent.act(instruction, image)
         hardware_interface.do(hand_control)
-
 
 if __name__ == "__main__":
     main()

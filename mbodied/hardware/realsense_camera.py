@@ -1,12 +1,13 @@
-import numpy as np
 import logging
+
+import numpy as np
 
 try:
     import pyrealsense2 as rs
 except ImportError:
     logging.warning("pyrealsense2 is not installed.")
-import json
 import base64
+import json
 
 
 class RealsenseCamera:

@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 
 from mbodied.hardware.interface import HardwareInterface
 from mbodied.types.motion_controls import HandControl
+from mbodied.types.sense.vision import Image
 
 
 class SimInterface(HardwareInterface):
@@ -34,8 +35,8 @@ class SimInterface(HardwareInterface):
         self.home_pos = [0, 0, 0, 0, 0, 0, 0]
         self.current_pos = self.home_pos
 
-    def do(self, motion: HandControl) -> None:
-        """Executes a given HandControl motion.
+    def do(self, motion: HandControl) -> list[float]:
+        """Executes a given HandControl motion and returns the new position of the robot arm.
 
         Args:
             motion: The HandControl motion to be executed.
@@ -59,3 +60,11 @@ class SimInterface(HardwareInterface):
             list[float]: A list of the current pose values [x, y, z, r, p, y, grasp].
         """
         return self.current_pos
+    
+    def fetch(self, **kwargs) -> Image:
+        """Fetches data from the hardware.
+
+        Args:
+            kwargs: Additional arguments to pass to the hardware interface.
+        """
+        return Image(size=(224,224))

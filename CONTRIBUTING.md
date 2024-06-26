@@ -15,24 +15,15 @@ git config --global pull.rebase true
 
 ### 🌐 Environment Setup
 
-1. Clone this repo:
+We use [hatch](https://hatch.pypa.io/1.12/) for packaging and managing dependencies.
 
-   ```console
-   git clone https://github.com/MbodiAI/mbodied-agents.git
-   ```
-
-2. Install system dependencies, we use [hatch](https://hatch.pypa.io/1.12/)
-
-   source install.bash
-   hatch run pip install '.[extras]'
-   ```
-
-3. Then for each new terminal, run:
+```console
+git clone https://github.com/MbodiAI/mbodied-agents.git
+source install.bash
+hatch run pip install '.[agents]'
+```
 
 
-   ```console
-   hatch shell
-   ```
 ## 🛠️ Style Guide
 [Optional VS Code Profile With All the Extensions and Shortcuts You Need](https://vscode.dev/profile/github/dadb33644d0ab9fcdeb1ec686561d070)
 

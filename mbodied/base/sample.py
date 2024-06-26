@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
-
-import jsonref
+from jsonref import replace_refs
 import numpy as np
 import torch
 from datasets import Dataset
@@ -113,31 +112,54 @@ class Sample(BaseModel):
             Dict[str, Any]: Dictionary representation of the Sample object.
         """
         return self.model_dump(exclude_none=exclude_none, exclude=exclude)
-
+    
     @classmethod
     def unflatten(cls, one_d_array_or_dict, schema=None) -> "Sample":
-        schema = schema or cls.model_json_schema()
-        if not isinstance(one_d_array_or_dict, list):
-            one_d_array_or_dict = list(one_d_array_or_dict)
-
-        if schema["type"] == "object":
-            obj = {}
-            index = 0
-            for key, subschema in schema["properties"].items():
-                if subschema["type"] == "object":
-                    sub_length = len(subschema["properties"])
-                    sub_array = one_d_array_or_dict[index : index + sub_length]
-                    # Create a dict directly for nested properties
-                    sub_obj = dict(zip(subschema["properties"].keys(), sub_array, strict=False))
-                    print(f"Key: {key}, Sub-Object: {sub_obj}")
-                    obj[key] = sub_obj
-                    index += sub_length
-                else:
-                    obj[key] = one_d_array_or_dict[index]
-                    index += 1
-            return cls(**obj)
-
-        raise ValueError("Unsupported schema type for unflattening")
+        """Unflatten a one-dimensional array or dictionary into a Sample instance.
+        
+        If a dictionary is provided, its keys are ignored.
+        
+        Args:
+            one_d_array_or_dict: A one-dimensional array or dictionary to unflatten.
+            schema: A dictionary representing the JSON schema. Defaults to using the class's schema.
+            
+        Returns:
+            Sample: The unflattened Sample instance.
+        
+        Examples:
+            >>> sample = Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
+            >>> flat_list = sample.flatten()
+            >>> print(flat_list)
+            [1, 2, 3, 4, 5]
+            >>> Sample.unflatten(flat_list, sample.schema())
+            Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
+        """
+        if schema is None:
+            schema = replace_refs(cls.model_json_schema())
+        
+        if isinstance(one_d_array_or_dict, dict):
+            flat_data = list(one_d_array_or_dict.values())
+        else:
+            flat_data = list(one_d_array_or_dict)
+        
+        def unflatten_recursive(schema_part, index=0):
+            if schema_part['type'] == 'object':
+                result = {}
+                for prop, prop_schema in schema_part['properties'].items():
+                    value, index = unflatten_recursive(prop_schema, index)
+                    result[prop] = value
+                return result, index
+            elif schema_part['type'] == 'array':
+                items = []
+                for _ in range(schema_part.get('maxItems', len(flat_data) - index)):
+                    value, index = unflatten_recursive(schema_part['items'], index)
+                    items.append(value)
+                return items, index
+            else:  # Assuming it's a primitive type
+                return flat_data[index], index + 1
+        
+        unflattened_dict, _ = unflatten_recursive(schema)
+        return cls(**unflattened_dict)
 
     def flatten(
         self,
@@ -183,7 +205,7 @@ class Sample(BaseModel):
         return accumulator
 
     @staticmethod
-    def to_schema(value: Any) -> dict:
+    def obj_to_schema(value: Any) -> Dict:
         """Generates a simplified JSON schema from a dictionary.
 
         Args:
@@ -193,10 +215,10 @@ class Sample(BaseModel):
             dict: A simplified JSON schema representing the structure of the dictionary.
         """
         if isinstance(value, dict):
-            return {"type": "object", "properties": {k: Sample.to_schema(v) for k, v in value.items()}}
+            return {"type": "object", "properties": {k: Sample.obj_to_schema(v) for k, v in value.items()}}
         if isinstance(value, list | tuple | np.ndarray):
             if len(value) > 0:
-                return {"type": "array", "items": Sample.to_schema(value[0])}
+                return {"type": "array", "items": Sample.obj_to_schema(value[0])}
             return {"type": "array", "items": {}}
         if isinstance(value, str):
             return {"type": "string"}
@@ -208,7 +230,7 @@ class Sample(BaseModel):
             return {"type": "boolean"}
         return {}
 
-    def schema(self, resolve_refs: bool = True, include_descriptions=False) -> dict:
+    def schema(self, resolve_refs: bool = True, include_descriptions=False) -> Dict:
         """Returns a simplified json schema.
 
         Removing additionalProperties,
@@ -218,25 +240,29 @@ class Sample(BaseModel):
         Args:
             schema (dict): A dictionary representing the JSON schema.
             resolve_refs (bool): Whether to resolve references in the schema. Defaults to True.
+            include_descriptions (bool): Whether to include descriptions in the schema. Defaults to False.
 
         Returns:
             dict: A simplified JSON schema.
         """
-        if include_descriptions:
-            schema = self.model_json_schema()
-        else:
-            schema = self.to_schema(self.dict())
-        if resolve_refs:
-            schema = jsonref.replace_refs(schema)
-        if schema.get("additionalProperties", False):
+        schema = self.model_json_schema()
+        if "additionalProperties" in schema:
             del schema["additionalProperties"]
+
+        if resolve_refs:
+            schema = replace_refs(schema)
+            
+        if not include_descriptions and "description" in schema:
+            del schema["description"]
+        
+        properties = schema.get("properties", {})
         for key, value in self.dict().items():
+            if key not in properties:
+                properties[key] = Sample.obj_to_schema(value)
             if isinstance(value, Sample):
-                schema["properties"][key] = Sample.to_schema(value.schema(resolve_refs=resolve_refs))
-            elif isinstance(value, dict | list):
-                schema["properties"][key] = Sample.to_schema(value)
-            if key not in self.model_fields:
-                schema["properties"][key] = Sample.to_schema(value)
+                properties[key] = value.schema( resolve_refs=resolve_refs, include_descriptions=include_descriptions)
+            else:
+               properties[key] = Sample.obj_to_schema(value)
         return schema
 
     @classmethod
@@ -394,7 +420,7 @@ class Sample(BaseModel):
         return cls(d)
 
     @classmethod
-    def from_flat_dict(cls, flat_dict: Dict[str, Any], schema: dict = None) -> "Sample":
+    def from_flat_dict(cls, flat_dict: Dict[str, Any], schema: Dict = None) -> "Sample":
         """Initialize a Sample instance from a flattened dictionary."""
         """
         Reconstructs the original JSON object from a flattened dictionary using the provided schema.
@@ -406,7 +432,7 @@ class Sample(BaseModel):
         Returns:
             dict: The reconstructed JSON object.
         """
-        jsonref.replace_refs(schema)
+        schema = schema or replace_refs(cls.model_json_schema())
         reconstructed = {}
 
         for flat_key, value in flat_dict.items():
@@ -528,6 +554,7 @@ class Sample(BaseModel):
         return self.__class__.model_validate(self.space().sample())
 
 
-class SampleList(Sample):
-    values: List[Sample] = Field(..., min_length=2, max_length=10)
-    numpy: NumpyArray | None = None
+if __name__ == "__main__":
+    sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
+
+    

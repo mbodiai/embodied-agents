@@ -7,19 +7,23 @@ name = "mbodied"
 dynamic = ["version"]
 description = 'Embodied AI'
 readme = "README.md"
-requires-python = ">=3.10, <=3.13"
+requires-python = ">=3.10, <=3.12"
 license = "apache-2.0"
 keywords = []
 authors = [{ name = "Mbodi Team", email = "info@mbodi.ai" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-dependencies = [
+dependencies = []
+
+[project.optional-dependencies]
+agents = [
   "coverage[toml]",
   "toml",
   "pytest",
@@ -45,17 +49,15 @@ dependencies = [
   "gradio_client",
   "xarm-python-sdk",
 ]
-
-[project.optional-dependencies]
-extras = [
+audio = [
   "playsound",
   "pyaudio",
 ]
 
 all = [
-  "open3d",
   "playsound",
   "pyaudio",
+  "open3d",
   "timm",
   "torchvision",
   "wandb",
@@ -80,7 +82,7 @@ allow-direct-references = true
 [tool.hatch.envs.default]
 python = "3.11"
 path = ".mbodied/envs/mbodied"
-dependencies = ["timm", "wandb"]
+
 
 [tool.hatch.envs.default.env-vars]
 

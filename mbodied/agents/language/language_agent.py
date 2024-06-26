@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ def make_context_list(context: list[str | Image | Message] | Image | str | Messa
         return [Message(role="user", content=[context]), Message(role="assistant", content="Understood.")]
     return []
 
-
+    
 class LanguageAgent(Agent):
     """An agent that can interact with users using natural language.
 
@@ -142,6 +142,10 @@ class LanguageAgent(Agent):
             return
         for _ in range(last_n):
             self.forget_last()
+    
+    def history(self) -> List[Message]:
+        """Return the conversation history."""
+        return self.context
 
     def remind_every(self, prompt: str | Image | Message, n: int) -> None:
         """Remind the agent of the prompt every n messages."""
@@ -153,6 +157,24 @@ class LanguageAgent(Agent):
         for reminder, n in self.reminders:
             if len(self.context) % n == 0:
                 self.context.append(reminder)
+    
+    def act_and_parse(self, instruction: str, image: Image = None, parse_target: Sample = Sample, context: list | str | Image | Message = None, model=None, **kwargs) -> Sample:
+        """Responds to the given instruction, image, and context and parses the response into a Sample object."""
+        response = self.act(instruction, image, context, model, **kwargs)
+        response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        try:
+            response = parse_target.model_validate_json(response)
+        except Exception as e:
+            error = f"Error parsing response: {e}"
+            logging.error(error)
+            logging.info(f"Recieved response: {response}. Retrying with error message.")
+            
+            instruction = instruction + "avoid the following error: " + error
+            response = self.act(instruction, image, context, model, **kwargs)
+            response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
+            response = parse_target.model_validate_json(response)
+        return response
+        
 
     def act(
         self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
