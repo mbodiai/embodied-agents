@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import pytest
-from mbodied_agents.agents.backends.anthropic_backend import AnthropicBackend
-from mbodied_agents.types.message import Message
+from mbodied.agents.backends import AnthropicBackend
+from mbodied.types.message import Message
 
 
 mock_anthropic_response = "Anthropic response text"
@@ -49,7 +49,7 @@ def anthropic_backend(anthropic_api_key):
 
 
 def test_anthropic_backend_create_completion(anthropic_backend):
-    response = anthropic_backend.create_completion(Message("hi"), context=[])
+    response = anthropic_backend.act(Message("hi"), context=[])
     assert response == mock_anthropic_response
 
 

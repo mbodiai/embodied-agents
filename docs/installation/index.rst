@@ -3,4 +3,10 @@ Installation
 
 .. code-block:: bash
 
-    $ pip install mbodied-agents
+    $ pip install mbodied
+
+Optional Dependencies
+
+.. code-block:: bash
+
+    $ pip install mbodied[extras]

@@ -11,6 +11,7 @@ Each building block represents a distinct function or service within the Mbodied
    message/index
    backend/index
    language_agent/index
+   motor_agent/index
    controls/index
    hardware_interface/index
    recorder/index

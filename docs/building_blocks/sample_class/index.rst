@@ -4,7 +4,7 @@ The Sample Class
 Overview
 ^^^^^^^^^^^^
 
-The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. By wrapping your observation or action objects in the `Sample <https://github.com/MbodiAI/mbodied-agents/blob/main/src/mbodied_agents/base/sample.py>`_ class, you'll be able to convert to and from the following with ease:
+The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extensible, flexible, and strongly typed. By wrapping your observation or action objects in the `Sample <https://github.com/MbodiAI/mbodied-agents/blob/main/mbodied/base/sample.py>`_ class, you'll be able to convert to and from the following with ease:
 
 - a Gym space for creating a new Gym environment
 - a flattened list, array, or tensor for plugging into an ML model
@@ -89,4 +89,4 @@ Gym Space Integration
    print(gym_space)
    # Output: Dict('action': Box(-inf, inf, (3,), float64), 'observation': Box(-inf, inf, (3,), float64))
 
-See `sample.py <https://github.com/MbodiAI/mbodied-agents/blob/main/src/mbodied_agents/base/sample.py>`_ for more details.
+See `sample.py <https://github.com/MbodiAI/mbodied-agents/blob/main/mbodied/base/sample.py>`_ for more details.

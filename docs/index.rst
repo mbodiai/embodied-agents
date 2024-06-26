@@ -6,7 +6,7 @@
 mbodied agents
 =============================================
 
-**mbodied agents** simplifies the integration of advanced AI models in robotics. It offers a unified platform for controlling various robots using state-of-the-art transformers and multimodal data processing. This toolkit enables experimentation with AI models, dataset collection and augmentation, and model training or finetuning for specific tasks. The goal is to develop intelligent, adaptable robots that learn from interactions and perform complex tasks in dynamic environments.
+**mbodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides a consistent interface for calling different AI models, handling multimodal data, and is configurable to any observation and action space.
 
 .. toctree::
    :maxdepth: 2
@@ -18,7 +18,7 @@ mbodied agents
    concepts/index
    building_blocks/index
    contributing/index
-   .. system_components/index
+   system_components/index
 
 .. raw:: html
 

@@ -1,37 +1,52 @@
 # Contributing Guidelines
 
-## Git Workflow
+## Git Workflow 💻
+Ensure that you use tools like gitlens (preferred), easycode, or write good commit messages for clarity.
+When pulling changes from the main branch, always use `--rebase` or `--ff-only`:
 
-- Always use gitlens (preferred), easycode, or write good commit messages.
-- Try to pull with `--ff-only` or `--rebase` when pulling changes from the `main` branch:
+`git pull --rebase`
 
-```bash
-git pull --rebase
+To set up your Git configuration for a smoother workflow:
 ```
-
-We recommend setting up your Git configuration as:
-
-```bash
 git config --global pull.ff only
 git config --global pull.rebase true
 ```
 
-## 🛠️ Style Guide
-[Optional VS Code Profile](https://vscode.dev/profile/github/dadb33644d0ab9fcdeb1ec686561d070)
 
-#### 1. Run linting with Ruff
+### 🌐 Environment Setup
+
+1. Clone this repo:
+
+   ```console
+   git clone https://github.com/MbodiAI/mbodied-agents.git
+   ```
+
+2. Install system dependencies, we use [hatch](https://hatch.pypa.io/1.12/)
+
+   source install.bash
+   hatch run pip install '.[extras]'
+   ```
+
+3. Then for each new terminal, run:
+
+
+   ```console
+   hatch shell
+   ```
+## 🛠️ Style Guide
+[Optional VS Code Profile With All the Extensions and Shortcuts You Need](https://vscode.dev/profile/github/dadb33644d0ab9fcdeb1ec686561d070)
+
+### 1. Run linting with Ruff 🧹
 Ensure your code is free from linting errors by running Ruff.
 
-#### 2. Organize tests in a dedicated directory 📁
-Create a parallel test file in the `tests/` directory.
-Name each test file with a `test_` prefix.
+### 2. Organize tests in a dedicated directory 📁
+Create a parallel test file in the tests/ directory. Name each test file with a test_ prefix.
 
-#### 3. Naming test functions 📝
-Prefix all test function names with `test_` so Pytest can automatically detect and execute them.
+### 3. Naming test functions 📝
+Prefix all test function names with test_ so Pytest can automatically detect and execute them.
 
-#### 4. Google-style 📚 docstrings with examples 💡
-Use Google-style docstrings to document all public classes, methods, functions, and modules.
-Example:
+### 4. Google-style 📚 docstrings with examples 💡
+Use Google-style docstrings to document all public classes, methods, functions, and modules. Example:
 ```
 def example_function(param1, param2):
     """This is a one-line summary of the function.
@@ -49,15 +64,13 @@ def example_function(param1, param2):
       >>> add(2, 3)
     """
     return True
-```
-
-#### 5. Test Pydantic models 🧪
+```    
+### 5. Test Pydantic models 🧪
 Ensure Pydantic models are thoroughly tested for:
-- JSON serialization
-- Deserialization
-- Saving to h5 files
-Example test cases:
-```python
+```
+JSON serialization
+Deserialization
+Saving to h5 files Example test cases:
 def test_pydantic_model_to_json():
     # Your test code here
     pass
@@ -71,3 +84,4 @@ def test_pydantic_model_save_to_h5():
     pass
 ```
 Following these guidelines will help maintain clean, well-documented, and tested code. Happy coding! 🚀
+

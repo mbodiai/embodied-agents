@@ -10,7 +10,7 @@ Start by creating the main project directory and its subdirectories. This can be
 
 ```bash
 # Navigate into main project directory
-cd mbodied-agents
+cd mbodied
 ```
 #### Step 2: Set Up Python Virtual Environment
 
@@ -48,7 +48,7 @@ Ensure all directories/files you want to include in the documentation have an `_
 ```bash
 
 # Generate .rst files for the modules
-sphinx-apidoc -o . ../src/mbodied_agents
+sphinx-apidoc -o . ../mbodied/
 ```
 
 This command generates `.rst` files in the `docs` directory, creating the documentation structure for your modules.
@@ -69,14 +69,14 @@ docs/
 ├── modules.rst
 ├── main.rst
 ├── README.md
-├── mbodied_agents.agents.backends.rst
-├── mbodied_agents.agents.language.rst
-├── mbodied_agents.agents.rst
-├── mbodied_agents.agents.sense.rst
-├── mbodied_agents.base.rst
-├── mbodied_agents.data.rst
-├── mbodied_agents.hardware.rst
-└── mbodied_agents.types.rst
+├── mbodied.agents.backends.rst
+├── mbodied.agents.language.rst
+├── mbodied.agents.rst
+├── mbodied.agents.sense.rst
+├── mbodied.base.rst
+├── mbodied.data.rst
+├── mbodied.hardware.rst
+└── mbodied.types.rst
 ```
 
 #### Step 6: Configure `conf.py` for Sphinx
@@ -131,11 +131,11 @@ Reorganize the `docs` directory to nest `.rst` files properly and create additio
 
 1. **Move `.rst` files:**
 
-   Move all `mbodied_agents.*.rst` files into the `building_blocks` directory.
+   Move all `mbodied.*.rst` files into the `building_blocks` directory.
 
    ```bash
    mkdir -p docs/building_blocks/{backend,cognitive_agent,controls,hardware_interface,message,recorder,sample_class}
-   mv docs/mbodied_agents.*.rst docs/building_blocks/
+   mv docs/mbodied.*.rst docs/building_blocks/
    ```
 
 2. **Create new directories and move `index.rst`:**
@@ -151,19 +151,19 @@ Reorganize the `docs` directory to nest `.rst` files properly and create additio
    Edit `modules.rst` to include a table of contents for the main project.
 
    ```plaintext
-   mbodied_agents
+   mbodied
    ==============
 
    .. toctree::
       :maxdepth: 4
 
-      mbodied_agents
+      mbodied
    ```
 
-4. **Rename `main.rst` to `mbodied_agents.rst`:**
+4. **Rename `main.rst` to `mbodied.rst`:**
 
    ```bash
-   mv docs/main.rst docs/mbodied_agents.rst
+   mv docs/main.rst docs/mbodied.rst
    ```
 
 5. **Ensure each new directory has an `index.rst` file:**
@@ -228,15 +228,15 @@ Ensure the full directory structure is correct by comparing it here:
 │   ├── glossary
 │   │   └── index.rst
 │   ├── index.rst
-│   ├── mbodied_agents.agents.backends.rst
-│   ├── mbodied_agents.agents.language.rst
-│   ├── mbodied_agents.agents.rst
-│   ├── mbodied_agents.agents.sense.rst
-│   ├── mbodied_agents.base.rst
-│   ├── mbodied_agents.data.rst
-│   ├── mbodied_agents.hardware.rst
-│   ├── mbodied_agents.rst
-│   ├── mbodied_agents.types.rst
+│   ├── mbodied.agents.backends.rst
+│   ├── mbodied.agents.language.rst
+│   ├── mbodied.agents.rst
+│   ├── mbodied.agents.sense.rst
+│   ├── mbodied.base.rst
+│   ├── mbodied.data.rst
+│   ├── mbodied.hardware.rst
+│   ├── mbodied.rst
+│   ├── mbodied.types.rst
 │   ├── installation
 │   │   └── index.rst
 │   ├── make.bat
@@ -253,7 +253,7 @@ Ensure the full directory structure is correct by comparing it here:
 │   ├── locobot.jpeg
 │   └── xarm.jpeg
 ├── src
-│   └── mbodied_agents
+│   └── mbodied
 │       ├── __about__.py
 │       ├── __init__.py
 │       ├── __pycache__

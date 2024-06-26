@@ -8,19 +8,20 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../src'))
 
-project = 'Mbodied Agents'
-copyright = '2024, Mbodi AI team'
-author = 'Mbodi AI team'
+sys.path.insert(0, os.path.abspath("../mbodied"))
+
+project = "Mbodied Agents"
+copyright = "2024, Mbodi AI team"
+author = "Mbodi AI team"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx.ext.napoleon"]
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------

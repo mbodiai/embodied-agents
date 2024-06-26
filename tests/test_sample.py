@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,8 @@ import h5py
 import os
 import tempfile
 
-from mbodied_agents.data.recording import Recorder
-from mbodied_agents.base.sample import Sample
+from mbodied.data.recording import Recorder
+from mbodied.base.sample import Sample
 
 
 def test_from_dict():
@@ -56,22 +56,19 @@ def test_to_dict():
 def test_serialize_nonstandard_types():
     data = {"array": np.array([1, 2, 3])}
     sample = Sample(**data)
-    assert np.array_equal(
-        sample.array, [1, 2, 3]), "Numpy arrays should work fine"
+    assert np.array_equal(sample.array, [1, 2, 3]), "Numpy arrays should work fine"
 
 
 def test_structured_flatten():
     nested_data = {"key1": 1, "key2": [2, 3, 4], "key3": {"nested_key": 5}}
     sample = Sample(**nested_data)
     flat_list = sample.flatten("list")
-    assert sorted(flat_list) == [
-        1, 2, 3, 4, 5], "Flat list should contain all values from the structure"
+    assert sorted(flat_list) == [1, 2, 3, 4, 5], "Flat list should contain all values from the structure"
 
 
 def test_unpack_as_dict():
     # Scenario with asdict=True
-    data = {"key1": [1, 2, 3], "key2": ["a", "b", "c"],
-            "key3": [[1, 2], [3, 4], [5, 6]]}
+    data = {"key1": [1, 2, 3], "key2": ["a", "b", "c"], "key3": [[1, 2], [3, 4], [5, 6]]}
     sample = Sample(**data)
     unpacked = sample.unpack(to_dicts=True)
 
@@ -86,21 +83,16 @@ def test_unpack_as_dict():
 
 def test_unpack_as_sample_instances():
     # Scenario with asdict=False
-    data = {"key1": [4, 5, 6], "key2": ["d", "e", "f"],
-            "key3": [[7, 8], [9, 10], [11, 12]]}
+    data = {"key1": [4, 5, 6], "key2": ["d", "e", "f"], "key3": [[7, 8], [9, 10], [11, 12]]}
     sample = Sample(**data)
     unpacked = sample.unpack(to_dicts=False)
 
     # Validate each unrolled item
     for idx, item in enumerate(unpacked):
-        assert isinstance(
-            item, Sample), "Unrolled item is not a Sample instance"
-        assert item.key1 == data["key1"][
-            idx], f"Unrolled item key1 does not match expected value for index {idx}"
-        assert item.key2 == data["key2"][
-            idx], f"Unrolled item key2 does not match expected value for index {idx}"
-        assert item.key3 == data["key3"][
-            idx], f"Unrolled item key3 does not match expected value for index {idx}"
+        assert isinstance(item, Sample), "Unrolled item is not a Sample instance"
+        assert item.key1 == data["key1"][idx], f"Unrolled item key1 does not match expected value for index {idx}"
+        assert item.key2 == data["key2"][idx], f"Unrolled item key2 does not match expected value for index {idx}"
+        assert item.key3 == data["key3"][idx], f"Unrolled item key3 does not match expected value for index {idx}"
 
 
 @pytest.fixture
@@ -131,14 +123,12 @@ def tmp_path():
 
 def test_space_for_list_attribute(sample_instance: Sample):
     space = sample_instance.space()
-    assert isinstance(
-        space.spaces["list_attr"], spaces.Box), "List attribute should correspond to a Box space"
+    assert isinstance(space.spaces["list_attr"], spaces.Box), "List attribute should correspond to a Box space"
 
 
 def test_space_for_dict_attribute(sample_instance: Sample):
     space = sample_instance.space()
-    assert isinstance(
-        space.spaces["dict_attr"], spaces.Dict), "Dict attribute should correspond to a Dict space"
+    assert isinstance(space.spaces["dict_attr"], spaces.Dict), "Dict attribute should correspond to a Dict space"
 
 
 def test_space(sample_instance: Sample):
@@ -153,8 +143,7 @@ def test_space(sample_instance: Sample):
         "list_of_samples_attr",
         "sample_attr",
     }
-    assert set(space.spaces.keys(
-    )) == expected_keys, "Space should include all attributes of the sample instance"
+    assert set(space.spaces.keys()) == expected_keys, "Space should include all attributes of the sample instance"
 
 
 def test_serialize_deserialize():
@@ -175,9 +164,9 @@ def test_recorder_record_and_save(sample_instance: Sample, tmp_path: str):
 
     recorder.close()
 
-    with h5py.File(f'{tmp_path}/test_recorder.h5', 'r') as f:
-        assert 'observation' in f, "Observation group should be present in the HDF5 file"
-        assert 'supervision' in f, "Action group should be present in the HDF5 file"
+    with h5py.File(f"{tmp_path}/test_recorder.h5", "r") as f:
+        assert "observation" in f, "Observation group should be present in the HDF5 file"
+        assert "supervision" in f, "Action group should be present in the HDF5 file"
 
     with h5py.File(f"{tmp_path}/test_recorder.h5", "r") as f:
         assert "observation" in f, "Observation group should be present in the HDF5 file"
@@ -212,8 +201,8 @@ def test_unflatten_numeric_only():
         y: str = "default"
         z: AnotherSample
         another_number: float
-    sample = DerivedSample(x=1, y="hello", z=AnotherSample(
-        **{"a": 3, "b": "world"}), another_number=5)
+
+    sample = DerivedSample(x=1, y="hello", z=AnotherSample(**{"a": 3, "b": "world"}), another_number=5)
 
     flat_list = sample.flatten(output_type="list")
     unflattened_sample = DerivedSample.unflatten(flat_list, sample.schema())

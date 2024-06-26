@@ -91,7 +91,7 @@ fi
 if [[ -z "$CI" ]]; then
   # shellcheck disable=SC1091
    hatch run echo "Sourcing environment..."
-  source .mbodied_agents/envs/mbodied_agents/bin/activate
+  source .mbodied/envs/mbodied/bin/activate
 else
   echo "CI environment detected. Skipping sourcing of environment."
 fi

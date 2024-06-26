@@ -1,6 +1,11 @@
 import pytest
 
-from mbodied_agents.types.language_controls import LangControl, MobileSingleArmLangControl, language_control_to_list, get_command_from_string
+from mbodied.types.language_controls import (
+    LangControl,
+    MobileSingleArmLangControl,
+    language_control_to_list,
+    get_command_from_string,
+)
 
 
 def test_enum_members():
@@ -34,7 +39,7 @@ def test_enum_iteration():
         "MOVE_HAND_LEFT": "move hand left",
         "MOVE_HAND_RIGHT": "move hand right",
         "MOVE_HAND_UP": "move hand up",
-        "MOVE_HAND_DOWN": "move hand down"
+        "MOVE_HAND_DOWN": "move hand down",
     }
 
     for command in LangControl:
@@ -128,7 +133,7 @@ def test_mobile_single_arm_lang_control():
         "PITCH_HAND_DOWN_A_LOT": "pitch hand down a lot",
         "ROTATE_WAIST_LEFT_A_LOT": "rotate waist left a lot",
         "ROTATE_WAIST_RIGHT_A_LOT": "rotate waist right a lot",
-        "SLEEP": "sleep"
+        "SLEEP": "sleep",
     }
 
     for command in MobileSingleArmLangControl:
@@ -147,11 +152,29 @@ def test_get_command_from_string():
 def test_language_control_to_list():
     # Test converting LangControl Enum to a list of its values
     expected_list = [
-        "start", "stop", "restart", "pause", "resume", "sleep", "go home",
-        "move forward", "move backward", "turn left", "turn right",
-        "look up", "look down", "look left", "look right",
-        "open hand", "close hand", "move hand forward", "move hand backward",
-        "move hand left", "move hand right", "move hand up", "move hand down"
+        "start",
+        "stop",
+        "restart",
+        "pause",
+        "resume",
+        "sleep",
+        "go home",
+        "move forward",
+        "move backward",
+        "turn left",
+        "turn right",
+        "look up",
+        "look down",
+        "look left",
+        "look right",
+        "open hand",
+        "close hand",
+        "move hand forward",
+        "move hand backward",
+        "move hand left",
+        "move hand right",
+        "move hand up",
+        "move hand down",
     ]
     assert language_control_to_list(LangControl) == expected_list
 
