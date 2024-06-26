@@ -20,10 +20,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-dependencies = []
-
-[project.optional-dependencies]
-agents = [
+dependencies = [
   "coverage[toml]",
   "toml",
   "pytest",
@@ -32,12 +29,12 @@ agents = [
   "pillow",
   "numpy==1.26.4",
   "opencv-python",
+  "pydantic_numpy==5.0.2",
   "anthropic",
   "openai",
   "anthropic",
   "backoff",
   "pydantic",
-  "pydantic_numpy==5.0.2",
   "torch",
   "h5py",
   "click",
@@ -48,6 +45,12 @@ agents = [
   "gradio",
   "gradio_client",
   "xarm-python-sdk",
+]
+
+[project.optional-dependencies]
+agents = [
+  "playsound",
+  "pyaudio",
 ]
 audio = [
   "playsound",
