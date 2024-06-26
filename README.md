@@ -47,17 +47,13 @@ Jump to [getting started](#getting-started) to get up and running on [real hardw
     - [Limitations](#limitations)
     - [Scope](#scope)
     - [Features](#features)
-    - [Example Use Case:](#example-use-case)
     - [Endpoints](#endpoints)
     - [Support Matrix](#support-matrix)
     - [To Do](#to-do)
   - [Installation](#installation)
   - [Getting Started](#getting-started)
-    - [Real Robot Hardware](#real-robot-hardware)
-    - [Simulation](#simulation)
-    - [Motor Agent example using OpenVLA](#motor-agent-example-using-openvla)
-  - [The Sample class](#the-sample-class)
-    - [The Sample class](#the-sample-class-1)
+    - [Notebooks](#notebooks)
+    - [The Sample class](#the-sample-class)
     - [Next Steps](#next-steps)
       - [Creating a Sample](#creating-a-sample)
       - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
@@ -127,24 +123,6 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - Full-compatiblity with HuggingFace Spaces, Datasets, Gymnasium Spaces, Ollama, and any OpenAI-compatible api.
 - Automatic dataset-recording and optionally uploads dataset to huggingface hub.
 
-### Example Use Case:
-
-**Local Thread**
-
-- Audio agent listens for a keyword.
-- YOLO agent processes camera input and produces bounding boxes.
-- Classical MPC module ensures commands don't violate constraints.
-
-**API Services**
-
-- Text-to-speech service further processes natural language input.
-- GPU-accelerated 3D object pose detection
-- GPT-4o for high-level plan generation
-
-**Remote Thread**
-
-- Custom proprietary model continually-learning through RLHF.
-
 ### Endpoints
 
 - [OpenVLA](https://api.mbodi.ai/community-models/)
@@ -169,10 +147,6 @@ pip install mbodied[agents]
 ```
 
 ## Getting Started
-
-### Real Robot Hardware
-
-Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing)
 
 Script: [examples/simple_robot_agent.py](examples/simple_robot_agent.py)
 
@@ -239,17 +213,13 @@ for instruction in plan.strip("[]").split(","):
     hardware_interface.do(response)
 ```
 
-### Simulation
+### Notebooks
 
-Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing)
+Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing)
 
-To learn more about **SimplerEnv**, please visit [![GitHub](https://img.shields.io/badge/GitHub-SimplerEnv-blue?logo=github)](https://github.com/simpler-env/SimplerEnv.git)
+Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing)
 
-### Motor Agent example using OpenVLA
-
-Run OpenVLA as Motor Agent on robot in several lines: [examples/minimal_openvla_agent.py](examples/minimal_openvla_agent.py)
-
-## The Sample class
+MotorAgent with OpenVLA: [examples/motor_example_openvla.py](examples/motor_example_openvla.py)
 
 ### The [Sample](mbodied/base/sample.py) class
 
@@ -261,8 +231,11 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
 
 ### Next Steps
+
+To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
+
 <details><summary>
-To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest/).
+More tutorials and examples
 </summary>
 
 #### Creating a Sample
