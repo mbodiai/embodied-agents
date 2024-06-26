@@ -163,7 +163,7 @@ Run OpenVLA as Motor Agent on robot in several lines: [examples/minimal_openvla_
 
 ## Building Blocks
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">The Sample class</h3></summary>
+<details> <summary><h3 style="display: inline-block;">The Sample class</h3></summary>
 
 The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extendable, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](mbodied/base/sample.py) class, you'll be able to convert to and from the following with ease:
 
@@ -265,7 +265,7 @@ See [sample.py](mbodied/base/sample.py) for more details.
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Message</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Message</h3></summary>
 
 The [Message](mbodied/types/message.py) class represents a single completion sample space. It can be text, image, a list of text/images, Sample, or other modality. The Message class is designed to handle various types of content and supports different roles such as user, assistant, or system.
 
@@ -279,19 +279,19 @@ Message(role="user", content=[Sample("Hello")])
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Backend</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Backend</h3></summary>
 
 The [Backend](mbodied/base/backend.py) class is an abstract base class for Backend implementations. It provides the basic structure and methods required for interacting with different backend services, such as API calls for generating completions based on given messages. See [backend directory](mbodied/agents/backends) on how various backends are implemented.
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Agent</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Agent</h3></summary>
 
 [Agent](mbodied/base/agent.py) is the base class for various agents listed below. It provides a template for creating agents that can talk to a remote backend/server and optionally record their actions and observations.
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Language Agent</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Language Agent</h3></summary>
 
 The [Language Agent](mbodied/agents/language/language_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
@@ -325,34 +325,34 @@ response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Motor Agent</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Motor Agent</h3></summary>
 
 [Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
 Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](mbodied/agents/motion/openvla_example_server.py)
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Sensory Agent</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Sensory Agent</h3></summary>
 
-These agents interact with the environment to collect sensory data. They always return a ``SensorReading``, which can be various forms of processed sensory input such as images, depth data, or audio signals.
+These agents interact with the environment to collect sensory data. They always return a `SensorReading`, which can be various forms of processed sensory input such as images, depth data, or audio signals.
 
 For example, [object_pose_estimator_3d](mbodied/agents/sense/object_pose_estimator_3d.py) is a sensory agent that senses objects' 3d coordinates as the robot sees.
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Motion Controls</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Motion Controls</h3></summary>
 
 The [motion_controls](mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Hardware Interface</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Hardware Interface</h3></summary>
 
 Mapping robot actions from a model to an action is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](mbodied/hardware/xarm_interface.py) as an example.
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Recorder</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Recorder</h3></summary>
 
 Dataset [Recorder](mbodied/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
 
@@ -372,7 +372,7 @@ The dataset is saved to `./saved_datasets`. Learn more about augmenting, and fin
 
 </details>
 
-<details> <summary><h3 style="display: inline-block; margin-bottom: 5px;">Dataset Replayer</h3></summary>
+<details> <summary><h3 style="display: inline-block;">Dataset Replayer</h3></summary>
 
 The [Replayer](mbodied/data/replaying.py) class is designed to process and manage data stored in HDF5 files generated by `Recorder`. It provides a variety of functionalities, including reading samples, generating statistics, extracting unique items, and converting datasets for use with HuggingFace. The Replayer also supports saving specific images during processing and offers a command-line interface for various operations.
 
