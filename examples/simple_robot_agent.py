@@ -116,7 +116,7 @@ def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset
         recorder=record_dataset,  # Pass in "default" to recorder to record the dataset automatically.
     )
 
-    hatdware_interface = SimInterface()
+    hardware_interface = SimInterface()
 
     if disable_audio:
         os.environ["NO_AUDIO"] = "1"
@@ -142,7 +142,7 @@ def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset
 
         # Execute the actions with the robot interface.
         for action in answer_actions.actions:
-            hatdware_interface.do(action)
+            hardware_interface.do(action)
 
 
 if __name__ == "__main__":

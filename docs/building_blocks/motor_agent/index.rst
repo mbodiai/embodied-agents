@@ -12,4 +12,4 @@ See `OpenVLA Agent <mbodied/agents/motion/openvla_agent.py>`_ and an `example Op
 
     motor_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/") # OpenVLA model
     hand_control = motor_agent.act("move left", image)
-    hatdware_interface.do(hand_control)
+    hardware_interface.do(hand_control)
