@@ -41,51 +41,25 @@ To record:
     ...     },
     ...     action=answer_actions,
     ... )
+    >>> recorder.push_to_hub()
 """
 
 import os
 from pathlib import Path
-from pydantic import Field
+
 import click
 from gymnasium import spaces
+from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.agents.sense.audio.audio_handler import AudioHandler
+from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
 from mbodied.base.sample import Sample
 from mbodied.data.recording import Recorder
 from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.motion_controls import HandControl
-from mbodied.types.sense.vision import Image
 from mbodied.types.message import Message
-
-
-class AnswerAndActionsList(Sample):
-    """A customized pydantic type for the robot's reply and actions."""
-
-    answer: str | None = Field(
-        default="",
-        description="Short, one sentence answer to the user's question or request.",
-    )
-    actions: list[HandControl] | None = Field(
-        default=[],
-        description="List of actions to be taken by the robot.",
-    )
-
-
-# This prompt is used to provide context to the LanguageAgent.
-initial_message = f"""You are a robot with vision capabilities.
-    For each task given, you respond in JSON format. Here's the JSON schema:
-    {AnswerAndActionsList.model_json_schema()}"""
-CONTEXT = [
-    Message(role="user", content=initial_message),
-    Message(role="assistant", content="Understood!"),
-]
-
-
-def get_image_from_camera() -> Image:
-    """Get an image from the camera. Using a static example here."""
-    resource = Path("resources") / "xarm.jpeg"
-    return Image(resource, size=(224, 224))
+from mbodied.types.motion_controls import FullJointControl, HandControl, JointControl
+from mbodied.types.sense.vision import Image
 
 
 @click.command("hri")
@@ -95,54 +69,66 @@ def get_image_from_camera() -> Image:
 @click.option("--backend_api_key", default=None, help="The API key for the backend, i.e. OpenAI, Anthropic")
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
 @click.option(
-    "--record_dataset", default="default", help="Recording action to take", type=click.Choice(["default", "omit"])
+    "--record_dataset", default="auto", help="Recording action to take", type=click.Choice(["auto", "omit"])
 )
 def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset: bool) -> None:
-    """Example for using LLMs for robot control. In this example, the language agent will perform double duty as both the cognitive and motor agent.
+    os.environ["NO_AUDIO"] = "1" if disable_audio else "0"
 
-    Args:
-        backend: The backend to use for the LanguageAgent (e.g., "openai").
-        disable_audio: If True, disables audio input/output.
-        record_dataset: If True, enables recording of the interaction data for training.
-
-    Example:
-        To run the script with OpenAI backend and disable audio:
-        python script.py --backend openai --disable_audio
-    """
-    cognitive_agent = LanguageAgent(
-        context=CONTEXT,
-        api_key=backend_api_key,
-        model_src=backend,
-        recorder=record_dataset,  # Pass in "default" to recorder to record the dataset automatically.
+    # Customize a  Motion by adding or overriding fields.
+    class FineGrainedHandControl(HandControl):
+        """Custom HandControl with an additional field."""
+        comment: str = Field(None, description="A comment to voice aloud.")
+        
+        # Any attempted validation will fail if the bounds are not satisfied.
+        index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+        thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+    
+    # Define the observation and action spaces.
+    observation_space = spaces.Dict(
+        {
+            "image": Image(size=(224, 224)).space(),
+            "instruction": spaces.Text(1000),
+        },
     )
+    action_space = FineGrainedHandControl().space()
+        
+    system_prompt = """You are a robot with vision capabilities. 
+    For each task given, you respond with a plan of actions as a json list."""
 
-    hardware_interface = SimInterface()
+    cognition = LanguageAgent(context=system_prompt, api_key=backend_api_key, model_src=backend)
+    
+    system_prompt = f"""You control a robot's hand based on the instructions given and the image provided.
+        You always respond with an action of the form: {FineGrainedHandControl.model_json_schema()}.
+   """ # Descriptions are taken from the docstrings or MotionField arguments.
 
-    if disable_audio:
-        os.environ["NO_AUDIO"] = "1"
-    # Prefer to use use_pyaudio=False for MAC.
-    audio = AudioHandler(use_pyaudio=False)
+    # Use a language agent as a motor agent proxy.
+    motion = LanguageAgent(
+        context=Message(role="system", content=system_prompt),
+        model_src=backend,
+        recorder="auto",
+        recorder_kwargs={"observation_space": observation_space, "action_space": action_space},
+    )
+    
+    # Subclass HardwareInterface and implement the do() method for your specific hardware.
+    hardware_interface = SimInterface() 
+    audio = AudioHandler(use_pyaudio=False) # PyAudio is buggy on Mac.
+    
+    # Recieve inputs.
+    image = Image(Path("resources") / "xarm.jpeg")
+    instruction = audio.listen()
+    
+    # Get the plan.
+    plan = cognition.act(instruction, image)
 
-    while True:
-        instruction = audio.listen()
-        print("Instruction:", instruction)  # noqa
-        image = get_image_from_camera()
-        response = cognitive_agent.act_and_record(instruction, image)
-
-        # Since we are using the language agent as a motor agent here, we'll have to parse the strings.
-        response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
-
+    for instruction in plan.strip("[]").split(","):
         # Pydantic de-serializes and validates json under the hood.
-        answer_actions = AnswerAndActionsList.model_validate_json(response)
-        print("Response:", answer_actions)  # noqa
+        response = motion.act_and_parse(instruction, image, parse_target=FineGrainedHandControl)
 
-        # Let the robot speak.
-        if answer_actions.answer:
-            audio.speak(answer_actions.answer)
-
-        # Execute the actions with the robot interface.
-        for action in answer_actions.actions:
-            hardware_interface.do(action)
+        # Listen to the robot's reasoning.
+        if response.comment:
+            audio.speak(response.comment)
+        
+        hardware_interface.do(response)
 
 
 if __name__ == "__main__":

@@ -78,7 +78,6 @@ the complexity of integrating multiple models across different modalities is a s
 hobbyists, and developers. This library aims to address these challenges by providing a simple, extensible, and efficient way to
 integrate large models into existing robot stacks.
 
-
 ### Goals
 
 Facillitate data-collection and sharing among roboticists.
@@ -91,7 +90,6 @@ We aim to achieve this by:
 3. Ensuring that this library is observation and action-space agnostic, allowing it to be used with any robot stack.
 
 Beyond just improved robustness and consistency, this architecture makes asynchronous and remote agent execution exceedingly simple. In particular we demonstrate how responsive natural language interactions can be achieved in under 10 lines of Python code.
-
 
 ### Limitations
 
@@ -144,7 +142,12 @@ pip install mbodied[audio]
 
 ## Getting Started
 
-Script: [examples/simple_robot_agent.py](examples/simple_robot_agent.py)
+Example Scripts:
+
+- [examples/simple_robot_agent.py](examples/simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output actions.
+- [examples/simple_robot_agent_layered.py](examples/simple_robot_agent_layered.py): Layered languaged based cognitive agent and motor agent executing task.
+- [examples/motor_example_openvla.py](examples/motor_example_openvla.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
+- [examples/reason_plan_act_robot.py](examples/reason_plan_act_robot.py): Layered language based cognitive agent and OpenVLA motor agent executing task.
 
 ### Notebooks
 
