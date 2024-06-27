@@ -58,6 +58,7 @@
     - [To Do](#to-do)
   - [Installation](#installation)
   - [Getting Started](#getting-started)
+    - [Customize a Motion to fit a robot's action space.](#customize-a-motion-to-fit-a-robots-action-space)
     - [Run a robotics transformer model on a robot.](#run-a-robotics-transformer-model-on-a-robot)
     - [Notebooks](#notebooks)
   - [The Sample Class and Building Blocks](#the-sample-class-and-building-blocks)
@@ -158,6 +159,20 @@ pip install mbodied[audio]
 
 ## Getting Started
 
+### Customize a Motion to fit a robot's action space.
+
+```python
+from mbodied.types.motion_controls import HandControl, FullJointControl
+from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
+
+    class FineGrainedHandControl(HandControl):
+        comment: str = Field(None, description="A comment to voice aloud.")
+        
+        # Any attempted validation will fail if the bounds and shape are not satisfied.
+        index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+        thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+```
+
 ### Run a robotics transformer model on a robot.
 
 ```python
@@ -213,9 +228,10 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A HuggingFace dataset with semantic search capabilities.
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
 
+To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
+
 <details> <summary><h3 style="display: inline-block;">More Details</h3></summary>
 
-To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
 
 #### Creating a Sample
 
