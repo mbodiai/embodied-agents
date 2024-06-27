@@ -54,10 +54,6 @@
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
-Jump to [getting started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) or [simulation](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing). Be sure to join our [Discord](https://discord.gg/BPQ7FEGxNb) for 🥇-winning discussions :)
-
-**⭐ Give us a star on GitHub if you like us!**
-
 ## Overview
 
 This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of the central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent has an `act` method that can be overriden and satisfies:
@@ -69,6 +65,10 @@ This repository is broken down into 3 main components: **Agents**, **Data**, and
 A call to `act` can perform local or remote inference, and can be asynchronous or synchronous. Remote execution is performed with [Gradio](https://www.gradio.app/docs/python-client/introduction) or [httpx](https://www.python-httpx.org/) and validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
+
+Jump to [getting started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) or [simulation](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing). Be sure to join our [Discord](https://discord.gg/BPQ7FEGxNb) for 🥇-winning discussions :)
+
+**⭐ Give us a star on GitHub if you like us!**
 
 ### Motivation
 
