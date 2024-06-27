@@ -3,17 +3,18 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mbodied-agents"
+name = "mbodied"
 dynamic = ["version"]
 description = 'Embodied AI'
 readme = "README.md"
-requires-python = ">=3.10, <=3.13"
+requires-python = ">=3.10, <=3.12"
 license = "apache-2.0"
 keywords = []
 authors = [{ name = "Mbodi Team", email = "info@mbodi.ai" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
@@ -28,12 +29,12 @@ dependencies = [
   "pillow",
   "numpy==1.26.4",
   "opencv-python",
+  "pydantic_numpy==5.0.2",
   "anthropic",
   "openai",
   "anthropic",
   "backoff",
   "pydantic",
-  "pydantic_numpy==5.0.2",
   "torch",
   "h5py",
   "click",
@@ -47,15 +48,19 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-extras = [
+
+audio = [
   "playsound",
   "pyaudio",
 ]
 
 all = [
-  "open3d",
   "playsound",
   "pyaudio",
+  "open3d",
+  "timm",
+  "torchvision",
+  "wandb",
 ]
 
 [project.urls]
@@ -66,17 +71,18 @@ Source = "https://github.com/mbodiai/mbodied-agents"
 [project.scripts]
 
 [tool.hatch.version]
-path = "src/mbodied_agents/__about__.py"
+path = "mbodied/__about__.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel.force-include]
-"resources" = "mbodied_agents/resources"
+"resources" = "mbodied/resources"
 
 [tool.hatch.envs.default]
 python = "3.11"
-path = ".mbodied_agents/envs/mbodied_agents"
+path = ".mbodied/envs/mbodied"
+
 
 [tool.hatch.envs.default.env-vars]
 
@@ -101,16 +107,16 @@ python = ["3.10", "3.11", "3.12"]
 [tool.hatch.envs.types]
 dependencies = ["mypy>=1.0.0"]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/mbodied_agents tests}"
+check = "mypy --install-types --non-interactive {args:mbodied/ tests}"
 
 [tool.coverage.run]
-source_pkgs = ["mbodied_agents", "tests"]
+source_pkgs = ["mbodied", "tests"]
 branch = true
 parallel = true
-omit = ["src/mbodied_agents/__about__.py"]
+omit = ["mbodied/__about__.py"]
 
 [tool.coverage.paths]
-mbodied = ["src/mbodied_agents", "mbodied_agents"]
+mbodied = ["mbodied/"]
 tests = ["tests"]
 
 [tool.coverage.report]

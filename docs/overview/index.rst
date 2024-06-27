@@ -1,41 +1,66 @@
 Overview
-================
+========
 
-**mbodied agents** offers the following features:
+.. image:: ../../assets/architecture.jpg
+   :alt: Architecture Diagram
+   :width: 700px
 
-- Configurability : Define your desired Observation and Action spaces and read data into the format that works best for your system.
+Motivation
+----------
 
-- Natural Language Control : Use verbal prompts to correct a cognitive agent's actions and calibrate its behavior to a new environment.
+It is currently unrealistic to run state-of-the-art AI models on edge devices for responsive, real-time applications. Furthermore, the complexity of integrating multiple models across different modalities is a significant barrier to entry for many researchers, hobbyists, and developers. This library aims to address these challenges by providing a simple, extensible, and efficient way to integrate large models into existing robot stacks.
 
-- Modularity : Easily swap out different backends, transformers, and hardware interfaces. For even better results, run multiple agents in separate threads.
+Goals
+-----
 
-- Validation : Ensure that your data is in the correct format and that your actions are within the correct bounds before sending them to the robot.
+Facilitate data-collection and sharing among roboticists by reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availability.
 
-Support Matrix
-^^^^^^^^^^^^^^^
+We aim to achieve this by:
 
-If you would like to integrate a new backend, sense, or motion control, it is very easy to do so. Please refer to the `contributing guide <https://github.com/MbodiAI/mbodied-agents/blob/main/CONTRIBUTING.md>`_ for more information.
+1. Providing simple, Python-first abstractions that are modular, extensible and applicable to a wide range of tasks.
+2. Providing endpoints, weights, and interactive Gradio playgrounds for easy access to state-of-the-art models.
+3. Ensuring that this library is observation and action-space agnostic, allowing it to be used with any robot stack.
 
-- OpenAI
-- Anthropic
-- Mbodi (Coming Soon)
-- HuggingFace (Coming Soon)
-- Gemini (Coming Soon)
+Beyond just improved robustness and consistency, this architecture makes asynchronous and remote agent execution exceedingly simple. In particular, we demonstrate how responsive natural language interactions can be achieved in under 10 lines of Python code.
 
-In Beta
-^^^^^^^^
+Scope
+-----
 
-For access (or just to say hey 😊), don't hesitate to fill out this `form <https://forms.gle/rv5rovK93dLucma37>`_ or reach out to us at info@mbodi.ai.
+- This library is intended to be used for research and prototyping.
+- This library is still experimental and under active development. Breaking changes may occur although they will be avoided as much as possible. Feel free to report issues!
 
-- **Conductor**: A service for processing and managing datasets, and automatically training your models on your own data.
+Limitations
+-----------
 
-- **Conductor Dashboard**: See how GPT-4o, Claude Opus, or your custom models are performing on your datasets and open benchmarks.
+*Agents are not yet capable of learning from experience*:
 
-- **Data Augmentation**: Build invariance to different environments by augmenting your dataset with Mbodi's diffusion-based data augmentation to achieve better generalization.
+- Frameworks for advanced RAG techniques are clumsy at best for OOD embodied applications, however, that may improve.
+- The amount of data required for fine-tuning is still prohibitively large and expensive to collect.
+- Online RL is still in its infancy and not yet practical for most applications.
 
-- **Mbodied SVLM**: A new Spatial Vision Language Model trained specifically for spatial reasoning and robotics control.
+Features
+--------
 
-Idea
-^^^^^^
+- User-friendly python SDK with explicit typing and modularity.
+- Asynchronous and remote thread-safe agent execution for maximal responsiveness and scalability.
+- Full-compatibility with HuggingFace Spaces, Datasets, Gymnasium Spaces, Ollama, and any OpenAI-compatible API.
+- Automatic dataset-recording and optionally uploads dataset to the HuggingFace hub.
 
-The core idea behind **mbodied agents** is end-to-end continual learning. We believe that the best way to train a robot is to have it learn from its own experiences.
+Example Use Case
+----------------
+
+**Local Thread**
+
+- Audio agent listens for a keyword.
+- YOLO agent processes camera input and produces bounding boxes.
+- Classical MPC module ensures commands don't violate constraints.
+
+**API Services**
+
+- Text-to-speech service further processes natural language input.
+- GPU-accelerated 3D object pose detection.
+- GPT-4o for high-level plan generation.
+
+**Remote Thread**
+
+- Custom proprietary model continually-learning through RLHF.

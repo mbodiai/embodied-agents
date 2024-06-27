@@ -1,4 +1,4 @@
-# Copyright 2024 Mbodi AI
+# Copyright 2024 mbodi ai
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,37 +12,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import logging
+"""Run a LanguageAgent with memory, optional remote acting, and optional automatic dataset creation capabilities.
 
+While it is always recommended to explicitly define your observation and action spaces,
+which can be set with a gym.Space object or any python object using the Sample class
+(see examples/using_sample.py for a tutorial), you can have the recorder infer the spaces
+by setting recorder="default" for automatic dataset recording.
+
+For example:
+    >>> agent = LanguageAgent(context=SYSTEM_PROMPT, model_src=backend, recorder="default")
+    >>> agent.act_and_record("pick up the fork", image)
+
+Alternatively, you can define the recorder separately to record the space you want.
+For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action:
+    >>> observation_space = spaces.Dict({"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)})
+    >>> action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
+    >>> recorder = Recorder(
+    ...     'example_recorder',
+    ...     out_dir='saved_datasets',
+    ...     observation_space=observation_space,
+    ...     action_space=action_space
+
+To record:
+    >>> recorder.record(
+    ...     observation={
+    ...         "image": image,
+    ...         "instruction": instruction,
+    ...     },
+    ...     action=answer_actions,
+    ... )
+"""
+
+import os
+from pathlib import Path
+from pydantic import Field
 import click
-from pydantic import BaseModel, Field
-from pydantic_core import from_json
 from gymnasium import spaces
 
-from mbodied_agents.agents.language import LanguageAgent
-from mbodied_agents.agents.sense.audio.audio_handler import AudioHandler
-from mbodied_agents.base.sample import Sample
-from mbodied_agents.hardware.sim_interface import SimInterface
-from mbodied_agents.types.controls import HandControl
-from mbodied_agents.types.sense.vision import Image
-from mbodied_agents.data.recording import Recorder
+from mbodied.agents.language import LanguageAgent
+from mbodied.agents.sense.audio.audio_handler import AudioAgent
+from mbodied.base.sample import Sample
+from mbodied.data.recording import Recorder
+from mbodied.hardware.sim_interface import SimInterface
+from mbodied.types.motion_controls import HandControl
+from mbodied.types.sense.vision import Image
+from mbodied.types.message import Message
 
 
 class AnswerAndActionsList(Sample):
-    """A customized pydantic type for the robot's reply and actions.
+    """A customized pydantic type for the robot's reply and actions."""
 
-    Attributes:
-        answer: A short, one sentence answer to the user's question or request.
-        actions: A list of actions (HandControl objects) to be taken by the robot.
-
-    Example:
-        >>> from mbodied_agents.types.controls import HandControl
-        >>> data = {"answer": "Hello, world!", "actions": [{"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0}]}
-        >>> response = AnswerAndActionsList.model_validate(data)
-        >>> response.answer
-        'Hello, world!'
-    """
     answer: str | None = Field(
         default="",
         description="Short, one sentence answer to the user's question or request.",
@@ -54,19 +73,32 @@ class AnswerAndActionsList(Sample):
 
 
 # This prompt is used to provide context to the LanguageAgent.
-SYSTEM_PROMPT = f"""
-    You are a robot with vision capabilities.
+initial_message = f"""You are a robot with vision capabilities.
     For each task given, you respond in JSON format. Here's the JSON schema:
-    {AnswerAndActionsList.model_json_schema()}
-    """
+    {AnswerAndActionsList.model_json_schema()}"""
+CONTEXT = [
+    Message(role="user", content=initial_message),
+    Message(role="assistant", content="Understood!"),
+]
+
+
+def get_image_from_camera() -> Image:
+    """Get an image from the camera. Using a static example here."""
+    resource = Path("resources") / "xarm.jpeg"
+    return Image(resource, size=(224, 224))
 
 
 @click.command("hri")
-@click.option("--backend", default="openai", help="The backend to use", type=click.Choice(["anthropic", "openai", "mbodi"]))
+@click.option(
+    "--backend", default="openai", help="The backend to use", type=click.Choice(["anthropic", "openai"])
+)
+@click.option("--backend_api_key", default=None, help="The API key for the backend, i.e. OpenAI, Anthropic")
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
-@click.option("--record_dataset", default=True, help="Record dataset for training automatically.")
-def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
-    """Main function to initialize and run the robot interaction.
+@click.option(
+    "--record_dataset", default="default", help="Recording action to take", type=click.Choice(["default", "omit"])
+)
+def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset: bool) -> None:
+    """Example for using LLMs for robot control. In this example, the language agent will perform double duty as both the cognitive and motor agent.
 
     Args:
         backend: The backend to use for the LanguageAgent (e.g., "openai").
@@ -77,68 +109,40 @@ def main(backend: str, disable_audio: bool, record_dataset: bool) -> None:
         To run the script with OpenAI backend and disable audio:
         python script.py --backend openai --disable_audio
     """
-    # Initialize the intelligent Robot Agent with language interface.
-    robot_agent = LanguageAgent(context=SYSTEM_PROMPT, api_service=backend)
+    cognitive_agent = LanguageAgent(
+        context=CONTEXT,
+        api_key=backend_api_key,
+        model_src=backend,
+        recorder=record_dataset,  # Pass in "default" to recorder to record the dataset automatically.
+    )
 
-    # Use a mock robot interface for movement visualization.
-    robot_interface = SimInterface()
+    hardware_interface = SimInterface()
 
-    # Enable or disable audio input/output capabilities.
     if disable_audio:
         os.environ["NO_AUDIO"] = "1"
     # Prefer to use use_pyaudio=False for MAC.
-    audio = AudioHandler(use_pyaudio=False)
-
-    # Data recorder for every conversation and action.
-    if record_dataset:
-        observation_space = spaces.Dict({
-            'image': Image(size=(224, 224)).space(),
-            'instruction': spaces.Text(1000)
-        })
-        action_space = AnswerAndActionsList(
-            actions=[HandControl()] * 6).space()
-        recorder = Recorder(
-            'example_recorder',
-            out_dir='saved_datasets',
-            observation_space=observation_space,
-            action_space=action_space
-        )
+    audio = AudioAgent(use_pyaudio=False)
 
     while True:
-        # Listen for instructions.
         instruction = audio.listen()
-        print("Instruction:", instruction)
+        print("Instruction:", instruction)  # noqa
+        image = get_image_from_camera()
+        response = cognitive_agent.act_and_record(instruction, image)
 
-        # Note: This is just an example vision image.
-        image = Image("resources/xarm.jpeg", size=(224, 224))
+        # Since we are using the language agent as a motor agent here, we'll have to parse the strings.
+        response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
 
-        # Get the robot's response and actions based on the instruction and image.
-        response = robot_agent.act(instruction, image)[0]
-        response = response.replace("```json", "").replace("```", "")
-        print("Response:", response)
-
-        # Validate the response to the pydantic object.
-        answer_actions = AnswerAndActionsList.model_validate(
-            from_json(response))
+        # Pydantic de-serializes and validates json under the hood.
+        answer_actions = AnswerAndActionsList.model_validate_json(response)
+        print("Response:", answer_actions)  # noqa
 
         # Let the robot speak.
         if answer_actions.answer:
             audio.speak(answer_actions.answer)
 
         # Execute the actions with the robot interface.
-        if answer_actions.actions:
-            for action in answer_actions.actions:
-                robot_interface.do(action)
-
-        # Record the dataset for training.
-        if record_dataset:
-            recorder.record(
-                observation={
-                    'image': image,
-                    'instruction': instruction,
-                },
-                action=answer_actions
-            )
+        for action in answer_actions.actions:
+            hardware_interface.do(action)
 
 
 if __name__ == "__main__":

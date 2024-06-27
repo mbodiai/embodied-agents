@@ -15,6 +15,7 @@ Overview
    .. code-block:: bash
 
       source install.bash
+      hatch run pip install '.[extras]'
 
 3. Then for each new terminal, run:
 

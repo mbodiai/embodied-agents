@@ -10,7 +10,7 @@ To run the Cognitive Agent on real robot hardware, refer to our in-depth tutoria
 .. raw:: html
    
    <p>
-      <a href="https://colab.research.google.com/drive/1DAQkuuEYj8demiuJS1_10FIyTI78Yzh4?usp=sharing" target="_blank">
+      <a href="https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing" target="_blank">
          <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
       </a>
    </p>
@@ -32,7 +32,7 @@ To run the Cognitive Agent in simulation, i.e., SimplerEnv, click the following 
 .. raw:: html
 
    <p>
-    <a href="https://colab.research.google.com/drive/1sZtVLv17g9Lin1O2DyecBItWXwzUVUeH" target="_blank">
+    <a href="https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing" target="_blank">
         <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" style="vertical-align: middle;"/>
     </a>
    </p>
