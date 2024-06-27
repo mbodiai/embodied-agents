@@ -32,7 +32,7 @@
 
 **Updates:**
 
-**June 26 2024, mbodied-agents beta v0.1.0**:
+**June 26 2024, mbodied-agents v1.0.0**:
 - Added Motor Agent supporting OpenVLA.
 - Added Sensory Agent supporting i.e. 3D object pose detection.
 - Improved automatic dataset recording.
