@@ -135,8 +135,9 @@ class Sample(BaseModel):
             Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
         """
         if schema is None:
-            schema = replace_refs(cls.model_json_schema())
+            schema = cls().schema()
         
+        # Convert input to list if it's not already
         if isinstance(one_d_array_or_dict, dict):
             flat_data = list(one_d_array_or_dict.values())
         else:
@@ -160,7 +161,6 @@ class Sample(BaseModel):
         
         unflattened_dict, _ = unflatten_recursive(schema)
         return cls(**unflattened_dict)
-
     def flatten(
         self,
         output_type: Flattenable = "dict",

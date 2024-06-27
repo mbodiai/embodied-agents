@@ -12,6 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Run a LanguageAgent with memory, optional remote acting, and optional automatic dataset creation capabilities.
+
+While it is always recommended to explicitly define your observation and action spaces,
+which can be set with a gym.Space object or any python object using the Sample class
+(see examples/using_sample.py for a tutorial), you can have the recorder infer the spaces
+by setting recorder="default" for automatic dataset recording.
+
+For example:
+    >>> agent = LanguageAgent(context=SYSTEM_PROMPT, model_src=backend, recorder="default")
+    >>> agent.act_and_record("pick up the fork", image)
+
+Alternatively, you can define the recorder separately to record the space you want.
+For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action:
+    >>> observation_space = spaces.Dict({"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)})
+    >>> action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
+    >>> recorder = Recorder(
+    ...     'example_recorder',
+    ...     out_dir='saved_datasets',
+    ...     observation_space=observation_space,
+    ...     action_space=action_space
+
+To record:
+    >>> recorder.record(
+    ...     observation={
+    ...         "image": image,
+    ...         "instruction": instruction,
+    ...     },
+    ...     action=answer_actions,
+    ... )
+"""
+
 import logging
 import os
 from dataclasses import dataclass

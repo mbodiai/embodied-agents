@@ -27,8 +27,10 @@ except ImportError:
 from openai import OpenAI
 from typing_extensions import Literal
 
+from mbodied.base.agent import Agent
 
-class AudioHandler:
+
+class AudioAgent(Agent):
     """Handles audio recording, playback, and speech-to-text transcription.
 
     This module uses OpenAI's API to transcribe audio input and synthesize speech.
@@ -36,7 +38,7 @@ class AudioHandler:
     It will then take input from the terminal.
 
     Usage:
-        audio_handler = AudioHandler(api_key="your-openai-api-key", use_pyaudio=False)
+        audio_handler = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
         audio_handler.speak("How can I help you?")
         message = audio_handler.listen()
     """
@@ -51,7 +53,7 @@ class AudioHandler:
         client: OpenAI = None,
         api_key: str = None,
     ):
-        """Initializes the AudioHandler with specified parameters.
+        """Initializes the AudioAgent with specified parameters.
 
         Args:
             listen_filename: The filename for storing recorded audio.

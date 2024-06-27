@@ -1,9 +1,10 @@
 from typing import Any
 
-from mbodied.base.sample import Sample
 from pydantic import ConfigDict, Field
 from pydantic_core import PydanticUndefined
 from typing_extensions import Literal
+
+from mbodied.base.sample import Sample
 
 MotionType = Literal[
     "UNSPECIFIED",

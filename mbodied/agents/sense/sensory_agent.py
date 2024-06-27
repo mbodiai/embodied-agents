@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from mbodied.base.agent import Agent
-from mbodied.types.sense.sensory_reading import SensorReading
+from mbodied.types.sense.sensor_reading import SensorReading
 
 
 class SensoryAgent(Agent):
@@ -42,9 +42,15 @@ class SensoryAgent(Agent):
         Returns:
             Sample: The sensory sample created by the agent.
         """
-        if not kwargs.get("bypass_check", False):
-            raise ValueError(
-                """The `sense` method must be implemented by the subclass but not called directly.
-                            Instead, call the module directly for automatic data collection, threading, and remote execution."""
-            )
         raise NotImplementedError
+    
+    def sense(self, **kwargs) -> SensorReading:
+        """Generate a SensorReading based on given parameters.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments for sensory agent to sense on.
+
+        Returns:
+            SensorReading: A SensorReading object based on the provided arguments.
+        """
+        return self.act(**kwargs)

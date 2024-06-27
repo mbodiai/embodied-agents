@@ -50,7 +50,7 @@ import click
 from gymnasium import spaces
 
 from mbodied.agents.language import LanguageAgent
-from mbodied.agents.sense.audio.audio_handler import AudioHandler
+from mbodied.agents.sense.audio.audio_handler import AudioAgent
 from mbodied.base.sample import Sample
 from mbodied.data.recording import Recorder
 from mbodied.hardware.sim_interface import SimInterface
@@ -121,7 +121,7 @@ def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset
     if disable_audio:
         os.environ["NO_AUDIO"] = "1"
     # Prefer to use use_pyaudio=False for MAC.
-    audio = AudioHandler(use_pyaudio=False)
+    audio = AudioAgent(use_pyaudio=False)
 
     while True:
         instruction = audio.listen()

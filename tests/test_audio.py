@@ -14,7 +14,7 @@
 
 import pytest
 from unittest.mock import MagicMock, mock_open
-from mbodied.agents.sense.audio.audio_handler import AudioHandler
+from mbodied.agents.sense.audio.audio_handler import AudioAgent
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def audio_handler(mocker):
     mocker.patch("mbodied.agents.sense.audio.audio_handler.pyaudio.PyAudio")
     mock_openai = mocker.patch("mbodied.agents.sense.audio.audio_handler.OpenAI").return_value
     mock_openai.audio.transcriptions.create.return_value = MagicMock(text="test transcription")
-    handler = AudioHandler(api_key="test-api-key")
+    handler = AudioAgent(api_key="test-api-key")
     return handler
 
 

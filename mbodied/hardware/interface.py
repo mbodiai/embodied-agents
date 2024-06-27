@@ -48,3 +48,12 @@ class HardwareInterface(ABC):
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError
+    
+    def capture(self, *args, **kwargs) -> None:
+        """Captures continuous data from the hardware.
+
+        Args:
+            args: Arguments to pass to the hardware interface.
+            kwargs: Additional arguments to pass to the hardware interface.
+        """
+        raise NotImplementedError

@@ -61,10 +61,6 @@ class SimInterface(HardwareInterface):
         """
         return self.current_pos
     
-    def fetch(self, **kwargs) -> Image:
-        """Fetches data from the hardware.
-
-        Args:
-            kwargs: Additional arguments to pass to the hardware interface.
-        """
+    def capture(self, **_) -> Image:
+        """Captures an image."""
         return Image(size=(224,224))

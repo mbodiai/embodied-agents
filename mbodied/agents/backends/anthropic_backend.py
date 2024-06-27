@@ -66,26 +66,29 @@ class AnthropicBackend(OpenAIBackendMixin):
         serialized: The serializer for Anthropic-specific data formats.
     """
 
-    DEFAULT_MODEL = "claude-3-opus-20240229"
+    DEFAULT_MODEL = "claude-3-5-sonnet-20240620"
     INITIAL_CONTEXT = [
         Message(role="user", content="Imagine you are a robot with advanced spatial reasoning."),
         Message(role="assistant", content="Got it!"),
     ]
 
-    def __init__(self, api_key: str | None, client: anthropic.Anthropic | None = None):
+    def __init__(self, api_key: str | None, client: anthropic.Anthropic | None = None, **kwargs):
         """Initializes the AnthropicBackend with the given API key and client.
 
         Args:
             api_key: The API key for the Anthropic service.
             client: An optional client for the Anthropic service.
+            kwargs: Additional keyword arguments.
         """
         self.api_key = api_key
         self.client = client
+        
+        self.model = kwargs.pop("model", self.DEFAULT_MODEL)
         if self.client is None:
             self.client = anthropic.Anthropic(api_key=self.api_key)
         self.serialized = AnthropicSerializer
 
-    def _create_completion(self, messages: list[Message], model: str = "claude-3-opus-20240229", **kwargs) -> str:
+    def _create_completion(self, messages: list[Message], model: str = "claude-3-5-sonnet-20240620", **kwargs) -> str:
         """Creates a completion for the given messages using the Anthropic API.
 
         Args:
