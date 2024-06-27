@@ -9,4 +9,4 @@ Optional Dependencies
 
 .. code-block:: bash
 
-    $ pip install mbodied[extras]
+    $ pip install mbodied[audio]

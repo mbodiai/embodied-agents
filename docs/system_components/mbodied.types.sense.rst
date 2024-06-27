@@ -13,18 +13,10 @@ Submodules
 ..    :undoc-members:
 ..    :show-inheritance:
 
-mbodied.types.sense.scene\_data module
---------------------------------------
-
-.. automodule:: mbodied.types.sense.scene_data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mbodied.types.sense.sensory\_reading module
 -------------------------------------------
 
-.. automodule:: mbodied.types.sense.sensory_reading
+.. automodule:: mbodied.types.sense.sensor_reading
    :members:
    :undoc-members:
    :show-inheritance:

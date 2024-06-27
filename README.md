@@ -19,7 +19,7 @@
 [![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
 [![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied/badge/?version=latest)](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)
 
-📖 **Docs**: [readthedocs](https://mbodi-ai-mbodied.readthedocs-hosted.com/en)
+📖 **Docs**: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
 🚀 **Simple Robot Agent Example:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) </br>
 💻 **Simulation Example with [SimplerEnv](https://github.com/simpler-env/SimplerEnv):** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing) </br>
@@ -29,6 +29,16 @@
 [![](https://dcbadge.limes.pink/api/server/BPQ7FEGxNb?theme=discord&?logoColor=pink)](https://discord.gg/BPQ7FEGxNb)
 
 </div>
+
+**Updates:**
+
+**June 26 2024, mbodied-agents beta v0.1.0**:
+- Added Motor Agent supporting OpenVLA.
+- Added Sensory Agent supporting i.e. 3D object pose detection.
+- Improved automatic dataset recording.
+- Agent now can make remote act calls to API servers i.e. Gradio.
+- Bug fixes and performance improvements have been made.
+- PyPI project is renamed to `mbodied`.
 
 # mbodied agents
 

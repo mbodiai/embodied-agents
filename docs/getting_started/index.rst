@@ -1,48 +1,51 @@
 Getting Started
 ==================
 
+Run a robotics transformer model on a robot
+-------------------------------------------
 
-Real Robot Hardware
-^^^^^^^^^^^^^^^^^^^^
+.. code-block:: python
 
-To run the Cognitive Agent on real robot hardware, refer to our in-depth tutorial provided in the Colab link below:
+    import os
+    from mbodied.agents import LanguageAgent
+    from mbodied.agents.motion import OpenVlaAgent
+    from mbodied.agents.sense.audio import AudioAgent
+    from mbodied.hardware.sim_interface import SimInterface
 
-.. raw:: html
-   
-   <p>
-      <a href="https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing" target="_blank">
-         <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
-      </a>
-   </p>
+    cognition = LanguageAgent(
+      context="You are an embodied planner that responds with a python list of strings and nothing else.",
+      api_key=os.getenv("ANTHROPIC_API_KEY"), # Or use OpenAI
+      model_src="anthropic", model_kwargs={"model": "claude-3-5-sonnet-20240620"},
+      recorder="auto",
+    )
+    speech = AudioAgent(use_pyaudio=False) # pyaudio is buggy on mac
+    motion = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
-Alternatively, you can also run `examples/simple_robot_agent.py <https://github.com/MbodiAI/mbodied-agents/blob/main/examples/simple_robot_agent.py>`_.
+    # Subclass and override do() and capture() methods.
+    hardware_interface = SimInterface()
 
-To run ``simple_robot_agent.py``, if you want to use OpenAI, for example, as your backend:
+    instruction = speech.listen()
+    plan = cognition.act(instruction, hardware_interface.capture())
 
-.. code-block:: shell
+    for step in plan.strip('[]').strip().split(','):
+      print("\nMotor agent is executing step: ", step, "\n")
+      for _ in range(10):
+        hand_control = motion.act(step, hardware_interface.capture())
+        hardware_interface.do(hand_control)
 
-   export OPENAI_API_KEY=your_api_key
-   python examples/simple_robot_agent.py --backend=openai
+Example Scripts
+---------------
 
-SimplerEnv Simulation
-^^^^^^^^^^^^^^^^^^^^^^
+- `examples/simple_robot_agent.py <examples/simple_robot_agent.py>`_: A very simple language based cognitive agent taking instruction from user and output actions.
+- `examples/simple_robot_agent_layered.py <examples/simple_robot_agent_layered.py>`_: Full example of layered language based cognitive agent and motor agent executing task.
+- `examples/motor_example_openvla.py <examples/motor_example_openvla.py>`_: Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
+- `examples/reason_plan_act_robot.py <examples/reason_plan_act_robot.py>`_: Full example of layered language based cognitive agent and OpenVLA motor agent executing task.
 
-To run the Cognitive Agent in simulation, i.e., SimplerEnv, click the following Colab to get started:
+Notebooks
+---------
 
-.. raw:: html
+Real Robot Hardware: `Open In Colab <https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing>`_
 
-   <p>
-    <a href="https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing" target="_blank">
-        <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" style="vertical-align: middle;"/>
-    </a>
-   </p>
+Simulation with SimplerEnv: `Open In Colab <https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing>`_
 
-To learn more about SimplerEnv, please visit the GitHub repository:
-
-.. raw:: html
-   
-   <p>
-    <a href="https://github.com/simpler-env/SimplerEnv.git" target="_blank">
-        <img src="https://img.shields.io/badge/GitHub-SimplerEnv-blue?logo=github" alt="GitHub SimplerEnv" style="vertical-align: middle;"/>
-    </a>
-   </p>
+MotorAgent with OpenVLA: `examples/motor_example_openvla.py <examples/motor_example_openvla.py>`_
