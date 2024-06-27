@@ -159,10 +159,10 @@ from mbodied.hardware.sim_interface import SimInterface
 
 cognition = LanguageAgent(
   context="You are an embodied planner that responds with a python list of strings and nothing else.",
-  api_key=os.getenv("ANTHROPIC_API_KEY"),
+  api_key=os.getenv("ANTHROPIC_API_KEY"), # Or use OpenAI
   model_src="anthropic", model_kwargs={"model": "claude-3-5-sonnet-20240620"},
   recorder="auto",
-) # Or use OpenAI alternatively.
+)
 speech = AudioAgent(use_pyaudio=False) # pyaudio is buggy on mac
 motion = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
