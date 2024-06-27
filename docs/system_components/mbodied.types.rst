@@ -37,14 +37,6 @@ mbodied.types.message module
    :undoc-members:
    :show-inheritance:
 
-mbodied.types.motion module
----------------------------
-
-.. automodule:: mbodied.types.motion
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mbodied.types.motion\_controls module
 -------------------------------------
 

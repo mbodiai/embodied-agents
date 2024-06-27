@@ -20,7 +20,7 @@ We use [hatch](https://hatch.pypa.io/1.12/) for packaging and managing dependenc
 ```console
 git clone https://github.com/MbodiAI/mbodied-agents.git
 source install.bash
-hatch run pip install '.[agents]'
+hatch run pip install '.[audio]'
 ```
 
 

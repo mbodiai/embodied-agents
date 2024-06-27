@@ -13,14 +13,6 @@ mbodied.hardware.interface module
    :show-inheritance:
 
 
-mbodied.hardware.remote\_interface module
------------------------------------------
-
-.. automodule:: mbodied.hardware.remote_interface
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mbodied.hardware.sim\_interface module
 --------------------------------------
 

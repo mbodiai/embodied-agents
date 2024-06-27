@@ -1,19 +1,22 @@
-from typing import Optional, Dict, List, Union
+from typing import Dict, List
+from PIL import Image as PILImage
 import numpy as np
-from gradio_client import Client, file
-from mbodied.types.sense.vision import Image
+from gradio_client import Client, handle_file
+
 from mbodied.agents.sense.sensory_agent import SensoryAgent
+from mbodied.base.sample import Sample
 from mbodied.types.geometry import Pose6D
+from mbodied.types.sense.vision import Image
 
 
 class ObjectPoseEstimator3D(SensoryAgent):
-    """A client class to interact with a Gradio server for image processing.
+    """3D object pose estimation class to interact with a Gradio server for image processing.
 
     Attributes:
         server_url (str): URL of the Gradio server.
     """
 
-    def __init__(self, server_url: str = "https://api.mbodi.ai/3d-object-pose-detection/") -> None:
+    def __init__(self, server_url: str = "https://api.mbodi.ai/3d-object-pose-detection") -> None:
         """Initialize the ObjectPoseEstimator3D with the server URL.
 
         Args:
@@ -21,37 +24,6 @@ class ObjectPoseEstimator3D(SensoryAgent):
         """
         self.server_url = server_url
         self.client = Client(self.server_url)
-
-    def format_parameters(self, parameter: Union[np.ndarray, list], param_type: str) -> dict:
-        """Format the given parameter based on its type to pass it to the Gradio server.
-
-        Args:
-            parameter (Union[np.ndarray, list]): The parameter to be formatted.
-            param_type (str): The type of the parameter ("intrinsics", "distortion_coeffs", "object_classes", "target_frame_offset").
-
-        Returns:
-            dict: Formatted parameter.
-
-        Example:
-            >>> estimator = ObjectPoseEstimator3D()
-            >>> param = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-            >>> estimator.format_parameters(param, "intrinsics")
-            {'headers': ['1', '2', '3'], 'data': [[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'metadata': None}
-        """
-        if param_type == "intrinsics":
-            return {"headers": ["1", "2", "3"], "data": parameter.tolist(), "metadata": None}
-        elif param_type == "distortion_coeffs":
-            return {"headers": ["1", "2", "3", "4", "5"], "data": [parameter], "metadata": None}
-        elif param_type == "object_classes":
-            return {"headers": ["1", "2", "3", "4", "5"], "data": [parameter], "metadata": None}
-        elif param_type == "target_frame_offset":
-            return {
-                "headers": ["X(m)", "Y(m)", "Z(m)", "Roll(degrees)", "Pitch(degrees)", "Yaw(degrees)"],
-                "data": [parameter],
-                "metadata": None,
-            }
-        else:
-            raise ValueError("Invalid parameter type specified")
 
     @staticmethod
     def save_data(
@@ -76,21 +48,21 @@ class ObjectPoseEstimator3D(SensoryAgent):
             >>> intrinsic_matrix = np.eye(3)
             >>> ObjectPoseEstimator3D.save_data(color_image, depth_image, "color.png", "depth.png", intrinsic_matrix)
         """
-        color_image = Image.fromarray(color_image_array, mode="RGB")
-        depth_image = Image.fromarray(depth_image_array.astype("uint16"), mode="I;16")
+        color_image = PILImage.fromarray(color_image_array, mode="RGB")
+        depth_image = PILImage.fromarray(depth_image_array.astype("uint16"), mode="I;16")
         color_image.save(color_image_path, format="PNG")
         depth_image.save(depth_image_path, format="PNG")
-        np.save("intrinsic_matrix.npy", intrinsic_matrix)
+        np.save("resources/intrinsic_matrix.npy", intrinsic_matrix)
 
-    def act(
+    def sense(
         self,
         rgb_image_path: str,
         depth_image_path: str,
-        camera_intrinsics: Union[str, np.ndarray],
-        distortion_coeffs: Optional[List[float]] = None,
-        aruco_pose_world_frame: Optional[Pose6D] = None,
-        object_classes: Optional[List[str]] = None,
-        confidence_threshold: Optional[float] = None,
+        camera_intrinsics: List[float] | np.ndarray,
+        distortion_coeffs: List[float] | None = None,
+        aruco_pose_world_frame: Pose6D | None = None,
+        object_classes: List[str] | None = None,
+        confidence_threshold: float | None = None,
         using_realsense: bool = False,
     ) -> Dict:
         """Capture images using the RealSense camera, process them, and send a request to estimate object poses.
@@ -98,7 +70,7 @@ class ObjectPoseEstimator3D(SensoryAgent):
         Args:
             rgb_image_path (str): Path to the RGB image.
             depth_image_path (str): Path to the depth image.
-            camera_intrinsics (Union[str, np.ndarray]): Path to the camera intrinsics or the intrinsic matrix.
+            camera_intrinsics (List[float] | np.ndarray): Path to the camera intrinsics or the intrinsic matrix.
             distortion_coeffs (Optional[List[float]]): List of distortion coefficients.
             aruco_pose_world_frame (Optional[Pose6D]): Pose of the ArUco marker in the world frame.
             object_classes (Optional[List[str]]): List of object classes.
@@ -109,11 +81,11 @@ class ObjectPoseEstimator3D(SensoryAgent):
             Dict: Result from the Gradio server.
 
         Example:
-            >>> estimator_agent = ObjectPoseEstimator3D()
-            >>> result = estimator_agent.act(
-            ...     "color_image.png",
-            ...     "depth_image.png",
-            ...     "intrinsic_matrix.npy",
+            >>> estimator = ObjectPoseEstimator3D()
+            >>> result = estimator.sense(
+            ...     "resources/color_image.png",
+            ...     "resources/depth_image.png",
+            ...     [911, 911, 653, 371],
             ...     [0.0, 0.0, 0.0, 0.0, 0.0],
             ...     [0.0, 0.2032, 0.0, -90, 0, -90],
             ...     ["Remote Control", "Basket", "Fork", "Spoon", "Red Marker"],
@@ -121,30 +93,28 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ...     False,
             ... )
         """
-        intrinsic_matrix = np.load(camera_intrinsics) if isinstance(camera_intrinsics, str) else camera_intrinsics
-
-        intrinsics_list = self.format_parameters(intrinsic_matrix, "intrinsics")
-        distortion_coeffs_list = self.format_parameters(distortion_coeffs, "distortion_coeffs")
-        object_classes_list = self.format_parameters(object_classes, "object_classes")
-        aruco_pose_world_frame_list = self.format_parameters(aruco_pose_world_frame, "target_frame_offset")
-
         camera_source = "realsense" if using_realsense else "webcam"
 
         result = self.client.predict(
-            image=file(rgb_image_path),
-            depth=file(depth_image_path),
-            camera_intrinsics=intrinsics_list,
-            distortion_coeffs=distortion_coeffs_list,
-            target_frame_offset=aruco_pose_world_frame_list,
-            object_classes=object_classes_list,
+            image=handle_file(rgb_image_path),
+            depth=handle_file(depth_image_path),
+            camera_intrinsics={
+                "headers": ["fx", "fy", "cx", "cy"],
+                "data": [Sample(camera_intrinsics).to("list")],
+                "metadata": None,
+            },
+            distortion_coeffs={
+                "headers": ["k1", "k2", "p1", "p2", "k3"],
+                "data": [Sample(distortion_coeffs).to("list")],
+                "metadata": None,
+            },
+            aruco_to_base_offset={
+                "headers": ["Z(m)", "Y(m)", "X(m)", "Roll(degrees)", "Pitch(degrees)", "Yaw(degrees)"],
+                "data": [Sample(aruco_pose_world_frame).to("list")],
+                "metadata": None,
+            },
+            object_classes={"headers": ["1"], "data": [Sample(object_classes).to("list")], "metadata": None},
             confidence_threshold=confidence_threshold,
             camera_source=camera_source,
-            api_name="/predict",
         )
-        return result
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
+        return result  # noqa: RET504
