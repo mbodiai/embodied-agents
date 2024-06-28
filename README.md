@@ -15,8 +15,8 @@
 [![license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mbodied)](https://pypi.org/project/mbodied/)
 [![PyPI](https://img.shields.io/pypi/v/mbodied)](https://pypi.org/project/mbodied)
-[![MacOS](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml)
-[![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
+[![MacOS](https://github.com/mbodiai/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/mbodiai/opensource/actions/workflows/macos.yml)
+[![Ubuntu](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml)
 [![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied/badge/?version=latest)](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)
 
 📖 **Docs**: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)

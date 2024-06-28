@@ -8,7 +8,7 @@ Overview
 
    .. code-block:: bash
 
-      git clone https://github.com/MbodiAI/embodied-agents.git
+      git clone https://github.com/mbodiai/embodied-agents.git
 
 2. Install system dependencies:
 

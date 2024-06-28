@@ -18,7 +18,7 @@ git config --global pull.rebase true
 We use [hatch](https://hatch.pypa.io/1.12/) for packaging and managing dependencies.
 
 ```console
-git clone https://github.com/MbodiAI/embodied-agents.git
+git clone https://github.com/mbodiai/embodied-agents.git
 source install.bash
 hatch run pip install '.[audio]'
 ```
