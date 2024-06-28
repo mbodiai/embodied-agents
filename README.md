@@ -32,7 +32,7 @@
 
 **Updates:**
 
-**June 26 2024, mbodied-agents v1.0.0**:
+**June 28 2024, embodied-agents v1.0.0**:
 - Added Motor Agent supporting OpenVLA.
 - Added Sensory Agent supporting i.e. 3D object pose detection.
 - Improved automatic dataset recording.
@@ -40,13 +40,13 @@
 - Bug fixes and performance improvements have been made.
 - PyPI project is renamed to `mbodied`.
 
-# mbodied agents
+# embodied agents
 
-**mbodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides consistency, reliability, scalability and is configurable to any observation and action space.
+**embodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides consistency, reliability, scalability and is configurable to any observation and action space.
 
 <img src="assets/new_demo.gif" alt="Demo GIF" style="width: 550px;">
 
-- [mbodied agents](#mbodied-agents)
+- [embodied agents](#embodied-agents)
   - [Overview](#overview)
     - [Motivation](#motivation)
     - [Goals](#goals)
@@ -228,7 +228,7 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A HuggingFace dataset with semantic search capabilities.
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
 
-To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
+To learn more about all of the possibilities with embodied agents, check out the [documentation](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
 <details> <summary><h3 style="display: inline-block;">More Details</h3></summary>
 

@@ -64,9 +64,9 @@ all = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/mbodiai/mbodied-agents#readme"
-Issues = "https://github.com/mbodiai/mbodied-agents/issues"
-Source = "https://github.com/mbodiai/mbodied-agents"
+Documentation = "https://github.com/mbodiai/embodied-agents#readme"
+Issues = "https://github.com/mbodiai/embodied-agents/issues"
+Source = "https://github.com/mbodiai/embodied-agents"
 
 [project.scripts]
 
