@@ -15,8 +15,8 @@
 [![license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mbodied)](https://pypi.org/project/mbodied/)
 [![PyPI](https://img.shields.io/pypi/v/mbodied)](https://pypi.org/project/mbodied)
-[![MacOS](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/MbodiAI/opensource/actions/workflows/macos.yml)
-[![Ubuntu](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/MbodiAI/opensource/actions/workflows/ubuntu.yml)
+[![MacOS](https://github.com/mbodiai/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/mbodiai/opensource/actions/workflows/macos.yml)
+[![Ubuntu](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml)
 [![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied/badge/?version=latest)](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)
 
 📖 **Docs**: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
@@ -32,21 +32,22 @@
 
 **Updates:**
 
-**June 26 2024, mbodied-agents v1.0.0**:
-- Added Motor Agent supporting OpenVLA.
+**June 30 2024, embodied-agents v1.0.0**:
+
+- Added Motor Agent supporting OpenVLA with free [API endpoint](https://api.mbodi.ai/community-models) hosted.
 - Added Sensory Agent supporting i.e. 3D object pose detection.
 - Improved automatic dataset recording.
-- Agent now can make remote act calls to API servers i.e. Gradio.
+- Agent now can make remote act calls to API servers i.e. Gradio, vLLM.
 - Bug fixes and performance improvements have been made.
 - PyPI project is renamed to `mbodied`.
 
-# mbodied agents
+# embodied agents
 
-**mbodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides consistency, reliability, scalability and is configurable to any observation and action space.
+**embodied agents** is a toolkit for integrating large multi-modal models into existing robot stacks with just a few lines of code. It provides consistency, reliability, scalability and is configurable to any observation and action space.
 
 <img src="assets/new_demo.gif" alt="Demo GIF" style="width: 550px;">
 
-- [mbodied agents](#mbodied-agents)
+- [embodied agents](#embodied-agents)
   - [Overview](#overview)
     - [Motivation](#motivation)
     - [Goals](#goals)
@@ -167,7 +168,7 @@ from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
 
     class FineGrainedHandControl(HandControl):
         comment: str = Field(None, description="A comment to voice aloud.")
-        
+
         # Any attempted validation will fail if the bounds and shape are not satisfied.
         index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
         thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
@@ -207,9 +208,9 @@ for step in plan.strip('[]').strip().split(','):
 Example Scripts:
 
 - [examples/simple_robot_agent.py](examples/simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output actions.
-- [examples/simple_robot_agent_layered.py](examples/simple_robot_agent_layered.py): Full example of layered languaged based cognitive agent and motor agent executing task.
+- [examples/full_example.py](examples/full_example.py): Full example of languaged based cognitive and motor agent executing task.
 - [examples/motor_example_openvla.py](examples/motor_example_openvla.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
-- [examples/reason_plan_act_robot.py](examples/reason_plan_act_robot.py): Full example of layered language based cognitive agent and OpenVLA motor agent executing task.
+- [examples/reason_plan_act_robot.py](examples/reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
 
 ### Notebooks
 
@@ -228,10 +229,9 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 - A HuggingFace dataset with semantic search capabilities.
 - A Pydantic BaseModel for reliable and quick json serialization/deserialization.
 
-To learn more about all of the possibilities with mbodied agents, check out the [documentation](https://mbodied-agents.readthedocs-hosted.com/en/latest)
+To learn more about all of the possibilities with embodied agents, check out the [documentation](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
 <details> <summary><h3 style="display: inline-block;">More Details</h3></summary>
-
 
 #### Creating a Sample
 

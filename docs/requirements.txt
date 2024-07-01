@@ -40,6 +40,7 @@ urllib3==2.2.1
 zipp==3.19.2
 scipy
 shapely
+mbodied
 
 # Conditionally install PyAudio only if not in ReadTheDocs
 # pyaudio==0.2.14; sys_platform != 'linux' or ('READTHEDOCS' not in os.environ)

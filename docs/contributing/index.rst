@@ -25,7 +25,7 @@ We use `hatch <https://hatch.pypa.io/1.12/>`_ for packaging and managing depende
 
 .. code-block:: console
 
-    git clone https://github.com/MbodiAI/mbodied-agents.git
+    git clone https://github.com/MbodiAI/embodied-agents.git
     source install.bash
     hatch run pip install '.[audio]'
 
