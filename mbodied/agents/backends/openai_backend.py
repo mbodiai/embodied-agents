@@ -90,7 +90,7 @@ class OpenAIBackendMixin:
         self.client = client
         if self.client is None:
             from openai import OpenAI
-            self.client = OpenAI(api_key=self.api_key)
+            self.client = OpenAI(api_key=self.api_key, **kwargs)
         self.serialized = OpenAISerializer
         self.response_format = response_format
 
