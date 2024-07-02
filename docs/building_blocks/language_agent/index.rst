@@ -33,3 +33,14 @@ to execute an instruction:
     response = robot_agent.act(instruction, image)[0]
     # You can also pass an arbituary number of text and image to the agent:
     response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
+
+Language Agent can connect to vLLM as well. For example, suppose you are running a vLLM server Mistral-7B on 1.2.3.4:1234. All you need to do is:
+
+.. code-block:: python
+
+    agent = LanguageAgent(
+        context=context,
+        model_src="openai",
+        model_kwargs={"api_key": "EMPTY", "base_url": "http://1.2.3.4:1234/v1"},
+    )
+    response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct-v0.3")

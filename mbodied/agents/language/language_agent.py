@@ -43,10 +43,11 @@ To record:
     ... )
 """
 
+import asyncio
 import logging
 import os
 from dataclasses import dataclass
-from typing import List, Literal, Optional, TypeAlias, Union
+from typing import List, Literal, TypeAlias
 
 from art import text2art
 from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
@@ -78,7 +79,7 @@ def make_context_list(context: list[str | Image | Message] | Image | str | Messa
         return [Message(role="user", content=[context]), Message(role="assistant", content="Understood.")]
     return []
 
-    
+
 class LanguageAgent(Agent):
     """An agent that can interact with users using natural language.
 
@@ -173,7 +174,7 @@ class LanguageAgent(Agent):
             return
         for _ in range(last_n):
             self.forget_last()
-    
+
     def history(self) -> List[Message]:
         """Return the conversation history."""
         return self.context
@@ -188,8 +189,16 @@ class LanguageAgent(Agent):
         for reminder, n in self.reminders:
             if len(self.context) % n == 0:
                 self.context.append(reminder)
-    
-    def act_and_parse(self, instruction: str, image: Image = None, parse_target: Sample = Sample, context: list | str | Image | Message = None, model=None, **kwargs) -> Sample:
+
+    def act_and_parse(
+        self,
+        instruction: str,
+        image: Image = None,
+        parse_target: Sample = Sample,
+        context: list | str | Image | Message = None,
+        model=None,
+        **kwargs,
+    ) -> Sample:
         """Responds to the given instruction, image, and context and parses the response into a Sample object."""
         response = self.act(instruction, image, context, model, **kwargs)
         response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
@@ -199,13 +208,26 @@ class LanguageAgent(Agent):
             error = f"Error parsing response: {e}"
             logging.error(error)
             logging.info(f"Recieved response: {response}. Retrying with error message.")
-            
+
             instruction = instruction + "avoid the following error: " + error
             response = self.act(instruction, image, context, model, **kwargs)
             response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
             response = parse_target.model_validate_json(response)
         return response
-        
+
+    async def async_act_and_parse(
+        self,
+        instruction: str,
+        image: Image = None,
+        parse_target: Sample = Sample,
+        context: list | str | Image | Message = None,
+        model=None,
+        **kwargs,
+    ) -> Sample:
+        """Responds to the given instruction, image, and context asynchronously and parses the response into a Sample object."""
+        return await asyncio.to_thread(
+            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs
+        )
 
     def act(
         self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
