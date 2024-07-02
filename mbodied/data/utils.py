@@ -38,6 +38,10 @@ def to_features(indict, image_keys=None, exclude_keys=None, prefix="") -> Featur
         return Value("int32")
     if isinstance(indict, float):
         return Value("float32")
+    if isinstance(indict, np.int32):
+        return Value("int32")
+    if isinstance(indict, np.float32):
+        return Value("float32")
 
     if isinstance(indict, list | tuple | np.ndarray):
         if len(indict) == 0:
@@ -53,6 +57,7 @@ def to_features(indict, image_keys=None, exclude_keys=None, prefix="") -> Featur
             elif full_key not in exclude_keys:
                 out_dict[key] = to_features(value, image_keys, exclude_keys, full_key)
         return out_dict
+
     raise ValueError(f"Cannot infer schema from {indict}")
 
 

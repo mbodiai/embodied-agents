@@ -31,7 +31,7 @@ from PIL import Image as PILImage
 
 class Replayer:
     """Replays datasets recorded by Recorder.
-    
+
     This class provides methods to read, process, and analyze HDF5 files recorded by the Recorder class.
 
     Example:
@@ -40,6 +40,7 @@ class Replayer:
             observation, action = sample
             ...
     """
+
     def __init__(
         self,
         path: str,
@@ -300,19 +301,20 @@ class FolderReplayer:
                 r = Replayer(f"{self.path}/{f}")
                 for _i, sample in enumerate(r):
                     observation = sample[0]
+                    action = sample[1]
                     image = np.asarray(observation["image"])
                     instruction = observation["instruction"]
-                    task = observation["task"]
-                    yield {"instruction": instruction, "task": task, "image": image, "action": sample[1]}
+                    yield {"observation": {"image": image, "instruction": instruction}, "action": action}
 
 
-def to_dataset(folder: str, name: str, description: str = None) -> None:
+def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> None:
     """Convert the folder of HDF5 files to a Hugging Face dataset.
 
     Args:
         folder (str): Path to the folder containing HDF5 files.
         name (str): Name of the dataset.
         description (str, optional): Description of the dataset. Defaults to None.
+        **kwargs: Additional arguments to pass to the Dataset.push_to_hub method.
     """
     r = FolderReplayer(folder)
     data = list(r.__iter__())
@@ -328,7 +330,7 @@ def to_dataset(folder: str, name: str, description: str = None) -> None:
 
     features = Features(
         {
-            "observation": {"image": Image(), "subtask": Value("string"), "task": Value("string")},
+            "observation": {"image": Image(), "instruction": Value("string")},
             "action": infer_features(data[0]["action"]),
         },
     )
@@ -345,7 +347,7 @@ def to_dataset(folder: str, name: str, description: str = None) -> None:
     ds = Dataset.from_dict(data, info=info)
     ds = ds.with_format("pandas")
     login(os.getenv("HF_TOKEN"))
-    ds.push_to_hub("mbodiai/{name}")
+    ds.push_to_hub(name, **kwargs)
 
 
 def parse_slice(s: str) -> int | slice:
