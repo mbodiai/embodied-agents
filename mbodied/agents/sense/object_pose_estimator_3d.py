@@ -59,7 +59,6 @@ class ObjectPoseEstimator3D(SensoryAgent):
         np.save("resources/intrinsic_matrix.npy", intrinsic_matrix)
 
     def act(
-    def act(
         self,
         rgb_image_path: str,
         depth_image_path: str,
