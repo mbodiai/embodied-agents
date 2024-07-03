@@ -1,13 +1,11 @@
-from typing import List, Union
-from PIL import Image as PILImage
-import numpy as np
+from typing import List
 from gradio_client import Client, handle_file
 from mbodied.base.sample import Sample
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sense.vision import Image
 from mbodied.types.sense.camera_params import IntrinsicParameters, DistortionParameters
-from mbodied.types.sense.world import SceneData, SceneObjects, ObjectsPose
+from mbodied.types.sense.world import SceneData, SceneObject
 
 
 class ObjectPoseEstimator3D(SensoryAgent):
@@ -27,44 +25,14 @@ class ObjectPoseEstimator3D(SensoryAgent):
         self.server_url = server_url
         self.client = Client(self.server_url)
 
-    @staticmethod
-    def save_data(
-        color_image_array: np.ndarray,
-        depth_image_array: np.ndarray,
-        color_image_path: str,
-        depth_image_path: str,
-        intrinsic_matrix: np.ndarray,
-    ) -> None:
-        """
-        Save color and depth images as PNG files.
-
-        Args:
-            color_image_array (np.ndarray): The color image array.
-            depth_image_array (np.ndarray): The depth image array.
-            color_image_path (str): The path to save the color image.
-            depth_image_path (str): The path to save the depth image.
-            intrinsic_matrix (np.ndarray): The intrinsic matrix.
-
-        Example:
-            >>> color_image = np.zeros((480, 640, 3), dtype=np.uint8)
-            >>> depth_image = np.zeros((480, 640), dtype=np.uint16)
-            >>> intrinsic_matrix = np.eye(3)
-            >>> ObjectPoseEstimator3D.save_data(color_image, depth_image, "color.png", "depth.png", intrinsic_matrix)
-        """
-        color_image = PILImage.fromarray(color_image_array, mode="RGB")
-        depth_image = PILImage.fromarray(depth_image_array.astype("uint16"), mode="I;16")
-        color_image.save(color_image_path, format="PNG")
-        depth_image.save(depth_image_path, format="PNG")
-        np.save("resources/intrinsic_matrix.npy", intrinsic_matrix)
-
     def act(
         self,
-        rgb_image_path: str = "resources/color_image.png",
-        depth_image_path: str = "resources/depth_image.png",
-        camera_intrinsics: IntrinsicParameters = IntrinsicParameters(focal_length_x=911.0, focal_length_y=911.0, optical_center_x=653.0, optical_center_y=371.0),
-        distortion_coeffs: DistortionParameters = DistortionParameters(k1=0.0, k2=0.0, p1=0.0, p2=0.0, k3=0.0),
-        aruco_pose_world_frame: Pose6D = Pose6D(z=0.0, y=0.2032, x=0.0, roll=-90.0, pitch=0.0, yaw=-90.0),
-        object_names: List[str] = ["Remote Control", "Basket", "Fork", "Spoon", "Red Marker"],
+        rgb_image: Image,
+        depth_image: Image,
+        camera_intrinsics: IntrinsicParameters = None,
+        distortion_coeffs: DistortionParameters = None,
+        aruco_pose_world_frame: Pose6D = None,
+        object_names: List[str] = None,
         confidence_threshold: float = 0.3,
         using_realsense: bool = True,
     ) -> SceneData:
@@ -72,8 +40,8 @@ class ObjectPoseEstimator3D(SensoryAgent):
         Capture images using the RealSense camera, process them, and send a request to estimate object poses.
 
         Args:
-            rgb_image_path (str): Path to the RGB image.
-            depth_image_path (str): Path to the depth image.
+            rgb_image (Image): RGB image.
+            depth_image (Image): Depth image.
             camera_intrinsics (IntrinsicParameters): Camera intrinsic parameters.
             distortion_coeffs (DistortionParameters): Camera distortion coefficients.
             aruco_pose_world_frame (Pose6D): Pose of the ArUco marker in the world frame.
@@ -109,8 +77,8 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ... )
             >>> object_names = ["Remote Control", "Basket", "Fork", "Spoon", "Red Marker"]
             >>> result = estimator.act(
-            ...     "resources/color_image.png",
-            ...     "resources/depth_image.png",
+            ...     rgb_image,
+            ...     depth_image,
             ...     camera_intrinsics=camera_intrinsics,
             ...     distortion_coeffs=distortion_params,
             ...     aruco_pose_world_frame=aruco_pose_world_frame,
@@ -119,12 +87,23 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ...     using_realsense=False
             ... )
         """
-        
+        if not isinstance(rgb_image, str):
+            rgb_image.save("resources/color_image.png")
+            
+        if not isinstance(depth_image, str):
+            depth_image.save("resources/depth_image.png")
+
+        rgb_image_path = rgb_image.path
+        depth_image_path = depth_image.path
+
         if camera_intrinsics is None:
+            camera_intrinsics = IntrinsicParameters(focal_length_x=911.0, focal_length_y=911.0, optical_center_x=653.0, optical_center_y=371.0)
             raise ValueError("Camera intrinsics are required.")
         if distortion_coeffs is None:
+            distortion_coeffs = DistortionParameters(k1=0.0, k2=0.0, p1=0.0, p2=0.0, k3=0.0)
             raise Warning("Distortion coefficients not provided.")
         if aruco_pose_world_frame is None:
+            aruco_pose_world_frame = Pose6D(z=0.0, y=0.0, x=0.0, roll=0.0, pitch=0.0, yaw=0.0)
             raise Warning("ArUco pose not provided.")
         if object_names is None:
             raise ValueError("Object names are required.")
@@ -162,18 +141,13 @@ class ObjectPoseEstimator3D(SensoryAgent):
         object_poses_data = result[1]
 
         # Parse the object poses
-        object_names = []
-        object_poses = []
+        scene_objects = []
 
         for object_name, pose_data in object_poses_data.items():
             pose = Pose6D(x=pose_data[0][0], y=pose_data[1][0], z=pose_data[2][0])
-            object_names.append(object_name.strip('.'))
-            object_poses.append(pose)
+            scene_objects.append(SceneObject(object_name=object_name.strip('.'), object_pose=pose))
 
-        scene_objects = SceneObjects(object_name=object_names)
-        objects_pose = ObjectsPose(object_pose=object_poses)
-
-        scene_data = SceneData(image=Image(annotated_image), objects=scene_objects, object_poses=objects_pose)
+        scene_data = SceneData(image=Image(annotated_image), scene_objects=scene_objects)
 
         return scene_data
 
@@ -217,8 +191,8 @@ if __name__ == "__main__":
     
     # Call the act method
     scene_data = estimator.act(
-        "resources/color_image.png",
-        "resources/depth_image.png",
+        rgb_image=Image("resources/color_image.png"),
+        depth_image=Image("resources/depth_image.png"),
         camera_intrinsics=intrinsic_params,
         distortion_coeffs=distortion_params,
         aruco_pose_world_frame=aruco_pose_world_frame,
@@ -231,5 +205,5 @@ if __name__ == "__main__":
     scene_data.image.show()
 
     # Print object names and poses
-    for obj, pose in zip(scene_data.objects.object_name, scene_data.object_poses.object_pose):
-        print(f"Object: {obj}, Pose: {pose}")
+    for obj in scene_data.scene_objects:
+        print(f"Object: {obj.object_name}, Pose: {obj.object_pose}")
