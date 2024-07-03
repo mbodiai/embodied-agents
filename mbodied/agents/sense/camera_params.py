@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import Field
-from mbodied.types.sample import Sample
+from mbodied.base.sample import Sample
 
 class IntrinsicParameters(Sample):
     """Model for Camera Intrinsic Parameters."""

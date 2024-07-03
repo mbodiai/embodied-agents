@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import  Field
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 
 from mbodied.types.sense.vision import Image
 from functools import partial
@@ -8,8 +8,8 @@ from mbodied.types.geometry import Pose6D
 
 class SceneObject(Sample):
     """Model for Scene Object Poses."""
-    object_name: str = Field(default=lambda: str, description="The name of an object in the scene")
-    object_pose: Pose6D = Field(default_factory=lambda: [Pose6D()], description="Pose of the object with respect to a reference frame")
+    object_name: str = ""
+    object_pose: Pose6D = Field(default_factory=Pose6D, description="Pose of the object with respect to a reference frame")
 
 
 class SceneData(Sample):

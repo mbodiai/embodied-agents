@@ -1,6 +1,6 @@
 from typing import List
 from gradio_client import Client, handle_file
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sense.vision import Image
