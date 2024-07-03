@@ -101,9 +101,9 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ...     k3=0.0
             ... )
             >>> aruco_pose_world_frame = Pose6D(
-            ...     x=0.0,
-            ...     y=0.2032,
             ...     z=0.0,
+            ...     y=0.2032,
+            ...     x=0.0,
             ...     roll=-90.0,
             ...     pitch=0.0,
             ...     yaw=-90.0
@@ -200,9 +200,9 @@ if __name__ == "__main__":
 
     # Create aruco pose world frame
     aruco_pose_world_frame = Pose6D(
-        x=0.0,
-        y=0.2032,
         z=0.0,
+        y=0.2032,
+        x=0.0,
         roll=-90.0,
         pitch=0.0,
         yaw=-90.0
