@@ -9,7 +9,7 @@ from mbodied.types.geometry import Pose6D
 class SceneObject(Sample):
     """Model for Scene Object Poses."""
     object_name: str = Field(default=lambda: str, description="The name of an object in the scene")
-    object_pose: Pose6D = Field(default_factory=lambda: Pose6D(), description="Pose of the object with respect to a reference frame")
+    object_pose: Pose6D = Field(default_factory=lambda: Pose6D, description="Pose of the object with respect to a reference frame")
 
 
 class SceneData(Sample):
