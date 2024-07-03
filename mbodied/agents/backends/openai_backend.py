@@ -16,6 +16,7 @@
 from typing import Any, List, Optional
 
 import backoff
+import httpx
 from anthropic import RateLimitError as AnthropicRateLimitError
 from openai._exceptions import RateLimitError as OpenAIRateLimitError
 
@@ -26,6 +27,8 @@ from mbodied.types.sense.vision import Image
 ERRORS = (
     OpenAIRateLimitError,
     AnthropicRateLimitError,
+    httpx.HTTPError,
+    ConnectionError,
 )
 
 

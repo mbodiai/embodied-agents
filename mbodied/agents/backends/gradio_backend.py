@@ -22,11 +22,11 @@ class GradioBackend:
 
     def __init__(
         self,
-        remote_server: str = None,
+        model_src: str = None,
         **kwargs,
     ) -> None:
-        self.remote_server = remote_server
-        self.client = Client(src=remote_server, **kwargs)
+        self.model_src = model_src
+        self.client = Client(src=model_src, **kwargs)
 
     def act(self, *args, **kwargs) -> str:
         """Forward queries to the gradio api endpoint `predict`.

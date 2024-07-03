@@ -18,7 +18,7 @@ from inspect import signature
 from pathlib import Path
 from typing import Literal
 
-from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend
+from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend, RekaBackend
 from mbodied.types.sample import Sample
 from mbodied.data.recording import Recorder
 
@@ -39,6 +39,7 @@ class Agent:
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
         "gradio": GradioBackend,
+        "reka": RekaBackend,
     }
 
     def __init__(
@@ -82,7 +83,7 @@ class Agent:
         else:
             actor_class = self.ACTOR_MAP.get(model_src, GradioBackend)
             if issubclass(actor_class, GradioBackend):
-                model_kwargs.update({"remote_server": model_src})
+                model_kwargs.update({"model_src": model_src})
             if api_key is not None:
                 model_kwargs["api_key"] = api_key
             self.actor = actor_class(**model_kwargs)
