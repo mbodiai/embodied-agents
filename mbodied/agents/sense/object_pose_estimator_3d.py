@@ -77,8 +77,8 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ... )
             >>> object_names = ["Remote Control", "Basket", "Fork", "Spoon", "Red Marker"]
             >>> result = estimator.act(
-            ...     rgb_image,
-            ...     depth_image,
+            ...     rgb_image=Image("resources/color_image.png"),
+            ...     depth_image=Image("resources/depth_image.png"),
             ...     camera_intrinsics=camera_intrinsics,
             ...     distortion_coeffs=distortion_params,
             ...     aruco_pose_world_frame=aruco_pose_world_frame,
