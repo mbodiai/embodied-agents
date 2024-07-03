@@ -7,7 +7,7 @@ name = "mbodied"
 dynamic = ["version"]
 description = 'Embodied AI'
 readme = "README.md"
-requires-python = ">=3.10, <=3.12"
+requires-python = ">=3.10"
 license = "apache-2.0"
 keywords = []
 authors = [{ name = "Mbodi Team", email = "info@mbodi.ai" }]
@@ -25,6 +25,7 @@ dependencies = [
   "toml",
   "pytest",
   "pytest-mock",
+  "pytest-asyncio",
   "gymnasium",
   "pillow",
   "numpy==1.26.4",

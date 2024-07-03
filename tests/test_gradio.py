@@ -26,12 +26,11 @@ def test_act():
         assert result == expected_result
 
 
-def test_async_act_non_blocking():
+def test_submit():
     test_args = ("input1", "input2")
     test_kwargs = {"key": "value"}
     api_name = "/test_api"
     result_callbacks = None
-    blocking = False
     expected_job = MagicMock()
 
     with patch("mbodied.agents.backends.gradio_backend.Client") as mock_client:
@@ -39,15 +38,14 @@ def test_async_act_non_blocking():
         mock_instance.submit.return_value = expected_job
         backend = GradioBackend(remote_server="http://fake-server.com")
 
-        job = backend.async_act(
-            *test_args, api_name=api_name, result_callbacks=result_callbacks, blocking=blocking, **test_kwargs
-        )
+        job = backend.submit(*test_args, api_name=api_name, result_callbacks=result_callbacks, **test_kwargs)
 
         mock_instance.submit.assert_called_once_with(
             api_name=api_name, result_callbacks=result_callbacks, *test_args, **test_kwargs
         )
         assert job == expected_job
         assert not job.done.called  # Ensuring that job.done was not called as it's non-blocking
+
 
 if __name__ == "__main__":
     pytest.main()

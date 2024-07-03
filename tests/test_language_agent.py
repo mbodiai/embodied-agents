@@ -127,5 +127,39 @@ def test_language_agent_act_with_context(mock_openai_init, mock_openai_act):
     assert agent.context[2].content[0] == response
 
 
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@pytest.mark.asyncio
+async def test_language_agent_async_act(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent()
+    response = await agent.async_act("Hello, async world!")
+    assert len(agent.context) == 2
+    assert agent.context[1].role == "assistant"
+    assert agent.context[1].content[0] == response
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@pytest.mark.asyncio
+async def test_language_agent_async_act_with_image(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent()
+    response = await agent.async_act("Hello, world!", image=Image(size=(224, 224)))
+    assert len(agent.context) == 2
+    assert isinstance(agent.context[0].content[1], Image)
+    assert agent.context[1].role == "assistant"
+    assert agent.context[1].content[0] == response
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@pytest.mark.asyncio
+async def test_language_agent_async_act_with_context(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent(context=["Hello"])
+    response = await agent.async_act("How are you?", context=["Nice weather today"])
+    assert len(agent.context) == 3
+    assert agent.context[2].role == "assistant"
+    assert agent.context[2].content[0] == response
+
+
 if __name__ == "__main__":
     pytest.main(["-vv", __file__])

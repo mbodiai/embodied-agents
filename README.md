@@ -32,7 +32,7 @@
 
 **Updates:**
 
-**June 30 2024, embodied-agents v1.0.0**:
+**June 30 2024, embodied-agents v1.0**:
 
 - Added Motor Agent supporting OpenVLA with free [API endpoint](https://api.mbodi.ai/community-models) hosted.
 - Added Sensory Agent supporting i.e. 3D object pose detection.
@@ -90,7 +90,7 @@ This repository is broken down into 3 main components: **Agents**, **Data**, and
 - **Motor Agents** always return a `Motion`.
 - **Sensory Agents** always return a `SensorReading`.
 
-A call to `act` can perform local or remote inference, and can be asynchronous or synchronous. Remote execution is performed with [Gradio](https://www.gradio.app/docs/python-client/introduction) or [httpx](https://www.python-httpx.org/) and validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
+A call to `act` or `async_act` can perform local or remote inference synchronously or asynchronously. Remote execution can be performed with [Gradio](https://www.gradio.app/docs/python-client/introduction), [httpx](https://www.python-httpx.org/), or different LLM clients. Validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
@@ -182,12 +182,12 @@ pip install mbodied[audio]
 from mbodied.types.motion_controls import HandControl, FullJointControl
 from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
 
-    class FineGrainedHandControl(HandControl):
-        comment: str = Field(None, description="A comment to voice aloud.")
+class FineGrainedHandControl(HandControl):
+    comment: str = Field(None, description="A comment to voice aloud.")
 
-        # Any attempted validation will fail if the bounds and shape are not satisfied.
-        index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
-        thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+    # Any attempted validation will fail if the bounds and shape are not satisfied.
+    index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
+    thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
 ```
 
 ### Run a robotics transformer model on a robot.
@@ -247,13 +247,10 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 
 To learn more about all of the possibilities with embodied agents, check out the [documentation](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
-
-
 ### 💡 Did you know
 
 - You can `pack` a list of `Sample`s or Dicts into a single `Sample` or `Dict` and `unpack` accordingly?
 - You can `unflatten` any python structure into a `Sample` class so long you provide it with a valid json schema?
-
 
 <details> <summary><h2 style="display: inline-block;">Deep Dive</h2></summary>
 
@@ -381,6 +378,17 @@ To execute an instruction:
 response = robot_agent.act(instruction, image)[0]
 # You can also pass an arbituary number of text and image to the agent:
 response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
+```
+
+Language Agent can connect to vLLM as well. For example, suppose you are running a vLLM server Mistral-7B on 1.2.3.4:1234. All you need to do is:
+
+```python
+agent = LanguageAgent(
+    context=context,
+    model_src="openai",
+    model_kwargs={"api_key": "EMPTY", "base_url": "http://1.2.3.4:1234/v1"},
+)
+response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct-v0.3")
 ```
 
 ### Motor Agent
