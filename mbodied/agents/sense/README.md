@@ -41,8 +41,8 @@ class CameraParameters(Sample):
 
 ```
 
-## Pose6D
-### Represents the 6D pose of an object.
+### Pose6D
+Represents the 6D pose of an object.
 
 ```python
 class Pose6D(Sample):
@@ -55,8 +55,8 @@ class Pose6D(Sample):
     
 ```
 
-## SceneObjects
-### Represents the names of objects in the scene.
+### SceneObjects
+Represents the names of objects in the scene.
 
 ```python
 class SceneObjects(Sample):
@@ -64,8 +64,8 @@ class SceneObjects(Sample):
 
 ```
 
-## ObjectsPose
-### Represents the poses of objects in the scene.
+### ObjectsPose
+Represents the poses of objects in the scene.
 
 ```python
 class ObjectsPose(Sample):
@@ -73,8 +73,8 @@ class ObjectsPose(Sample):
 
 ```
 
-## SceneData
-### Represents the data of a scene, including the image, objects, and their poses.
+### SceneData
+Represents the data of a scene, including the image, objects, and their poses.
 
 ```python
 class SceneData(Sample):
@@ -165,7 +165,7 @@ for obj, pose in zip(scene_data.objects.object_name, scene_data.object_poses.obj
 
 The server script sets up a Gradio interface to perform object detection and pose estimation using images. The script includes the following functionalities:
 
-- Image Processing Function (`process_images`): Processes RGB and depth images to detect objects and estimate their poses.
+- Image Processing Function (process_images): Processes RGB and depth images to detect objects and estimate their poses.
 - Gradio Interface: A user-friendly interface to input images and parameters, and visualize results.
 
 ## Key Components
