@@ -7,6 +7,8 @@ from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.base.sample import Sample
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sense.vision import Image
+from mbodied.types.sense.camera import CameraParameters
+from mbodied.types.sense.world import SceneData
 
 
 class ObjectPoseEstimator3D(SensoryAgent):
@@ -54,14 +56,14 @@ class ObjectPoseEstimator3D(SensoryAgent):
         depth_image.save(depth_image_path, format="PNG")
         np.save("resources/intrinsic_matrix.npy", intrinsic_matrix)
 
-    def sense(
+    def act(
         self,
         rgb_image_path: str,
         depth_image_path: str,
-        camera_intrinsics: List[float] | np.ndarray,
-        distortion_coeffs: List[float] | None = None,
+        camera_intrinsics: CameraParameters = None,
+        distortion_coeffs: CameraParameters = None,
         aruco_pose_world_frame: Pose6D | None = None,
-        object_classes: List[str] | None = None,
+        object_classes: SceneData = None,
         confidence_threshold: float | None = None,
         using_realsense: bool = False,
     ) -> Dict:
@@ -100,21 +102,25 @@ class ObjectPoseEstimator3D(SensoryAgent):
             depth=handle_file(depth_image_path),
             camera_intrinsics={
                 "headers": ["fx", "fy", "cx", "cy"],
-                "data": [Sample(camera_intrinsics).to("list")],
+                "data": [camera_intrinsics.intrinsic.to("list")],
                 "metadata": None,
             },
             distortion_coeffs={
                 "headers": ["k1", "k2", "p1", "p2", "k3"],
-                "data": [Sample(distortion_coeffs).to("list")],
+                "data": [camera_intrinsics.distortion.to("list")],
                 "metadata": None,
             },
             aruco_to_base_offset={
                 "headers": ["Z(m)", "Y(m)", "X(m)", "Roll(degrees)", "Pitch(degrees)", "Yaw(degrees)"],
-                "data": [Sample(aruco_pose_world_frame).to("list")],
+                "data": [aruco_pose_world_frame.to("list")],
                 "metadata": None,
             },
-            object_classes={"headers": ["1"], "data": [Sample(object_classes).to("list")], "metadata": None},
+            object_classes={"headers": ["1"], "data": [object_classes.objects.object_name.to('list')], "metadata": None},
             confidence_threshold=confidence_threshold,
             camera_source=camera_source,
         )
-        return result  # noqa: RET504
+        
+        annotated_image: SceneData.image = result[0]
+        object_poses: SceneData.objects = result[1]
+
+        return annotated_image, object_poses
