@@ -37,23 +37,16 @@ class GradioBackend:
         """
         return self.client.predict(*args, **kwargs)
 
-    def async_act(self, *args, api_name="/predict", result_callbacks=None, blocking=False, blocking_timeout=10, **kwargs) -> Job:
+    def submit(self, *args, api_name="/predict", result_callbacks=None, **kwargs) -> Job:
         """Asynchronous submit queries to the gradio api endpoint.
 
         Args:
             *args: The arguments to pass to the gradio server.
             api_name: The name of the api endpoint to submit the job.
             result_callbacks: The callbacks to apply to the result.
-            blocking: Whether to block until the job is done.
             **kwargs: The keywrod arguments to pass to the gradio server.
 
         Returns:
             Job: Gradio job object.
         """
-        job = self.client.submit(api_name=api_name, result_callbacks=result_callbacks, *args, **kwargs)
-        tic = time.time()
-        if blocking:
-            while not job.done:
-                if time.time() - tic > blocking_timeout:
-                    raise TimeoutError("Job did not finish in time.")
-        return job
+        return self.client.submit(api_name=api_name, result_callbacks=result_callbacks, *args, **kwargs)

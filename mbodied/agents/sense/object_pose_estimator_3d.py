@@ -1,6 +1,7 @@
 from typing import Dict, List
 from PIL import Image as PILImage
 import numpy as np
+import asyncio
 from gradio_client import Client, handle_file
 
 from mbodied.agents.sense.sensory_agent import SensoryAgent
@@ -14,6 +15,7 @@ class ObjectPoseEstimator3D(SensoryAgent):
 
     Attributes:
         server_url (str): URL of the Gradio server.
+        client (Client): Gradio client to interact with the server.
     """
 
     def __init__(self, server_url: str = "https://api.mbodi.ai/3d-object-pose-detection") -> None:
@@ -54,7 +56,7 @@ class ObjectPoseEstimator3D(SensoryAgent):
         depth_image.save(depth_image_path, format="PNG")
         np.save("resources/intrinsic_matrix.npy", intrinsic_matrix)
 
-    def sense(
+    def act(
         self,
         rgb_image_path: str,
         depth_image_path: str,
@@ -82,7 +84,7 @@ class ObjectPoseEstimator3D(SensoryAgent):
 
         Example:
             >>> estimator = ObjectPoseEstimator3D()
-            >>> result = estimator.sense(
+            >>> result = estimator.act(
             ...     "resources/color_image.png",
             ...     "resources/depth_image.png",
             ...     [911, 911, 653, 371],

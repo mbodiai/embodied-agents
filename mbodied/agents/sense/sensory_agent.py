@@ -43,7 +43,7 @@ class SensoryAgent(Agent):
             Sample: The sensory sample created by the agent.
         """
         raise NotImplementedError
-    
+
     def sense(self, **kwargs) -> SensorReading:
         """Generate a SensorReading based on given parameters.
 

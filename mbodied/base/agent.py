@@ -13,11 +13,12 @@
 # limitations under the License.
 
 
+import asyncio
 from inspect import signature
 from pathlib import Path
 from typing import Literal
 
-from mbodied.agents.backends import AnthropicBackend, OpenAIBackend, GradioBackend
+from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend
 from mbodied.base.sample import Sample
 from mbodied.data.recording import Recorder
 
@@ -103,6 +104,15 @@ class Agent:
         """
         raise NotImplementedError("Subclass should implement this method.")
 
+    async def async_act(self, *args, **kwargs) -> Sample:
+        """Act asynchronously based on the observation.
+
+        Subclass should implement this method.
+
+        For remote actors, this method should call actor.async_act() correctly to perform the actions.
+        """
+        return await asyncio.to_thread(self.act, *args, **kwargs)
+
     def act_and_record(self, *args, **kwargs) -> Sample:
         """Peform action based on the observation and record the action, if applicable.
 
@@ -120,6 +130,15 @@ class Agent:
             )
             self.recorder.record(observation=observation, action=action)
         return action
+
+    async def async_act_and_record(self, *args, **kwargs) -> Sample:
+        """Act asynchronously based on the observation.
+
+        Subclass should implement this method.
+
+        For remote actors, this method should call actor.async_act() correctly to perform the actions.
+        """
+        return await asyncio.to_thread(self.act_and_record, *args, **kwargs)
 
     @staticmethod
     def create_observation_from_args(observation_space, function, args, kwargs) -> dict:
