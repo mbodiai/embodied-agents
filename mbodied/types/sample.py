@@ -24,13 +24,12 @@ import torch
 from datasets import Dataset
 from gymnasium import spaces
 from jsonref import replace_refs
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import from_json
 from typing_extensions import Annotated
 
 from mbodied.data.utils import to_features
-from mbodied.types.ndarray import NumpyArray
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 

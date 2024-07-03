@@ -16,8 +16,8 @@ from typing import Any
 
 from pydantic import ConfigDict, model_serializer, model_validator
 
-from mbodied.types.sample import Sample
 from mbodied.types.message import Message
+from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
 
 

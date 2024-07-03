@@ -52,10 +52,10 @@ from typing import List, Literal, TypeAlias
 from art import text2art
 from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
 
-from mbodied.agents.backends import OpenAIBackend
 from mbodied.agents import Agent
-from mbodied.types.sample import Sample
+from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
+from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
 
 SupportsOpenAI: TypeAlias = OpenAIBackend

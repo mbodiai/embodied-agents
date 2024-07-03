@@ -1,13 +1,12 @@
 from typing import Dict, List
-from PIL import Image as PILImage
+
 import numpy as np
-import asyncio
 from gradio_client import Client, handle_file
+from PIL import Image as PILImage
 
 from mbodied.agents.sense.sensory_agent import SensoryAgent
-from mbodied.types.sample import Sample
 from mbodied.types.geometry import Pose6D
-from mbodied.types.sense.vision import Image
+from mbodied.types.sample import Sample
 
 
 class ObjectPoseEstimator3D(SensoryAgent):

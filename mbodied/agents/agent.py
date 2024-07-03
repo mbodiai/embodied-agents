@@ -19,8 +19,8 @@ from pathlib import Path
 from typing import Literal
 
 from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend
-from mbodied.types.sample import Sample
 from mbodied.data.recording import Recorder
+from mbodied.types.sample import Sample
 
 
 class Agent:

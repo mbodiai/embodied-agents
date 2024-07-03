@@ -15,7 +15,6 @@
 from typing import List, Literal
 
 import torch
-from PIL import Image
 from transformers import AutoModelForVision2Seq, AutoProcessor
 
 from mbodied.agents.backends.serializer import Serializer

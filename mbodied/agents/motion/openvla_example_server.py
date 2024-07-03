@@ -1,10 +1,10 @@
-import gradio as gr
-from transformers import AutoModelForVision2Seq, AutoProcessor
-from PIL import Image
-import torch
-from io import BytesIO
 import base64
+from io import BytesIO
 
+import gradio as gr
+import torch
+from PIL import Image
+from transformers import AutoModelForVision2Seq, AutoProcessor
 
 """
 An example of a Gradio server for the OpenVLA robot action prediction.
