@@ -15,7 +15,6 @@
 import base64 as base64lib
 import importlib
 import io
-import logging
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse

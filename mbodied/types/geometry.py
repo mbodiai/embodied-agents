@@ -1,4 +1,4 @@
-from mbodied.base.motion import AbsoluteMotionField, Motion, MotionField, RelativeMotionField
+from mbodied.types.motion import AbsoluteMotionField, Motion, MotionField, RelativeMotionField
 
 
 class Pose3D(Motion):

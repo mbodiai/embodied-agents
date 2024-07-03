@@ -45,18 +45,19 @@ To record:
 
 import os
 from pathlib import Path
-from pydantic import Field
+
 import click
 from gymnasium import spaces
+from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent
-from mbodied.agents.sense.audio.audio_handler import AudioAgent
-from mbodied.base.sample import Sample
+from mbodied.agents.sense.audio.audio_agent import AudioAgent
 from mbodied.data.recording import Recorder
 from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.motion_controls import HandControl
-from mbodied.types.sense.vision import Image
 from mbodied.types.message import Message
+from mbodied.types.motion.control import HandControl
+from mbodied.types.sample import Sample
+from mbodied.types.sense.vision import Image
 
 
 class AnswerAndActionsList(Sample):
@@ -89,9 +90,7 @@ def get_image_from_camera() -> Image:
 
 
 @click.command("hri")
-@click.option(
-    "--backend", default="openai", help="The backend to use", type=click.Choice(["anthropic", "openai"])
-)
+@click.option("--backend", default="openai", help="The backend to use", type=click.Choice(["anthropic", "openai"]))
 @click.option("--backend_api_key", default=None, help="The API key for the backend, i.e. OpenAI, Anthropic")
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
 @click.option(

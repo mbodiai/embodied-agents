@@ -64,11 +64,11 @@
     - [Notebooks](#notebooks)
   - [The Sample Class](#the-sample-class)
     - [💡 Did you know](#-did-you-know)
+  - [Building Blocks](#building-blocks)
       - [Creating a Sample](#creating-a-sample)
       - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
       - [Converting to Different Containers](#converting-to-different-containers)
       - [Gym Space Integration](#gym-space-integration)
-  - [Building Blocks](#building-blocks)
     - [Message](#message)
     - [Backend](#backend)
     - [Agent](#agent)
@@ -179,8 +179,8 @@ pip install mbodied[audio]
 ### Customize a Motion to fit a robot's action space.
 
 ```python
-from mbodied.types.motion_controls import HandControl, FullJointControl
-from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
+from mbodied.types.motion.control import HandControl, FullJointControl
+from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
 
 class FineGrainedHandControl(HandControl):
     comment: str = Field(None, description="A comment to voice aloud.")
@@ -455,7 +455,6 @@ for observation, action in replayer:
 │     │  ├─ language/ .. Language based agents modules
 │     │  ├─ motion/ .... Motion based agents modules
 │     │  └─ sense/ ..... Sensory, e.g. audio, processing modules
-│     ├─ base/ ......... Base classes and core infra modules
 │     ├─ data/ ......... Data handling and processing
 │     ├─ hardware/ ..... Hardware interface and interaction
 │     └─ types/ ........ Common types and definitions

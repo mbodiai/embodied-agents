@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from mbodied.base.agent import Agent
+from mbodied.agents import Agent
 from mbodied.types.sense.sensor_reading import SensorReading
 
 

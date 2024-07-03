@@ -19,7 +19,7 @@ import backoff
 from anthropic import RateLimitError as AnthropicRateLimitError
 from openai._exceptions import RateLimitError as OpenAIRateLimitError
 
-from mbodied.base.serializer import Serializer
+from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
 from mbodied.types.sense.vision import Image
 

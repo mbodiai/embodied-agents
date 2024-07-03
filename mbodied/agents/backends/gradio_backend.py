@@ -14,7 +14,6 @@
 
 from gradio_client import Client
 from gradio_client.client import Job
-import time
 
 
 class GradioBackend:

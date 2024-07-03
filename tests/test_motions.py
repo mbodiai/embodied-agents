@@ -20,7 +20,7 @@ from pathlib import Path
 import h5py
 from tempfile import TemporaryDirectory
 
-from mbodied.types.motion_controls import (
+from mbodied.types.motion.control import (
     LocationAngle,
     Pose6D,
     JointControl,

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from mbodied.agents.backends.openai_backend import OpenAIBackendMixin
-from mbodied.base.serializer import Serializer
+from mbodied.agents.backends.serializer import Serializer
 
 
 # TODO: Bring the OllamaSerializer and OllamaBackend classes.

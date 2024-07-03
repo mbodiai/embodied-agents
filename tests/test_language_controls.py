@@ -1,6 +1,6 @@
 import pytest
 
-from mbodied.types.language_controls import (
+from mbodied.types.language.control import (
     LangControl,
     MobileSingleArmLangControl,
     language_control_to_list,
