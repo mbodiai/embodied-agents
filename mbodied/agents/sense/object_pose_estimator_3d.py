@@ -1,5 +1,5 @@
-from typing import Dict, List
 
+from PIL import Image as PILImage
 import numpy as np
 from gradio_client import Client, handle_file
 from PIL import Image as PILImage
@@ -7,8 +7,8 @@ from PIL import Image as PILImage
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sense.vision import Image
-from mbodied.types.sense.camera import CameraParameters
-from mbodied.types.sense.world import SceneData
+from mbodied.types.sense.camera import IntrinsicParameters, DistortionParameters
+from mbodied.types.sense.world import SceneData, SceneObjects, ObjectsPose
 
 
 class ObjectPoseEstimator3D(SensoryAgent):
@@ -36,7 +36,8 @@ class ObjectPoseEstimator3D(SensoryAgent):
         depth_image_path: str,
         intrinsic_matrix: np.ndarray,
     ) -> None:
-        """Save color and depth images as PNG files.
+        """
+        Save color and depth images as PNG files.
 
         Args:
             color_image_array (np.ndarray): The color image array.
@@ -61,39 +62,70 @@ class ObjectPoseEstimator3D(SensoryAgent):
         self,
         rgb_image_path: str,
         depth_image_path: str,
-        camera_intrinsics: CameraParameters = None,
-        distortion_coeffs: CameraParameters = None,
-        aruco_pose_world_frame: Pose6D | None = None,
-        object_classes: SceneData = None,
-        confidence_threshold: float | None = None,
+        camera_intrinsics: IntrinsicParameters = None,
+        distortion_coeffs: DistortionParameters = None,
+        aruco_pose_world_frame: Pose6D = None,
+        object_classes: SceneObjects = None,
+        confidence_threshold: float = None,
         using_realsense: bool = False,
-    ) -> Dict:
-        """Capture images using the RealSense camera, process them, and send a request to estimate object poses.
+    ) -> SceneData:
+        """
+        Capture images using the RealSense camera, process them, and send a request to estimate object poses.
 
         Args:
             rgb_image_path (str): Path to the RGB image.
             depth_image_path (str): Path to the depth image.
-            camera_intrinsics (List[float] | np.ndarray): Path to the camera intrinsics or the intrinsic matrix.
-            distortion_coeffs (Optional[List[float]]): List of distortion coefficients.
+            camera_intrinsics (Optional[IntrinsicParameters]): Camera intrinsic parameters.
+            distortion_coeffs (Optional[DistortionParameters]): Camera distortion coefficients.
             aruco_pose_world_frame (Optional[Pose6D]): Pose of the ArUco marker in the world frame.
-            object_classes (Optional[List[str]]): List of object classes.
+            object_classes (Optional[SceneObjects]): Scene data containing objects.
             confidence_threshold (Optional[float]): Confidence threshold for object detection.
             using_realsense (bool): Whether to use the RealSense camera.
 
         Returns:
-            Dict: Result from the Gradio server.
+            SceneData: Result from the Gradio server.
 
         Example:
             >>> estimator = ObjectPoseEstimator3D()
+            >>> camera_intrinsics = IntrinsicParameters(
+            ...     focal_length_x=911.0,
+            ...     focal_length_y=911.0,
+            ...     optical_center_x=653.0,
+            ...     optical_center_y=371.0
+            ... )
+            >>> distortion_params = DistortionParameters(
+            ...     k1=0.0,
+            ...     k2=0.0,
+            ...     p1=0.0,
+            ...     p2=0.0,
+            ...     k3=0.0
+            ... )
+            >>> aruco_pose_world_frame = Pose6D(
+            ...     x=0.0,
+            ...     y=0.2032,
+            ...     z=0.0,
+            ...     roll=-90.0,
+            ...     pitch=0.0,
+            ...     yaw=-90.0
+            ... )
+            >>> object_classes = SceneObjects(
+            ...     object_name=[
+            ...         "Remote Control",
+            ...         "Basket",
+            ...         "Fork",
+            ...         "Spoon",
+            ...         "Red Marker",
+            ...     ]
+            ... )
             >>> result = estimator.act(
             ...     "resources/color_image.png",
             ...     "resources/depth_image.png",
-            ...     [911, 911, 653, 371],
-            ...     [0.0, 0.0, 0.0, 0.0, 0.0],
-            ...     [0.0, 0.2032, 0.0, -90, 0, -90],
-            ...     ["Remote Control", "Basket", "Fork", "Spoon", "Red Marker"],
-            ...     0.5,
-            ...     False,
+            ...     camera_intrinsics=camera_intrinsics,
+            ...     distortion_coeffs=distortion_params,
+            ...     aruco_pose_world_frame=aruco_pose_world_frame,
+            ...     object_classes=object_classes,
+            ...     confidence_threshold=0.5,
+            ...     using_realsense=False
             ... )
         """
         camera_source = "realsense" if using_realsense else "webcam"
@@ -103,25 +135,108 @@ class ObjectPoseEstimator3D(SensoryAgent):
             depth=handle_file(depth_image_path),
             camera_intrinsics={
                 "headers": ["fx", "fy", "cx", "cy"],
-                "data": [camera_intrinsics.intrinsic.to("list")],
+                "data": [camera_intrinsics.to('list')] if camera_intrinsics else None,
                 "metadata": None,
             },
             distortion_coeffs={
                 "headers": ["k1", "k2", "p1", "p2", "k3"],
-                "data": [camera_intrinsics.distortion.to("list")],
+                "data": [distortion_coeffs.to('list')] if distortion_coeffs else None,
                 "metadata": None,
             },
             aruco_to_base_offset={
                 "headers": ["Z(m)", "Y(m)", "X(m)", "Roll(degrees)", "Pitch(degrees)", "Yaw(degrees)"],
-                "data": [aruco_pose_world_frame.to("list")],
+                "data": [aruco_pose_world_frame.to('list')] if aruco_pose_world_frame else None,
                 "metadata": None,
             },
-            object_classes={"headers": ["1"], "data": [object_classes.objects.object_name.to('list')], "metadata": None},
+            object_classes={
+                "headers": ["object_name"],
+                "data": [object_classes.to('list')] if object_classes else None,
+                "metadata": None,
+            },
             confidence_threshold=confidence_threshold,
             camera_source=camera_source,
         )
-        
-        annotated_image: SceneData.image = result[0]
-        object_poses: SceneData.objects = result[1]
 
-        return annotated_image, object_poses
+        annotated_image = result[0]
+        object_poses_data = result[1]
+
+        # Parse the object poses
+        object_names = []
+        object_poses = []
+
+        for object_name, pose_data in object_poses_data.items():
+            pose = Pose6D(x=pose_data[0][0], y=pose_data[1][0], z=pose_data[2][0])
+            object_names.append(object_name.strip('.'))
+            object_poses.append(pose)
+
+        scene_objects = SceneObjects(object_name=object_names)
+        objects_pose = ObjectsPose(object_pose=object_poses)
+
+        scene_data = SceneData(image=Image(annotated_image), objects=scene_objects, object_poses=objects_pose)
+
+        return scene_data
+
+    
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+
+    # Create intrinsic parameters
+    intrinsic_params = IntrinsicParameters(
+        focal_length_x=911.0,
+        focal_length_y=911.0,
+        optical_center_x=653.0,
+        optical_center_y=371.0
+    )
+
+    # Create distortion parameters
+    distortion_params = DistortionParameters(
+        k1=0.0,
+        k2=0.0,
+        p1=0.0,
+        p2=0.0,
+        k3=0.0
+    )
+
+    # Create aruco pose world frame
+    aruco_pose_world_frame = Pose6D(
+        x=0.0,
+        y=0.2032,
+        z=0.0,
+        roll=-90.0,
+        pitch=0.0,
+        yaw=-90.0
+    )
+
+    # Create object classes
+    object_classes = SceneObjects(
+        object_name=[
+            "Remote Control",
+            "Basket",
+            "Fork",
+            "Spoon",
+            "Red Marker",
+        ]
+    )
+
+    # Initialize the estimator
+    estimator = ObjectPoseEstimator3D()
+    
+    # Call the act method
+    scene_data = estimator.act(
+        "resources/color_image.png",
+        "resources/depth_image.png",
+        camera_intrinsics=intrinsic_params,
+        distortion_coeffs=distortion_params,
+        aruco_pose_world_frame=aruco_pose_world_frame,
+        object_classes=object_classes,
+        confidence_threshold=0.5,
+        using_realsense=False
+    )
+
+    # Display the annotated image
+    scene_data.image.show()
+
+    # Print object names and poses
+    for obj, pose in zip(scene_data.objects.object_name, scene_data.object_poses.object_pose):
+        print(f"Object: {obj}, Pose: {pose}")
