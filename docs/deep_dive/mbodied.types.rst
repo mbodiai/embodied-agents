@@ -15,10 +15,27 @@ Subpackages
 Submodules
 ----------
 
+mbodied.types.sample module
+--------------------------
+
+.. automodule:: mbodied.types.sample
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   
+
 mbodied.types.geometry module
 -----------------------------
 
 .. automodule:: mbodied.types.geometry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mbodied.types.language module
+---------------------------------------
+
+.. automodule:: mbodied.types.language
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,6 +48,7 @@ mbodied.types.message module
    :undoc-members:
    :show-inheritance:
 
+
 mbodied.types.ndarray module
 ----------------------------
 
@@ -39,13 +57,14 @@ mbodied.types.ndarray module
    :undoc-members:
    :show-inheritance:
 
-mbodied.types.sample module
----------------------------
+mbodied.motion module
+--------------------------
 
-.. automodule:: mbodied.types.sample
+.. automodule:: mbodied.motion
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 Module contents
 ---------------
@@ -54,3 +73,5 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
+
+

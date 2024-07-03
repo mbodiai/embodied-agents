@@ -180,7 +180,7 @@ pip install mbodied[audio]
 
 ```python
 from mbodied.types.motion.control import HandControl, FullJointControl
-from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
+from mbodied.motion import AbsoluteMotionField, RelativeMotionField
 
 class FineGrainedHandControl(HandControl):
     comment: str = Field(None, description="A comment to voice aloud.")

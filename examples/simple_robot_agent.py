@@ -51,9 +51,12 @@ from gymnasium import spaces
 from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent
-from mbodied.agents.sense.audio.audio_agent import AudioAgent
+from mbodied.agents.sense.audio.audio_handler import AudioAgent
+from mbodied.types.sample import Sample
 from mbodied.data.recording import Recorder
 from mbodied.hardware.sim_interface import SimInterface
+from mbodied.types.motion.control import HandControl
+from mbodied.types.sense.vision import Image
 from mbodied.types.message import Message
 from mbodied.types.motion.control import HandControl
 from mbodied.types.sample import Sample

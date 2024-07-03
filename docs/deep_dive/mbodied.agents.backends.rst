@@ -45,7 +45,7 @@ mbodied.agents.backends.openvla\_backend module
    :show-inheritance:
 
 mbodied.agents.backends.serializer module
------------------------------------------
+------------------------------
 
 .. automodule:: mbodied.agents.backends.serializer
    :members:
@@ -59,3 +59,4 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
+
