@@ -62,7 +62,23 @@
     - [Customize a Motion to fit a robot's action space.](#customize-a-motion-to-fit-a-robots-action-space)
     - [Run a robotics transformer model on a robot.](#run-a-robotics-transformer-model-on-a-robot)
     - [Notebooks](#notebooks)
-  - [The Sample Class and Building Blocks](#the-sample-class-and-building-blocks)
+  - [The Sample Class](#the-sample-class)
+    - [💡 Did you know](#-did-you-know)
+      - [Creating a Sample](#creating-a-sample)
+      - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
+      - [Converting to Different Containers](#converting-to-different-containers)
+      - [Gym Space Integration](#gym-space-integration)
+  - [Building Blocks](#building-blocks)
+    - [Message](#message)
+    - [Backend](#backend)
+    - [Agent](#agent)
+    - [Language Agent](#language-agent)
+    - [Motor Agent](#motor-agent)
+    - [Sensory Agent](#sensory-agent)
+    - [Motions](#motions)
+    - [Hardware Interface](#hardware-interface)
+    - [Recorder](#recorder)
+    - [Replayer](#replayer)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
@@ -220,7 +236,7 @@ Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [
 
 MotorAgent with OpenVLA: [examples/motor_example_openvla.py](examples/motor_example_openvla.py)
 
-## The [Sample](mbodied/base/sample.py) Class and Building Blocks
+## The [Sample](mbodied/base/sample.py) Class
 
 The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extendable, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](mbodied/base/sample.py) class, you'll be able to convert to and from the following with ease:
 
@@ -231,7 +247,17 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 
 To learn more about all of the possibilities with embodied agents, check out the [documentation](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
-<details> <summary><h3 style="display: inline-block;">More Details</h3></summary>
+
+
+### 💡 Did you know
+
+- You can `pack` a list of `Sample`s or Dicts into a single `Sample` or `Dict` and `unpack` accordingly?
+- You can `unflatten` any python structure into a `Sample` class so long you provide it with a valid json schema?
+
+
+<details> <summary><h2 style="display: inline-block;">Deep Dive</h2></summary>
+
+## Building Blocks
 
 #### Creating a Sample
 
@@ -392,7 +418,7 @@ recorder = Recorder('example_recorder', out_dir='saved_datasets', observation_sp
 recorder.record(observation={'image': image, 'instruction': instruction,}, action=hand_control)
 ```
 
-The dataset is saved to `./saved_datasets`. Learn more about augmenting, and fine-tuning with this dataset by filling out this [form](https://forms.gle/rv5rovK93dLucma37).
+The dataset is saved to `./saved_datasets`.
 
 ### Replayer
 
