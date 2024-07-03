@@ -120,27 +120,3 @@ class ObjectPoseEstimator3D(SensoryAgent):
             camera_source=camera_source,
         )
         return result  # noqa: RET504
-
-    async def async_act(
-        self,
-        rgb_image_path: str,
-        depth_image_path: str,
-        camera_intrinsics: List[float] | np.ndarray,
-        distortion_coeffs: List[float] | None = None,
-        aruco_pose_world_frame: Pose6D | None = None,
-        object_classes: List[str] | None = None,
-        confidence_threshold: float | None = None,
-        using_realsense: bool = False,
-    ) -> Dict:
-        """Capture images using the RealSense camera, process them, and send a request to estimate object poses asynchronously."""
-        return await asyncio.to_thread(
-            self.act,
-            rgb_image_path,
-            depth_image_path,
-            camera_intrinsics,
-            distortion_coeffs,
-            aruco_pose_world_frame,
-            object_classes,
-            confidence_threshold,
-            using_realsense,
-        )
