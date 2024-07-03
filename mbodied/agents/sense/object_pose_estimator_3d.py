@@ -87,12 +87,6 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ...     using_realsense=False
             ... )
         """
-        if not isinstance(rgb_image, str):
-            rgb_image.save("resources/color_image.png")
-            
-        if not isinstance(depth_image, str):
-            depth_image.save("resources/depth_image.png")
-
         rgb_image_path = rgb_image.path
         depth_image_path = depth_image.path
 
