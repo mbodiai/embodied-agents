@@ -62,12 +62,12 @@ class ObjectPoseEstimator3D(SensoryAgent):
         self,
         rgb_image_path: str,
         depth_image_path: str,
-        camera_intrinsics: IntrinsicParameters = None,
-        distortion_coeffs: DistortionParameters = None,
-        aruco_pose_world_frame: Pose6D = None,
-        object_classes: SceneObjects = None,
-        confidence_threshold: float = None,
-        using_realsense: bool = False,
+        camera_intrinsics: IntrinsicParameters,
+        distortion_coeffs: DistortionParameters,
+        aruco_pose_world_frame: Pose6D,
+        object_classes: SceneObjects,
+        confidence_threshold: float,
+        using_realsense: bool,
     ) -> SceneData:
         """
         Capture images using the RealSense camera, process them, and send a request to estimate object poses.
