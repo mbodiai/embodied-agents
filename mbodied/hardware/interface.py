@@ -22,6 +22,7 @@ class HardwareInterface(ABC):
     control robots or other hardware devices.
     """
 
+    @abstractmethod
     def __init__(self, **kwargs):
         """Initializes the hardware interface.
 
@@ -31,7 +32,7 @@ class HardwareInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def do(self, *args, **kwargs) -> None: # noqa
+    def do(self, *args, **kwargs) -> None:  # noqa
         """Executes motion.
 
         Args:
@@ -39,7 +40,7 @@ class HardwareInterface(ABC):
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError
-    
+
     def fetch(self, *args, **kwargs) -> None:
         """Fetches data from the hardware.
 
@@ -48,7 +49,7 @@ class HardwareInterface(ABC):
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError
-    
+
     def capture(self, *args, **kwargs) -> None:
         """Captures continuous data from the hardware.
 
