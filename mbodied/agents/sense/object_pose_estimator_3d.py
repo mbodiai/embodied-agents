@@ -7,7 +7,7 @@ from gradio_client import Client, handle_file
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sense.vision import Image
-from mbodied.types.sense.camera import IntrinsicParameters, DistortionParameters
+from mbodied.types.sense.camera_params import IntrinsicParameters, DistortionParameters
 from mbodied.types.sense.world import SceneData, SceneObjects, ObjectsPose
 
 
