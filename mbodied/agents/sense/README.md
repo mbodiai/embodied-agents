@@ -7,12 +7,12 @@ It interacts with the Gradio server to process images and estimate object poses.
 
 ## Usage
 
-To use the sense function, instantiate the `ObjectPoseEstimator3D` class with the server URL and call the `sense` method with appropriate arguments. 
-For optimal results:
+To use the `act` method, instantiate the ObjectPoseEstimator3D class with the server URL and call the `act` method with appropriate arguments. For optimal results:
+
 - Use an image with an ArUco marker present.
-- Provide the path of the camera intrinsic mati and distortion coefficient list.
+- Provide the camera intrinsic parameters and distortion coefficients.
 - Provide the translation and rotational offsets required to align the ArUco marker frame with the base frame. If the ArUco marker is the base frame, provide `[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]`.
-- Provide a list of object names to detect in the image.
+- Provide a list of `object_classes` to detect in the image.
 
 ## Data Types
 
