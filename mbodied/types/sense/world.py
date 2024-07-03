@@ -1,23 +1,23 @@
-from typing import List, Optional, Any
+from typing import List
 from pydantic import  Field
 from mbodied.base.sample import Sample
 
 from mbodied.types.sense.vision import Image
-from mbodied.types.sense.camera import CameraParameters
 from functools import partial
+from mbodied.types.geometry import Pose6D
     
-class SceneObject(Sample):
-    """Model for Ground Truth Objects."""
-    rotation_object_to_camera: List[float] = Field(
-        default_factory= lambda: [0.0], description="Rotation matrix from model to camera coordinate system")
-    translation_object_to_camera: List[float] = Field(
-        default_factory=lambda: [0.0], description="Translation vector from model to camera coordinate system")
-    object_id: int = -1
-    shapenet_name: str = "unknown"
-    object_name: str = "unknown"
+class SceneObjects(Sample):
+    """Model for Scene Object."""
+    object_name: List[str] | str = Field(default_factory=str, description="Name of the object in the scene")
+
+class ObjectsPose(Sample):
+    """Model for Object Pose."""
+    object_pose: List[Pose6D] | Pose6D = Field(default_factory=Pose6D, description="Pose of the object with respect to a world frame")
+
 
 class SceneData(Sample):
     """Model for Scene Data."""
-    camera: CameraParameters = Field(default_factory=CameraParameters, description="Camera parameters")
-    objects: List[SceneObject] = Field(default_factory=lambda: [SceneObject()], description="List of objects in the scene")
-    image: Image | str = Field(default_factory=partial(Image, size=(224,224)), description="Image of the scene")
+    image: Image = Field(default_factory=partial(Image, size=(224,224)), description="Image of the scene")
+    objects: SceneObjects = Field(default_factory=lambda: [SceneObjects()], description="List of objects in the scene")
+    object_poses: ObjectsPose = Field(default_factory=lambda: [Pose6D()], description="List of object poses in the scene")
+
