@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 from pathlib import Path
+
 import click
-import json
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.agents.motion.openvla_agent import OpenVlaAgent
-from mbodied.agents.sense.audio.audio_handler import AudioAgent
+from mbodied.agents.sense.audio.audio_agent import AudioAgent
 from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.sense.vision import Image
 from mbodied.types.message import Message
+from mbodied.types.sense.vision import Image
 
 
 def get_image_from_camera() -> Image:

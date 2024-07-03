@@ -23,7 +23,7 @@ try:
     import pyaudio
 except ImportError:
     logging.warning("playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install.")
-    
+
 from openai import OpenAI
 from typing_extensions import Literal
 
@@ -38,9 +38,9 @@ class AudioAgent(Agent):
     It will then take input from the terminal.
 
     Usage:
-        audio_handler = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
-        audio_handler.speak("How can I help you?")
-        message = audio_handler.listen()
+        audio_agent = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
+        audio_agent.speak("How can I help you?")
+        message = audio_agent.listen()
     """
 
     mode = Literal["speak", "type", "speak_or_type"]

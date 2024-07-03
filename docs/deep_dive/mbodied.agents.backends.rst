@@ -12,6 +12,14 @@ mbodied.agents.backends.anthropic\_backend module
    :undoc-members:
    :show-inheritance:
 
+mbodied.agents.backends.gradio\_backend module
+----------------------------------------------
+
+.. automodule:: mbodied.agents.backends.gradio_backend
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mbodied.agents.backends.ollama\_backend module
 ----------------------------------------------
 
@@ -37,7 +45,7 @@ mbodied.agents.backends.openvla\_backend module
    :show-inheritance:
 
 mbodied.agents.backends.serializer module
-------------------------------
+-----------------------------------------
 
 .. automodule:: mbodied.agents.backends.serializer
    :members:
@@ -51,4 +59,3 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
-
