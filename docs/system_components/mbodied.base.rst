@@ -4,37 +4,31 @@ mbodied.base package
 Submodules
 ----------
 
-mbodied.base.agent module
+mbodied.agents module
 -------------------------
 
-.. automodule:: mbodied.base.agent
+.. automodule:: mbodied.agents
    :members:
    :undoc-members:
    :show-inheritance:
 
-mbodied.base.motion module
+mbodied.motion module
 --------------------------
 
-.. automodule:: mbodied.base.motion
+.. automodule:: mbodied.motion
    :members:
    :undoc-members:
    :show-inheritance:
 
-mbodied.base.sample module
+mbodied.types.sample module
 --------------------------
 
-.. automodule:: mbodied.base.sample
+.. automodule:: mbodied.types.sample
    :members:
    :undoc-members:
    :show-inheritance:
 
-mbodied.base.serializer module
-------------------------------
 
-.. automodule:: mbodied.base.serializer
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

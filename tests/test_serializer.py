@@ -15,10 +15,10 @@
 import numpy as np
 import pytest
 from pydantic import ValidationError
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 from mbodied.types.message import Message
 from mbodied.types.sense.vision import Image
-from mbodied.base.serializer import Serializer
+from mbodied.agents.backends.serializer import Serializer
 
 
 def test_serialize_string():

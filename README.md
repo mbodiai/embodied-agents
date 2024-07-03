@@ -179,8 +179,8 @@ pip install mbodied[audio]
 ### Customize a Motion to fit a robot's action space.
 
 ```python
-from mbodied.types.motion_controls import HandControl, FullJointControl
-from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
+from mbodied.types.motion.control import HandControl, FullJointControl
+from mbodied.motion import AbsoluteMotionField, RelativeMotionField
 
 class FineGrainedHandControl(HandControl):
     comment: str = Field(None, description="A comment to voice aloud.")

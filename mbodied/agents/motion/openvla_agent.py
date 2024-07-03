@@ -1,5 +1,5 @@
 from mbodied.agents.motion.motor_agent import MotorAgent
-from mbodied.types.motion_controls import HandControl, Motion
+from mbodied.types.motion.control import HandControl, Motion
 from mbodied.types.sense.vision import Image
 
 

@@ -19,7 +19,7 @@ import h5py
 from pathlib import Path
 from mbodied.data.replaying import Replayer, parse_slice
 from mbodied.data.recording import Recorder
-from mbodied.types.motion_controls import LocobotActionOrAnswer as ActionOrAnswer
+from mbodied.types.motion.control import LocobotActionOrAnswer as ActionOrAnswer
 from gymnasium import spaces
 import sys
 import logging

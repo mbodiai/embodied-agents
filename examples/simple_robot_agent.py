@@ -51,10 +51,10 @@ from gymnasium import spaces
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.agents.sense.audio.audio_handler import AudioAgent
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 from mbodied.data.recording import Recorder
 from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.motion_controls import HandControl
+from mbodied.types.motion.control import HandControl
 from mbodied.types.sense.vision import Image
 from mbodied.types.message import Message
 

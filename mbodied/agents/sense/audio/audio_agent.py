@@ -23,11 +23,11 @@ try:
     import pyaudio
 except ImportError:
     logging.warning("playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install.")
-
+    
 from openai import OpenAI
 from typing_extensions import Literal
 
-from mbodied.base.agent import Agent
+from mbodied.agents import Agent
 
 
 class AudioAgent(Agent):
@@ -76,6 +76,9 @@ class AudioAgent(Agent):
         if self.client is None:
             self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
             logging.info("OpenAI API key fetched from the environment key.")
+
+    def act(self, *args, **kwargs):
+        return self.listen(*args, **kwargs)
 
     def listen(self, keep_audio: bool = False, mode: str = "speak") -> str:
         """Listens for audio input and transcribes it using OpenAI's API.

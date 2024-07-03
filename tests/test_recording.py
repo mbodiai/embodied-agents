@@ -19,7 +19,7 @@ import os
 from gymnasium import spaces
 from gymnasium import spaces
 from mbodied.data.recording import Recorder, create_dataset_for_space_dict
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 from tempfile import TemporaryDirectory
 from mbodied.types.sense.vision import Image
 from PIL import Image as PILImage

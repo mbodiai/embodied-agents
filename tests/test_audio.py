@@ -14,7 +14,7 @@
 
 import pytest
 from unittest.mock import MagicMock, mock_open
-from mbodied.agents.sense.audio.audio_handler import AudioAgent
+from mbodied.agents.sense.audio.audio_agent import AudioAgent
 
 
 @pytest.fixture

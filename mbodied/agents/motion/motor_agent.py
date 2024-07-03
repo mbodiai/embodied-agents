@@ -14,8 +14,8 @@
 
 from abc import abstractmethod
 
-from mbodied.base.agent import Agent
-from mbodied.types.motion_controls import Motion
+from mbodied.agents import Agent
+from mbodied.types.motion import Motion
 
 
 class MotorAgent(Agent):
