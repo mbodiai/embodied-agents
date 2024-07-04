@@ -5,7 +5,6 @@ from gradio_client import Client, handle_file
 from PIL import Image as PILImage
 
 from mbodied.agents.sense.sensory_agent import SensoryAgent
-from mbodied.types.sample import Sample
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sample import Sample
 

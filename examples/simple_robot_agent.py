@@ -47,16 +47,11 @@ import os
 from pathlib import Path
 
 import click
-from gymnasium import spaces
 from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent
-from mbodied.agents.sense.audio.audio_handler import AudioAgent
-from mbodied.types.sample import Sample
-from mbodied.data.recording import Recorder
+from mbodied.agents.sense.audio.audio_agent import AudioAgent
 from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.motion.control import HandControl
-from mbodied.types.sense.vision import Image
 from mbodied.types.message import Message
 from mbodied.types.motion.control import HandControl
 from mbodied.types.sample import Sample
@@ -97,7 +92,7 @@ def get_image_from_camera() -> Image:
 @click.option("--backend_api_key", default=None, help="The API key for the backend, i.e. OpenAI, Anthropic")
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
 @click.option(
-    "--record_dataset", default="default", help="Recording action to take", type=click.Choice(["default", "omit"])
+    "--record_dataset", default="default", help="Recording action to take", type=click.Choice(["default", "omit"]),
 )
 def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset: bool) -> None:
     """Example for using LLMs for robot control. In this example, the language agent will perform double duty as both the cognitive and motor agent.

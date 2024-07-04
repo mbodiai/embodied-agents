@@ -23,9 +23,6 @@ import numpy as np
 from datasets import Dataset, DatasetInfo, Features, Image, Value
 from h5py import string_dtype
 from huggingface_hub import login
-from mbodied.types.sample import Sample
-from mbodied.data.utils import infer_features
-from mbodied.types.sense.vision import Image as MbImage
 from PIL import Image as PILImage
 
 from mbodied.data.utils import infer_features

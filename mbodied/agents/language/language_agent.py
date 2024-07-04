@@ -54,8 +54,6 @@ from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
 
 from mbodied.agents import Agent
 from mbodied.agents.backends import OpenAIBackend
-from mbodied.agents import Agent
-from mbodied.types.sample import Sample
 from mbodied.types.message import Message
 from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
@@ -228,11 +226,11 @@ class LanguageAgent(Agent):
     ) -> Sample:
         """Responds to the given instruction, image, and context asynchronously and parses the response into a Sample object."""
         return await asyncio.to_thread(
-            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs
+            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs,
         )
 
     def act(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs,
     ) -> str:
         """Responds to the given instruction, image, and context.
 

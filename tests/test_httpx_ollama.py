@@ -23,37 +23,36 @@ mock_response = "OpenAI response text"
 
 class FakeHttpx:
     class Response:
-        def __init__(self, content,*args, **kwargs):
+        def __init__(self, content, *args, **kwargs):
             self.content = content
             self.status_code = 200
-        
+
         def json(self):
             return {"message": {"content": self.content}}
-        
+
         def __call__(self, *args, **kwargs):
             return self
-        
-
 
     def stream(self, *args, **kwargs):
         return self
-    
+
     def iter_bytes(self):
         yield mock_response.encode()
-    
+
     def iter_text(self):
         yield mock_response
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, *args, **kwargs):
         pass
 
     def __init__(self, *args, **kwargs):
         self.post = self.Response(content=mock_response)
 
-@mock.patch('httpx.Client', FakeHttpx)
+
+@mock.patch("httpx.Client", FakeHttpx)
 def test_completion():
     print("Initializing OllamaBackend")
     # api_key = os.getenv("MBB_API_KEY")
@@ -65,11 +64,13 @@ def test_completion():
     response = wrapper._create_completion([Message(role="user", content=text)], model="llama3")
     assert response == mock_response
 
-@mock.patch('httpx.Client', FakeHttpx)
+
+@mock.patch("httpx.Client", FakeHttpx)
 def test_async_stream():
     wrapper = OllamaBackend()
     for chunk in wrapper._stream_completion([Message(role="user", content="Hello")], "llama3"):
         assert chunk == mock_response
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])

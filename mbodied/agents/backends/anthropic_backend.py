@@ -59,7 +59,7 @@ class AnthropicSerializer(Serializer):
 
 class AnthropicBackend(OpenAIBackendMixin):
     """Backend for interacting with Anthropic's API.
-    
+
     Attributes:
         api_key: The API key for the Anthropic service.
         client: The client for the Anthropic service.
@@ -82,7 +82,7 @@ class AnthropicBackend(OpenAIBackendMixin):
         """
         self.api_key = api_key
         self.client = client
-        
+
         self.model = kwargs.pop("model", self.DEFAULT_MODEL)
         if self.client is None:
             self.client = anthropic.Anthropic(api_key=self.api_key)

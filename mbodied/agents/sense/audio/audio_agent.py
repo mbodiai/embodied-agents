@@ -23,7 +23,7 @@ try:
     import pyaudio
 except ImportError:
     logging.warning("playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install.")
-    
+
 from openai import OpenAI
 from typing_extensions import Literal
 

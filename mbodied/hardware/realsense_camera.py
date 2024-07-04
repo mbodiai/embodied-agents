@@ -69,7 +69,7 @@ class RealsenseCamera:
                 intrinsics.model = rs.distortion.inverse_brown_conrady
 
                 intrinsics_matrix = np.array(
-                    [[intrinsics.fx, 0, intrinsics.ppx], [0, intrinsics.fy, intrinsics.ppy], [0, 0, 1]]
+                    [[intrinsics.fx, 0, intrinsics.ppx], [0, intrinsics.fy, intrinsics.ppy], [0, 0, 1]],
                 )
 
                 return color_image, depth_image, intrinsics, intrinsics_matrix
@@ -101,9 +101,9 @@ class RealsenseCamera:
         for key, value in intrinsics_dict.items():
             if isinstance(value, np.ndarray):
                 intrinsics_dict[key] = value.tolist()
-            elif isinstance(value, (bytes, bytearray)):
+            elif isinstance(value, bytes | bytearray):
                 intrinsics_dict[key] = value.decode()
-            elif isinstance(value, object) and not isinstance(value, (int, float, str, list, dict, bool, type(None))):
+            elif isinstance(value, object) and not isinstance(value, int | float | str | list | dict | bool | type(None)):
                 intrinsics_dict[key] = str(value)
 
         return intrinsics_dict
@@ -120,8 +120,7 @@ class RealsenseCamera:
         """
         intrinsics_dict = RealsenseCamera.serialize_intrinsics(intrinsics)
         intrinsics_json = json.dumps(intrinsics_dict)
-        intrinsics_base64 = base64.b64encode(intrinsics_json.encode("utf-8")).decode("utf-8")
-        return intrinsics_base64
+        return base64.b64encode(intrinsics_json.encode("utf-8")).decode("utf-8")
 
     @staticmethod
     def base64_to_intrinsics(base64_str: str) -> rs.intrinsics:
@@ -159,7 +158,7 @@ class RealsenseCamera:
 
     @staticmethod
     def matrix_and_distortion_to_intrinsics(
-        image_height: int, image_width: int, matrix: np.ndarray, coeffs: np.ndarray
+        image_height: int, image_width: int, matrix: np.ndarray, coeffs: np.ndarray,
     ) -> rs.intrinsics:
         """Convert a 3x3 intrinsic matrix and a 1x5 distortion coefficients array to an rs.intrinsics object.
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Literal
+from typing import Literal
 
 import torch
 from transformers import AutoModelForVision2Seq, AutoProcessor

@@ -1,11 +1,11 @@
 # Copyright 2024 Mbodi AI
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,13 +29,13 @@ image.save("path/to/new/image.jpg", quality=5)
 
 TODO: Implement Lazy attribute loading for the image data.
 """
+
 import base64 as base64lib
-import importlib
 import io
+import logging
 from pathlib import Path
-from typing import Annotated, Any, Optional, Tuple, Union
+from typing import Any, Tuple, Union
 from urllib.parse import urlparse
-from urllib.request import urlopen
 
 import numpy as np
 from datasets.features import Features
@@ -50,8 +50,6 @@ from pydantic import (
     Field,
     FilePath,
     InstanceOf,
-    PrivateAttr,
-    field_serializer,
     model_serializer,
     model_validator,
 )
@@ -61,7 +59,6 @@ from mbodied.types.ndarray import NumpyArray
 from mbodied.types.sample import Sample
 
 SupportsImage = Union[np.ndarray, PILImage, Base64Str, AnyUrl, FilePath]  # noqa: UP007
-
 
 
 class Image(Sample):
@@ -90,24 +87,22 @@ class Image(Sample):
         >>> array = Image(image).array
         >>> base64 = Image(image).base64
     """
-    model_config: ConfigDict = ConfigDict(
-        arbitrary_types_allowed=True, extras="forbid", validate_assignment=False)
+
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True, extras="forbid", validate_assignment=False)
 
     array: NumpyArray
-    size: tuple[int, int] 
-    
+    size: tuple[int, int]
+
     pil: InstanceOf[PILImage] | None = Field(
         None,
         repr=False,
         exclude=True,
         description="The image represented as a PIL Image object.",
     )
-    encoding: Literal["png", "jpeg", "jpg",
-                      "bmp", "gif"] 
-    base64: Optional[InstanceOf[Base64Str]] = None
-    url: Optional[InstanceOf[AnyUrl] | str] = None
+    encoding: Literal["png", "jpeg", "jpg", "bmp", "gif"]
+    base64: InstanceOf[Base64Str] | None = None
+    url: InstanceOf[AnyUrl] | str | None = None
     path: FilePath | None = None
-
 
     @classmethod
     def supports(cls, arg: SupportsImage) -> bool:
@@ -192,7 +187,7 @@ class Image(Sample):
         return f"Image(base64={self.base64[:10]}..., encoding={self.encoding}, size={self.size})"
 
     @staticmethod
-    def from_base64(base64_str: str, encoding: str, size=None) -> 'Image':
+    def from_base64(base64_str: str, encoding: str, size=None) -> "Image":
         """Decodes a base64 string to create an Image instance.
 
         Args:
@@ -208,7 +203,7 @@ class Image(Sample):
         return Image(image, encoding, size)
 
     @staticmethod
-    def open(path: str, encoding: str = 'jpeg', size=None) -> 'Image':
+    def open(path: str, encoding: str = "jpeg", size=None) -> "Image":
         """Opens an image from a file path.
 
         Args:
@@ -254,7 +249,7 @@ class Image(Sample):
         }
 
     @staticmethod
-    def load_url(url: str) -> PILImage | None:
+    def load_url(url: str, download=False) -> PILImage | None:
         """Downloads an image from a URL or decodes it from a base64 data URI.
 
         Args:
@@ -268,25 +263,34 @@ class Image(Sample):
             base64_str = url.split(";base64", 1)[1]
             image_data = base64lib.b64decode(base64_str)
             return PILModule.open(io.BytesIO(image_data)).convert("RGB")
-        else:
-            try:
-                # Open the URL and read the image data
-                import urllib.request
 
-                user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-                headers={'User-Agent':user_agent,} 
+        try:
+            # Open the URL and read the image data
+            import urllib.request
 
-                request=urllib.request.Request(url,None,headers) #The assembled request
-                response = urllib.request.urlopen(request)
-                data = response.read() # The data u need
-                return PILModule.open(io.BytesIO(data)).convert("RGB")
-            except Exception as e:
-                logging.warning(f"Failed to load image from URL: {url}. {e}")
-                logging.warning(f"Not validating the Image data")
-                return None
+            user_agent = (
+                "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7"
+            )
+            headers = {
+                "User-Agent": user_agent,
+            }
+            if download:
+                accept = input("Do you want to download the image? (y/n): ")
+                if "y" not in accept.lower():
+                    return None
+            if not url.startswith("http"):
+                raise ValueError("URL must start with 'http' or 'https'.")
+            request = urllib.request.Request(url, None, headers)  # The assembled request
+            response = urllib.request.urlopen(request)
+            data = response.read()  # The data u need
+            return PILModule.open(io.BytesIO(data)).convert("RGB")
+        except Exception as e:
+            logging.warning(f"Failed to load image from URL: {url}. {e}")
+            logging.warning("Not validating the Image data")
+            return None
 
     @classmethod
-    def from_bytes(cls, bytes_data: bytes, encoding: str = "jpeg", size=None) -> 'Image':
+    def from_bytes(cls, bytes_data: bytes, encoding: str = "jpeg", size=None) -> "Image":
         """Creates an Image instance from a bytes object.
 
         Args:
@@ -299,7 +303,7 @@ class Image(Sample):
         """
         image = PILModule.open(io.BytesIO(bytes_data)).convert("RGB")
         return cls(image, encoding, size)
-    
+
     @staticmethod
     def bytes_to_data(bytes_data: bytes, encoding: str = "jpeg", size=None) -> dict:
         """Creates an Image instance from a bytes object.
@@ -314,8 +318,6 @@ class Image(Sample):
         """
         image = PILModule.open(io.BytesIO(bytes_data)).convert("RGB")
         return Image.pil_to_data(image, encoding, size)
-    
-    
 
     @model_validator(mode="before")
     @classmethod
@@ -340,49 +342,41 @@ class Image(Sample):
 
         # Validate the encoding first
         if validated_values["encoding"] not in ["png", "jpeg", "jpg", "bmp", "gif"]:
-            raise ValueError(
-                "The 'encoding' must be a valid image format (png, jpeg, jpg, bmp, gif).")
+            raise ValueError("The 'encoding' must be a valid image format (png, jpeg, jpg, bmp, gif).")
 
         if "bytes" in values and values["bytes"] is not None:
-            validated_values.update(cls.bytes_to_data(
-                values["bytes"], values["encoding"], values["size"]))
+            validated_values.update(cls.bytes_to_data(values["bytes"], values["encoding"], values["size"]))
             return validated_values
-            
+
         if "pil" in values and values["pil"] is not None:
             validated_values.update(
-                cls.pil_to_data(
-                    values["pil"], values["encoding"], values["size"]),
+                cls.pil_to_data(values["pil"], values["encoding"], values["size"]),
             )
             return validated_values
         # Process the provided image source
         if "path" in provided_fields:
             image = PILModule.open(values["path"]).convert("RGB")
             validated_values["path"] = values["path"]
-            validated_values.update(cls.pil_to_data(
-                image, validated_values["encoding"], validated_values["size"]))
+            validated_values.update(cls.pil_to_data(image, validated_values["encoding"], validated_values["size"]))
 
         elif "array" in provided_fields:
             image = PILModule.fromarray(values["array"]).convert("RGB")
-            validated_values.update(cls.pil_to_data(
-                image, validated_values["encoding"], validated_values["size"]))
+            validated_values.update(cls.pil_to_data(image, validated_values["encoding"], validated_values["size"]))
 
         elif "pil" in provided_fields:
             validated_values.update(
-                cls.pil_to_data(
-                    values["pil"], validated_values["encoding"], validated_values["size"]),
+                cls.pil_to_data(values["pil"], validated_values["encoding"], validated_values["size"]),
             )
 
         elif "base64" in provided_fields:
             validated_values.update(
-                cls.from_base64(
-                    values["base64"], validated_values["encoding"], validated_values["size"]),
+                cls.from_base64(values["base64"], validated_values["encoding"], validated_values["size"]),
             )
 
         elif "url" in provided_fields:
             url_path = urlparse(values["url"]).path
             file_extension = (
-                Path(url_path).suffix[1:].lower() if Path(
-                    url_path).suffix else validated_values["encoding"]
+                Path(url_path).suffix[1:].lower() if Path(url_path).suffix else validated_values["encoding"]
             )
             validated_values["encoding"] = file_extension
             image = cls.load_url(values["url"])
@@ -390,22 +384,19 @@ class Image(Sample):
                 validated_values["array"] = np.zeros((224, 224, 3), dtype=np.uint8)
                 validated_values["size"] = (224, 224)
                 return validated_values
-         
-            validated_values.update(cls.pil_to_data(
-                image, file_extension, validated_values["size"]))
+
+            validated_values.update(cls.pil_to_data(image, file_extension, validated_values["size"]))
             validated_values["url"] = values["url"]
-        
+
         elif "size" in values and values["size"] is not None:
             array = np.zeros((values["size"][0], values["size"][1], 3), dtype=np.uint8)
             image = PILModule.fromarray(array).convert("RGB")
-            validated_values.update(cls.pil_to_data(
-                image, validated_values["encoding"], validated_values["size"]))
+            validated_values.update(cls.pil_to_data(image, validated_values["encoding"], validated_values["size"]))
         if any(validated_values[k] is None for k in ["array", "base64", "pil", "url"]):
             logging.warning(
                 f"Failed to validate image data. Could only fetch {[k for k in validated_values if validated_values[k] is not None]}",
             )
         return validated_values
-    
 
     def save(self, path: str, encoding: str | None = None, quality: int = 10) -> None:
         """Save the image to the specified path.
@@ -433,11 +424,14 @@ class Image(Sample):
         self.path = path  # Update the path attribute to the new file path
 
     def show(self) -> None:
-        import matplotlib
         import platform
+
+        import matplotlib
+
         if platform.system() == "Darwin":
             matplotlib.use("TkAgg")
         import matplotlib.pyplot as plt
+
         plt.imshow(self.array)
 
     def space(self) -> spaces.Box:
@@ -445,25 +439,15 @@ class Image(Sample):
         if self.size is None:
             raise ValueError("Image size is not defined.")
         return spaces.Box(low=0, high=255, shape=(*self.size, 3), dtype=np.uint8)
-    
 
     @model_serializer(mode="plain", when_used="json")
     def exclude_pil(self) -> dict:
         """Convert the image to a base64 encoded string."""
         if self.base64 in self.url:
-            return {
-                "size": self.size,
-                "url": self.url,
-                "encoding": self.encoding
-            }
-        return {
-            "base64": self.base64,
-            "size": self.size,
-            "url": self.url,
-            "encoding": self.encoding
-        }
-    
-    def dump(self, *args, as_field: str|None = None, **kwargs) -> dict | Any:
+            return {"size": self.size, "url": self.url, "encoding": self.encoding}
+        return {"base64": self.base64, "size": self.size, "url": self.url, "encoding": self.encoding}
+
+    def dump(self, *args, as_field: str | None = None, **kwargs) -> dict | Any:
         """Return a dict or a field of the image."""
         if as_field is not None:
             return getattr(self, as_field)
@@ -472,13 +456,9 @@ class Image(Sample):
             "base64": self.base64,
             "size": self.size,
             "url": self.url,
-            "encoding": self.encoding
+            "encoding": self.encoding,
         }
 
     def infer_features_dict(self) -> Features:
         """Infer features of the image."""
         return HFImage()
-
-
-
-    

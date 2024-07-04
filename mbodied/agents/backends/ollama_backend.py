@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+from typing import Any
+
 from mbodied.agents.backends.httpx_backend import HttpxBackend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
 from mbodied.types.sense.vision import Image
 
-import httpx
-import backoff
-
-from typing import Any, List, Optional
 
 class OllamaSerializer(Serializer):
     """Serializer for Ollama-specific data formats."""
@@ -40,53 +37,31 @@ class OllamaSerializer(Serializer):
     def serialize_msg(cls, message: Message) -> dict[str, Any]:
         """Serializes a message to the Ollama format."""
         images = [cls.serialize_image(im) for im in message.content if isinstance(im, Image)]
-        texts = '.'.join([txt for txt in message.content if isinstance(txt, str)])
+        texts = ".".join([txt for txt in message.content if isinstance(txt, str)])
         return {
             "role": message.role,
             "content": texts,
             "images": images,
         }
-    
+
     @classmethod
     def extract_response(cls, response: dict[str, Any]) -> str:
         """Extracts the response from the Ollama format."""
         return response["message"]["content"]
-        
+
 
 class OllamaBackend(HttpxBackend):
     """Backend for interacting with Ollama's API."""
+
     INITIAL_CONTEXT = [
         Message(role="system", content="You are a robot with advanced spatial reasoning."),
     ]
-    DEFAULT_MODEL = "llava"  
+    DEFAULT_MODEL = "llava"
     SERIALIZER = OllamaSerializer
     DEFAULT_SRC = "http://localhost:11434/api/chat/"
 
-    def __init__(self, api_key: str | None=None, model_src: str = None):
+    def __init__(self, api_key: str | None = None, model_src: str = None):
         """Initializes an OllamaBackend instance."""
-        print("Initializing OllamaBackend")
-        super().__init__(api_key, model_src=self.DEFAULT_SRC)
-        
+        model_sr = model_src or self.DEFAULT_SRC
+        super().__init__(api_key, model_src=model_sr)
 
-
-
-
-if __name__ == "__main__":
-
-    print("Initializing OllamaBackend")
-    # api_key = os.getenv("MBB_API_KEY")
-    wrapper = OllamaBackend()
-    image_url = "https://v0.docs.reka.ai/_images/000000245576.jpg"
-    text = "What animal is this? Answer briefly."
-    print("Sending message to Ollama model...")
-    # Synchronous usage
-    response = wrapper._create_completion([Message(role="user", content=text)], model="llama3")
-    print(response)
-
-    # Asynchronous usage
-    import asyncio
-    # asyncio.run(wrapper.post_message_async(image_url, text))
-
-    # Asynchronous streaming usage
-    for chunk in wrapper._stream_completion([Message(role="user", content="Hello")], "llama3"):
-        print(chunk)

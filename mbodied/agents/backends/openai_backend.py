@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from typing import Any, List, Optional
+from typing import Any, List
 
 import backoff
 import httpx
@@ -93,6 +93,7 @@ class OpenAIBackendMixin:
         self.client = client
         if self.client is None:
             from openai import OpenAI
+
             kwargs.pop("model_src", None)
             self.client = OpenAI(api_key=self.api_key, **kwargs)
         self.serialized = OpenAISerializer
@@ -128,7 +129,7 @@ class OpenAIBackendMixin:
         ERRORS,
         max_tries=3,
     )
-    def act(self, message: Message, context: List[Message] | None = None, model: Optional[Any] = None, **kwargs) -> str:
+    def act(self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs) -> str:
         """Create a completion based on the given message and context.
 
         Args:

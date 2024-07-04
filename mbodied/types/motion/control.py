@@ -18,7 +18,6 @@ import numpy as np
 from gymnasium import spaces
 from pydantic import Field
 
-from mbodied.types.motion import Motion, MotionField
 from mbodied.types.geometry import LocationAngle, Pose, Pose6D
 from mbodied.types.motion import Motion, MotionField
 
@@ -75,10 +74,10 @@ class HandControl(Motion):
 
 class HeadControl(Motion):
     tilt: JointControl = MotionField(
-        default_factory=lambda: JointControl(), description="Tilt of the robot head in radians (down is negative)."
+        default_factory=lambda: JointControl(), description="Tilt of the robot head in radians (down is negative).",
     )
     pan: JointControl = MotionField(
-        default_factory=lambda: JointControl(), description="Pan of the robot head in radians (left is negative)."
+        default_factory=lambda: JointControl(), description="Pan of the robot head in radians (left is negative).",
     )
 
 
