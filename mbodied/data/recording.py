@@ -266,7 +266,7 @@ class Recorder:
                     setattr(sample, key, recursive_setarray(value))
             return sample
 
-        if observation:
+        if observation is not None:
             if not hasattr(observation, "dict"):
                 observation = Sample(observation)
                 observation = recursive_setarray(observation)  # Bug hacky fix for Image recording.
@@ -276,7 +276,7 @@ class Recorder:
                 self.root_keys += new_root_keys
                 self.root_spaces += new_root_spaces
             self.record_timestep(self.file["observation"], observation, self.index)
-        if action:
+        if action is not None:
             if not hasattr(action, "dict"):
                 action = Sample(action)
                 action = recursive_setarray(action)  # Bug hacky fix for Image recording.
@@ -286,7 +286,7 @@ class Recorder:
                 self.root_keys += new_root_keys
                 self.root_spaces += new_root_spaces
             self.record_timestep(self.file["action"], action, self.index)
-        if supervision:
+        if supervision is not None:
             if not hasattr(supervision, "dict"):
                 supervision = Sample(supervision)
                 supervision = recursive_setarray(supervision)  # Bug hacky fix for Image recording.
