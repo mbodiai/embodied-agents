@@ -81,7 +81,7 @@ allow-direct-references = true
 "resources" = "mbodied/resources"
 
 [tool.hatch.envs.default]
-python = "3.12"
+python = "3.11"
 path = ".mbodied/envs/mbodied"
 
 
