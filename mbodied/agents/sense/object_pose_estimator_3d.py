@@ -87,9 +87,22 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ...     using_realsense=False
             ... )
         """
-        rgb_image_path = rgb_image.path
-        depth_image_path = depth_image.path
 
+        if not isinstance(rgb_image, Image):
+            raise TypeError("RGB image must be an instance of Image.")
+        if not isinstance(depth_image, Image):
+            raise TypeError("Depth image must be an instance of Image.")
+        
+         # Handle RGB image
+        if rgb_image.path is None:
+            rgb_image.save("resources/color_image.png")
+        rgb_image_path = rgb_image.path
+
+        # Handle depth image
+        if depth_image.path is None:
+            depth_image.save("resources/depth_image.png")
+        depth_image_path = depth_image.path
+        
         if camera_intrinsics is None:
             camera_intrinsics = IntrinsicParameters(focal_length_x=911.0, focal_length_y=911.0, optical_center_x=653.0, optical_center_y=371.0)
             raise ValueError("Camera intrinsics are required.")
