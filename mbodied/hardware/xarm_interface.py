@@ -14,13 +14,15 @@
 
 import math
 
+from gymnasium import spaces
 from xarm.wrapper import XArmAPI
 
-from mbodied.hardware.interface import HardwareInterface
+from mbodied.hardware.recording_interface import RecordingHardwareInterface
 from mbodied.types.motion.control import HandControl
+from mbodied.types.sense.vision import Image
 
 
-class XarmInterface(HardwareInterface):
+class XarmInterface(RecordingHardwareInterface):
     """Control the xArm robot arm with SDK.
 
     Usage:
@@ -33,12 +35,23 @@ class XarmInterface(HardwareInterface):
         home_pos: The home position of the robot arm.
     """
 
-    def __init__(self, ip: str = "192.168.1.228"):
+    def __init__(self, ip: str = "192.168.1.228", record=False):
         """Initializes the XarmInterface and sets up the robot arm.
 
         Args:
             ip: The IP address of the xArm robot.
+            record: Whether to record the state of the robot arm to dataset.
         """
+        if record:
+            recorder_kwargs = {
+                "name": "xarm_record",
+                "observation_space": spaces.Dict(
+                    {"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)},
+                ),
+                "action_space": HandControl().space(),
+                "out_dir": "xarm_dataset",
+            }
+            super().__init__(**recorder_kwargs)
         self.ip = ip
 
         self.arm = XArmAPI(self.ip)
@@ -53,7 +66,7 @@ class XarmInterface(HardwareInterface):
         self.arm.set_gripper_mode(0)
 
         self.home_pos = [300, 0, 325, -180, 0, 0]
-        self.arm.set_position(*self.home_pos, wait=True, speed=300)
+        self.arm.set_position(*self.home_pos, wait=True, speed=200)
         self.arm.set_gripper_position(800, wait=True)
 
     def do(self, motion: HandControl) -> None:
@@ -72,15 +85,23 @@ class XarmInterface(HardwareInterface):
         current_pos[4] += math.degrees(motion.pose.pitch)
         current_pos[5] += math.degrees(motion.pose.yaw)
 
-        self.arm.set_position(*current_pos, wait=False, speed=300)
+        self.arm.set_position(*current_pos, wait=False, speed=200)
+        self.arm.set_gripper_position(motion.grasp.value * 800, wait=False)
 
-        if motion.grasp.value < 0.5:
-            self.arm.set_gripper_position(0, wait=True)
-        elif motion.grasp.value >= 0.5:
-            self.arm.set_gripper_position(800, wait=True)
+    def set_pose(self, motion: HandControl) -> None:
+        """Sets the robot arm to a given absolute HandControl pose."""
+        current_pos = self.arm.get_position()[1]
+        current_pos[0] = motion.pose.x * 1000
+        current_pos[1] = motion.pose.y * 1000
+        current_pos[2] = motion.pose.z * 1000
+        current_pos[3] = math.degrees(motion.pose.roll)
+        current_pos[4] = math.degrees(motion.pose.pitch)
+        current_pos[5] = math.degrees(motion.pose.yaw)
+        self.arm.set_position(*current_pos, wait=True, speed=200)
+        self.arm.set_gripper_position(motion.grasp.value * 800, wait=True)
 
-    def get_pose(self) -> list[float]:
-        """Gets the current pose of the robot arm.
+    def get_pose(self) -> HandControl:
+        """Gets the current pose (absolute HandControl) of the robot arm.
 
         Returns:
             A list of the current pose values [x, y, z, r, p, y].
@@ -92,4 +113,11 @@ class XarmInterface(HardwareInterface):
         current_pos[3] = round(math.radians(current_pos[3]), 6)
         current_pos[4] = round(math.radians(current_pos[4]), 6)
         current_pos[5] = round(math.radians(current_pos[5]), 6)
-        return current_pos
+
+        hand_control = current_pos.copy()
+        hand_control.append(self.arm.get_gripper_position()[1] / 800)
+        return HandControl.unflatten(hand_control)
+
+    def capture(self) -> Image:
+        """Captures an image from the robot camera. Placeholder for real camera input."""
+        return Image(size=(224, 224))

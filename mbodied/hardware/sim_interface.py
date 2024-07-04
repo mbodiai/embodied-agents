@@ -19,7 +19,7 @@ from mbodied.types.sense.vision import Image
 
 class SimInterface(HardwareInterface):
     """A simulated interface for testing and validating purposes.
-    
+
     This class simulates the interface between the robot arm and the control system.
 
     Attributes:
@@ -60,7 +60,7 @@ class SimInterface(HardwareInterface):
             list[float]: A list of the current pose values [x, y, z, r, p, y, grasp].
         """
         return self.current_pos
-    
+
     def capture(self, **_) -> Image:
         """Captures an image."""
-        return Image(size=(224,224))
+        return Image(size=(224, 224))
