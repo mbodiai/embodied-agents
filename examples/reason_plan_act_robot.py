@@ -85,9 +85,11 @@ def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset
     response = cognitive_agent.act(instruction, get_image_from_camera())
     response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
     plans = json.loads(response)
+    print("Cognitive agent's plan: ", plans)  # noqa: T201
 
     # Execute the plan from cognitive agent with motor agent.
     for step in plans:
+        print("\nMotor agent is executing step: ", step, "\n")  # noqa: T201
         counter = 5  # A counter for testing purposes only as done signal.
         while True:
             hand_control = motor_agent.act(step, get_image_from_camera())

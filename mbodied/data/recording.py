@@ -176,6 +176,7 @@ class Recorder:
 
         self.image_keys_to_save = image_keys_to_save
         self.index = 0
+        logging.info("Recording dataset to", self.filename)
 
     def configure_root_spaces(self, **spaces: spaces.Dict):
         """Configure the root spaces.

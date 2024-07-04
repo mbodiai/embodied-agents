@@ -29,7 +29,7 @@ class Vision2SeqBackend(Serializer):
 class Vision2SeqBackend(Backend):
     """Vision2SeqBackend backend that runs locally to generate robot actions.
 
-    Beware of the memory requirements of 8B+ parameter models like OpenVLA.
+    Beware of the memory requirements of 7B+ parameter models like OpenVLA.
 
     Attributes:
         model_id (str): The model to use for the OpenVLA backend.

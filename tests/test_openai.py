@@ -61,10 +61,10 @@ class FakeOpenAI:
 
 
 # Test the OpenAIBackend create_completion method
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_openai_backend_create_completion(mock_openai_act):
     backend = OpenAIBackend(api_key="fake_openai_api_key", model_src="openai")
-    response = backend.act(Message("hi"), context=[])
+    response = backend.predict(Message("hi"), context=[])
     assert response == mock_openai_response
 
 
