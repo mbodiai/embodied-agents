@@ -53,7 +53,7 @@ def test_initialization(mock_xarm_api, xarm):
     mock_xarm_api.set_gripper_mode.assert_called_with(0)
     mock_xarm_api.set_gripper_enable.assert_called_with(True)
     mock_xarm_api.set_gripper_speed.assert_called_with(1000)
-    mock_xarm_api.set_position.assert_called_with(300, 0, 325, -180, 0, 0, wait=True, speed=300)
+    mock_xarm_api.set_position.assert_called_with(300, 0, 325, -180, 0, 0, wait=True, speed=200)
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
 
@@ -74,8 +74,8 @@ def test_do(mock_xarm_api, xarm):
         0 + math.degrees(0.3),
     ]
 
-    mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=300)
-    mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
+    mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=200)
+    mock_xarm_api.set_gripper_position.assert_called_with(480.0, wait=False)
 
 
 def test_get_pose(mock_xarm_api, xarm):
@@ -83,8 +83,9 @@ def test_get_pose(mock_xarm_api, xarm):
 
     pose = xarm.get_pose()
 
-    expected_pose = [0.3, 0.0, 0.325, round(math.radians(-180), 6), 0.0, 0.0]
-    assert pose == expected_pose
+    expected_pose = [0.3, 0.0, 0.325, round(math.radians(-180), 6), 0.0, 0.0, 1.0]
+    hand_pose = HandControl.unflatten(expected_pose)
+    assert pose == hand_pose
 
 
 if __name__ == "__main__":
