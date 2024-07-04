@@ -40,7 +40,6 @@ class Agent:
     ACTOR_MAP = {
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
-        "gradio": GradioBackend,
         "ollama": OllamaBackend,
     }
 
@@ -69,18 +68,17 @@ class Agent:
             model_src: The model source to use.
             model_kwargs: The additional arguments to pass to the model.
         """
-        if repo_exists(model_src) or repo_exists(model_src.split("https://huggingface.co/")[1]):
-            try:
-                backend = GradioBackend(model_src=model_src, **model_kwargs)
-                return backend
-            except Exception as e:
-                logging.warning(f"Tried loading model from {model_src}: {e}. Using httpx backend.")
-           
         try:
-            backend = HttpxBackend(model_src=model_src, **model_kwargs)
+            backend = GradioBackend(model_src=model_src, **model_kwargs)
             return backend
         except Exception as e:
-            raise ValueError(f"Could not load model from {model_src}. Ensure the repo exists on HuggingFace or a valid Http endpoint is provided.")
+            logging.error(f"Failed to initialize Gradio backend: {e}. Defaulting to Httpx backend. Ensure that the source is a valid http endpoint.")
+            try:
+                backend = HttpxBackend(model_src=model_src, **model_kwargs)
+                return backend
+            except Exception as e:
+                logging.error(f"Failed to initialize Httpx backend: {e}.")
+                raise ValueError(f"Failed to initialize backend for model source: {model_src}. Pleases select one of {Agent.ACTOR_MAP.keys()} or valid huggingface space or http endpoint.")
 
     def __init__(
         self,
