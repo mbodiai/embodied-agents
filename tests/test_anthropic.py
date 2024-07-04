@@ -49,7 +49,7 @@ def anthropic_backend(anthropic_api_key):
 
 
 def test_anthropic_backend_create_completion(anthropic_backend):
-    response = anthropic_backend.act(Message("hi"), context=[])
+    response = anthropic_backend.predict(Message("hi"), context=[])
     assert response == mock_anthropic_response
 
 
