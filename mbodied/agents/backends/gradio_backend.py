@@ -15,8 +15,10 @@
 from gradio_client import Client
 from gradio_client.client import Job
 
+from mbodied.agents.backends.backend import Backend
 
-class GradioBackend:
+
+class GradioBackend(Backend):
     """Gradio backend that handles connections to gradio servers."""
 
     def __init__(
@@ -27,7 +29,7 @@ class GradioBackend:
         self.model_src = model_src
         self.client = Client(src=model_src, **kwargs)
 
-    def act(self, *args, **kwargs) -> str:
+    def predict(self, *args, **kwargs) -> str:
         """Forward queries to the gradio api endpoint `predict`.
 
         Args:

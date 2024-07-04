@@ -42,6 +42,8 @@ class Agent:
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
         "ollama": OllamaBackend,
+        "gradio": GradioBackend,
+        "http": HttpxBackend,
     }
 
     @staticmethod
@@ -89,7 +91,6 @@ class Agent:
         api_key: str = None,
         model_src=None,
         model_kwargs=None,
-        local_only: bool = False,
     ):
         """Initialize the agent, optionally setting up a recorder, remote actor, or loading a local model.
 
@@ -118,8 +119,6 @@ class Agent:
         self.actor = None
         if Path(model_src).exists():
             self.load_model(model_src, **model_kwargs)
-        elif local_only:
-            raise ValueError("'local_only' requested yet model source not found.")
         else:
             self.actor: Backend = self.init_backend(model_src, model_kwargs, api_key)
 

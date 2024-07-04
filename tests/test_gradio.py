@@ -20,7 +20,7 @@ def test_act():
         mock_instance.predict.return_value = expected_result
         backend = GradioBackend(model_src="http://fake-server.com")
 
-        result = backend.act(*test_args, **test_kwargs)
+        result = backend.predict(*test_args, **test_kwargs)
 
         mock_instance.predict.assert_called_once_with(*test_args, **test_kwargs)
         assert result == expected_result

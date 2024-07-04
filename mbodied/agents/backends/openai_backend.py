@@ -64,7 +64,6 @@ class OpenAISerializer(Serializer):
         """
         return {"type": "text", "text": text}
 
-
 class OpenAIBackendMixin:
     """Backend for interacting with OpenAI's API.
 
@@ -129,7 +128,7 @@ class OpenAIBackendMixin:
         ERRORS,
         max_tries=3,
     )
-    def act(self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs) -> str:
+    def predict(self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs) -> str:
         """Create a completion based on the given message and context.
 
         Args:

@@ -28,7 +28,7 @@ mock_return_value = "test"
 def test_openai_backend_create_completion_success(mock_create):
     api_key = "test"
     backend = OpenAIBackend(api_key=api_key)
-    result = backend.act(Message(content="test"), [Message(content="Test message")])
+    result = backend.predict(Message(content="test"), [Message(content="Test message")])
     assert result == mock_return_value
     mock_create.assert_called_once()
 

@@ -17,6 +17,7 @@ from typing import Literal
 import torch
 from transformers import AutoModelForVision2Seq, AutoProcessor
 
+from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.sense.vision import Image
 
@@ -25,7 +26,7 @@ class Vision2SeqBackend(Serializer):
     pass
 
 
-class Vision2SeqBackend:
+class Vision2SeqBackend(Backend):
     """Vision2SeqBackend backend that runs locally to generate robot actions.
 
     Beware of the memory requirements of 8B+ parameter models like OpenVLA.
@@ -64,7 +65,7 @@ class Vision2SeqBackend:
             **kwargs,
         ).to(device)
 
-    def act(self, instruction: str, image: Image, unnorm_key: str = "bridge_orig") -> str:
+    def predict(self, instruction: str, image: Image, unnorm_key: str = "bridge_orig") -> str:
         prompt = f"In: What action should the robot take to {instruction}?\nOut:"
         inputs = self.processor(prompt, image.pil).to(self.device, dtype=self.torch_dtype)
         response = self.model.predict_action(**inputs, unnorm_key=unnorm_key, do_sample=False)
