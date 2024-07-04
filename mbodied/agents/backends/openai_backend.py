@@ -16,6 +16,7 @@
 from typing import Any, List, Optional
 
 import backoff
+import httpx
 from anthropic import RateLimitError as AnthropicRateLimitError
 from openai._exceptions import RateLimitError as OpenAIRateLimitError
 
@@ -26,6 +27,8 @@ from mbodied.types.sense.vision import Image
 ERRORS = (
     OpenAIRateLimitError,
     AnthropicRateLimitError,
+    httpx.HTTPError,
+    ConnectionError,
 )
 
 
@@ -90,6 +93,7 @@ class OpenAIBackendMixin:
         self.client = client
         if self.client is None:
             from openai import OpenAI
+            kwargs.pop("model_src", None)
             self.client = OpenAI(api_key=self.api_key, **kwargs)
         self.serialized = OpenAISerializer
         self.response_format = response_format

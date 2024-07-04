@@ -21,11 +21,11 @@ class GradioBackend:
 
     def __init__(
         self,
-        remote_server: str = None,
+        model_src: str = None,
         **kwargs,
     ) -> None:
-        self.remote_server = remote_server
-        self.client = Client(src=remote_server, **kwargs)
+        self.model_src = model_src
+        self.client = Client(src=model_src, **kwargs)
 
     def act(self, *args, **kwargs) -> str:
         """Forward queries to the gradio api endpoint `predict`.
@@ -37,7 +37,7 @@ class GradioBackend:
         return self.client.predict(*args, **kwargs)
 
     def submit(self, *args, api_name="/predict", result_callbacks=None, **kwargs) -> Job:
-        """Asynchronous submit queries to the gradio api endpoint.
+        """Submit queries asynchronously without need of asyncio.
 
         Args:
             *args: The arguments to pass to the gradio server.

@@ -15,14 +15,16 @@
 
 import asyncio
 from inspect import signature
+import logging
 from pathlib import Path
 from typing import Literal
 
-from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend
+from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend, HttpxBackend, OllamaBackend
 from mbodied.types.sample import Sample
 from mbodied.data.recording import Recorder
-from mbodied.types.sample import Sample
+from huggingface_hub import repo_exists
 
+Backend = AnthropicBackend | GradioBackend | OpenAIBackend | HttpxBackend | OllamaBackend
 
 class Agent:
     """Abstract base class for agents.
@@ -35,12 +37,50 @@ class Agent:
         actor (Union[OpenAIBackend, AnthropicBackend, GradioClient]): The remote actor to interact with.
         kwargs (dict): Additional arguments to pass to the recorder.
     """
-
     ACTOR_MAP = {
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
         "gradio": GradioBackend,
+        "ollama": OllamaBackend,
     }
+
+    @staticmethod
+    def init_backend(model_src: str, model_kwargs: dict, api_key: str) -> type:
+        """Initialize the backend based on the model source.
+
+        Args:
+            model_src: The model source to use.
+            model_kwargs: The additional arguments to pass to the model.
+            api_key: The API key to use for the remote actor.
+
+        Returns:
+            type: The backend class to use.
+        """
+        if model_src in Agent.ACTOR_MAP:
+            return Agent.ACTOR_MAP[model_src](**model_kwargs, api_key=api_key)
+        return Agent.handle_default(model_src, model_kwargs)
+
+
+    @staticmethod
+    def handle_default(model_src: str, model_kwargs: dict) -> None:
+        """Default to gradio then httpx backend if the model source is not recognized.
+
+        Args:
+            model_src: The model source to use.
+            model_kwargs: The additional arguments to pass to the model.
+        """
+        if repo_exists(model_src) or repo_exists(model_src.split("https://huggingface.co/")[1]):
+            try:
+                backend = GradioBackend(model_src=model_src, **model_kwargs)
+                return backend
+            except Exception as e:
+                logging.warning(f"Tried loading model from {model_src}: {e}. Using httpx backend.")
+           
+        try:
+            backend = HttpxBackend(model_src=model_src, **model_kwargs)
+            return backend
+        except Exception as e:
+            raise ValueError(f"Could not load model from {model_src}. Ensure the repo exists on HuggingFace or a valid Http endpoint is provided.")
 
     def __init__(
         self,
@@ -81,12 +121,7 @@ class Agent:
         elif local_only:
             raise ValueError("'local_only' requested yet model source not found.")
         else:
-            actor_class = self.ACTOR_MAP.get(model_src, GradioBackend)
-            if issubclass(actor_class, GradioBackend):
-                model_kwargs.update({"remote_server": model_src})
-            if api_key is not None:
-                model_kwargs["api_key"] = api_key
-            self.actor = actor_class(**model_kwargs)
+            self.actor: Backend = self.init_backend(model_src, model_kwargs, api_key)
 
     def load_model(self, model: str) -> None:
         """Load a model from a file or path. Required if the model is a weights path.
