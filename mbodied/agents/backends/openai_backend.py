@@ -13,9 +13,10 @@
 # limitations under the License.
 
 
-from typing import Any, List, Optional
+from typing import Any, List
 
 import backoff
+import httpx
 from anthropic import RateLimitError as AnthropicRateLimitError
 from openai._exceptions import RateLimitError as OpenAIRateLimitError
 
@@ -26,6 +27,8 @@ from mbodied.types.sense.vision import Image
 ERRORS = (
     OpenAIRateLimitError,
     AnthropicRateLimitError,
+    httpx.HTTPError,
+    ConnectionError,
 )
 
 
@@ -61,7 +64,6 @@ class OpenAISerializer(Serializer):
         """
         return {"type": "text", "text": text}
 
-
 class OpenAIBackendMixin:
     """Backend for interacting with OpenAI's API.
 
@@ -90,6 +92,8 @@ class OpenAIBackendMixin:
         self.client = client
         if self.client is None:
             from openai import OpenAI
+
+            kwargs.pop("model_src", None)
             self.client = OpenAI(api_key=self.api_key, **kwargs)
         self.serialized = OpenAISerializer
         self.response_format = response_format
@@ -124,7 +128,7 @@ class OpenAIBackendMixin:
         ERRORS,
         max_tries=3,
     )
-    def act(self, message: Message, context: List[Message] | None = None, model: Optional[Any] = None, **kwargs) -> str:
+    def predict(self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs) -> str:
         """Create a completion based on the given message and context.
 
         Args:

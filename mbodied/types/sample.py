@@ -111,22 +111,22 @@ class Sample(BaseModel):
             Dict[str, Any]: Dictionary representation of the Sample object.
         """
         return self.model_dump(exclude_none=exclude_none, exclude=exclude)
-    
+
     @classmethod
     def unflatten(cls, one_d_array_or_dict, schema=None) -> "Sample":
         """Unflatten a one-dimensional array or dictionary into a Sample instance.
-        
+
         If a dictionary is provided, its keys are ignored.
-        
+
         Args:
             one_d_array_or_dict: A one-dimensional array or dictionary to unflatten.
             schema: A dictionary representing the JSON schema. Defaults to using the class's schema.
-            
+
         Returns:
             Sample: The unflattened Sample instance.
-        
+
         Examples:
-            >>> sample = Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
+            >>> sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
             >>> flat_list = sample.flatten()
             >>> print(flat_list)
             [1, 2, 3, 4, 5]
@@ -135,31 +135,32 @@ class Sample(BaseModel):
         """
         if schema is None:
             schema = cls().schema()
-        
+
         # Convert input to list if it's not already
         if isinstance(one_d_array_or_dict, dict):
             flat_data = list(one_d_array_or_dict.values())
         else:
             flat_data = list(one_d_array_or_dict)
-        
+
         def unflatten_recursive(schema_part, index=0):
-            if schema_part['type'] == 'object':
+            if schema_part["type"] == "object":
                 result = {}
-                for prop, prop_schema in schema_part['properties'].items():
+                for prop, prop_schema in schema_part["properties"].items():
                     value, index = unflatten_recursive(prop_schema, index)
                     result[prop] = value
                 return result, index
-            elif schema_part['type'] == 'array':
+            elif schema_part["type"] == "array":
                 items = []
-                for _ in range(schema_part.get('maxItems', len(flat_data) - index)):
-                    value, index = unflatten_recursive(schema_part['items'], index)
+                for _ in range(schema_part.get("maxItems", len(flat_data) - index)):
+                    value, index = unflatten_recursive(schema_part["items"], index)
                     items.append(value)
                 return items, index
             else:  # Assuming it's a primitive type
                 return flat_data[index], index + 1
-        
+
         unflattened_dict, _ = unflatten_recursive(schema)
         return cls(**unflattened_dict)
+
     def flatten(
         self,
         output_type: Flattenable = "dict",
@@ -250,18 +251,18 @@ class Sample(BaseModel):
 
         if resolve_refs:
             schema = replace_refs(schema)
-            
+
         if not include_descriptions and "description" in schema:
             del schema["description"]
-        
+
         properties = schema.get("properties", {})
         for key, value in self.dict().items():
             if key not in properties:
                 properties[key] = Sample.obj_to_schema(value)
             if isinstance(value, Sample):
-                properties[key] = value.schema( resolve_refs=resolve_refs, include_descriptions=include_descriptions)
+                properties[key] = value.schema(resolve_refs=resolve_refs, include_descriptions=include_descriptions)
             else:
-               properties[key] = Sample.obj_to_schema(value)
+                properties[key] = Sample.obj_to_schema(value)
         return schema
 
     @classmethod
@@ -555,5 +556,3 @@ class Sample(BaseModel):
 
 if __name__ == "__main__":
     sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
-
-    

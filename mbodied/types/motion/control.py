@@ -74,10 +74,10 @@ class HandControl(Motion):
 
 class HeadControl(Motion):
     tilt: JointControl = MotionField(
-        default_factory=lambda: JointControl(), description="Tilt of the robot head in radians (down is negative)."
+        default_factory=lambda: JointControl(), description="Tilt of the robot head in radians (down is negative).",
     )
     pan: JointControl = MotionField(
-        default_factory=lambda: JointControl(), description="Pan of the robot head in radians (left is negative)."
+        default_factory=lambda: JointControl(), description="Pan of the robot head in radians (left is negative).",
     )
 
 

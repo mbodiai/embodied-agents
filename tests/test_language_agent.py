@@ -61,7 +61,7 @@ class FakeOpenAI:
 
 # Mock the initialization of OpenAIBackend within LanguageAgent
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_initialization(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
     assert agent.reminders == []
@@ -69,7 +69,7 @@ def test_language_agent_initialization(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_forget_last(mock_openai_init, mock_openai_act):
     agent = LanguageAgent(context=["Hello", Image(size=(224, 224)), "How are you?"])
     last_message = agent.forget_last()
@@ -79,7 +79,7 @@ def test_language_agent_forget_last(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_remind_every(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
     agent.remind_every("Please provide more details", 3)
@@ -89,7 +89,7 @@ def test_language_agent_remind_every(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_forget(mock_openai_init, mock_openai_act):
     agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
     agent.forget(last_n=2)
@@ -97,7 +97,7 @@ def test_language_agent_forget(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_act(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
     response = agent.act("Hello, world!")
@@ -107,7 +107,7 @@ def test_language_agent_act(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_act_with_image(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
     response = agent.act("Hello, world!", image=Image(size=(224, 224)))
@@ -118,7 +118,7 @@ def test_language_agent_act_with_image(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_act_with_context(mock_openai_init, mock_openai_act):
     agent = LanguageAgent(context=["Hello"])
     response = agent.act("How are you?", context=["Nice weather today"])
@@ -128,7 +128,7 @@ def test_language_agent_act_with_context(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 @pytest.mark.asyncio
 async def test_language_agent_async_act(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
@@ -139,7 +139,7 @@ async def test_language_agent_async_act(mock_openai_init, mock_openai_act):
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 @pytest.mark.asyncio
 async def test_language_agent_async_act_with_image(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
@@ -151,7 +151,7 @@ async def test_language_agent_async_act_with_image(mock_openai_init, mock_openai
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 @pytest.mark.asyncio
 async def test_language_agent_async_act_with_context(mock_openai_init, mock_openai_act):
     agent = LanguageAgent(context=["Hello"])

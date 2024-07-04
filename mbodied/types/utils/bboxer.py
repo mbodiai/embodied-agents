@@ -3,9 +3,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 
-def draw_bounding_box_with_label(
-    image_path: str, bbox: tuple, label: str, color: str = "red", width: int = 2
-) -> Image:
+def draw_bounding_box_with_label(image_path: str, bbox: tuple, label: str, color: str = "red", width: int = 2) -> Image:
     """Draws a bounding box with a label and shading on an image.
 
     Args:

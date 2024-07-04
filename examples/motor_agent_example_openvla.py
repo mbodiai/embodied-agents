@@ -24,7 +24,7 @@ def main() -> None:
 
     # Subclass HardwareInterface and implement the do() method for your specific hardware.
     hardware_interface = SimInterface()
-    
+
     # Use the same instruction throughout.
     instruction = input("Your instruction:")
 
@@ -33,6 +33,7 @@ def main() -> None:
         image = Image(Path("resources") / "xarm.jpeg")
         hand_control = motor_agent.act(instruction, image)
         hardware_interface.do(hand_control)
+
 
 if __name__ == "__main__":
     main()

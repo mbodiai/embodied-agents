@@ -31,6 +31,7 @@ class Serializer(Sample):
         wrapped: The message or sample to be serialized.
         model_config: The Pydantic configuration for the Serializer model.
     """
+
     wrapped: Any | None = None
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
@@ -74,13 +75,17 @@ class Serializer(Sample):
             ValueError: If the 'wrapped' field contains an invalid type.
 
         """
-        if ("wrapped" in values and values["wrapped"] is not None
-                and not isinstance(
-                    values["wrapped"],
-                    Message | Sample | list | str | Image,
-                )):
+        if (
+            "wrapped" in values
+            and values["wrapped"] is not None
+            and not isinstance(
+                values["wrapped"],
+                Message | Sample | list | str | Image,
+            )
+        ):
             raise ValueError(
-                f"Invalid wrapped type {type(values['wrapped'])}", )
+                f"Invalid wrapped type {type(values['wrapped'])}",
+            )
         return values
 
     def serialize_sample(self, sample: Any) -> dict[str, Any]:
@@ -166,3 +171,12 @@ class Serializer(Sample):
 
         """
         return {"type": "text", "text": text}
+
+    def __call__(self) -> dict[str, Any] | list[Any]:
+        """Calls the serialize method.
+
+        Returns:
+            A dictionary representing the serialized wrapped content.
+
+        """
+        return self.model_dump()

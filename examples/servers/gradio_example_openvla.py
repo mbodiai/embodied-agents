@@ -38,14 +38,13 @@ class OpenVLAInterface:
 
         prompt = f"In: What action should the robot take to {instruction}?\nOut:"
         inputs = self.processor(prompt, image).to("cuda", dtype=torch.bfloat16)
-        action = self.model.predict_action(**inputs, unnorm_key=unnorm_key, do_sample=False)
-        return action
+        return self.model.predict_action(**inputs, unnorm_key=unnorm_key, do_sample=False)
 
 
 def create_interface():
     """Creates and returns a Gradio Interface for the OpenVLA robot action prediction."""
     vla_interface = OpenVLAInterface()
-    gr_interface = gr.Interface(
+    return gr.Interface(
         fn=vla_interface.predict_action,
         inputs=[
             gr.Textbox(label="Base64 Image (using API) or upload image below.", visible=False),
@@ -57,7 +56,6 @@ def create_interface():
         title="OpenVLA Robot Action Prediction",
         description="Provide an image of the robot workspace and an instruction to predict the robot's action. You can either upload an image or provide a base64-encoded image with API.",
     )
-    return gr_interface
 
 
 # Launch the server on port 3389

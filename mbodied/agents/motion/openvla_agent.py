@@ -48,7 +48,7 @@ class OpenVlaAgent(MotorAgent):
         """
         if self.actor is None:
             raise ValueError("Remote actor for OpenVLA not initialized.")
-        response = self.actor.act(image.base64, instruction, unnorm_key)
+        response = self.actor.predict(image.base64, instruction, unnorm_key)
         items = response.strip("[]").split()
         action = [float(item) for item in items]
         return HandControl.unflatten(action)

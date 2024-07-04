@@ -314,7 +314,7 @@ def sample_points_in_3d(
 
             iter_tick += 1
             if iter_tick > 1000:
-                print("[sample_points_in_3d] Exceeded 1000 iterations.")
+                logging.warning("Failed to sample points with the given constraints.")
                 break
 
         xyzs[i] = xyz

@@ -14,13 +14,16 @@
 
 
 import asyncio
+import logging
 from inspect import signature
 from pathlib import Path
 from typing import Literal
 
-from mbodied.agents.backends import AnthropicBackend, GradioBackend, OpenAIBackend
+from mbodied.agents.backends import AnthropicBackend, GradioBackend, HttpxBackend, OllamaBackend, OpenAIBackend
 from mbodied.data.recording import Recorder
 from mbodied.types.sample import Sample
+
+Backend = AnthropicBackend | GradioBackend | OpenAIBackend | HttpxBackend | OllamaBackend
 
 
 class Agent:
@@ -38,8 +41,48 @@ class Agent:
     ACTOR_MAP = {
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
+        "ollama": OllamaBackend,
         "gradio": GradioBackend,
+        "http": HttpxBackend,
     }
+
+    @staticmethod
+    def init_backend(model_src: str, model_kwargs: dict, api_key: str) -> type:
+        """Initialize the backend based on the model source.
+
+        Args:
+            model_src: The model source to use.
+            model_kwargs: The additional arguments to pass to the model.
+            api_key: The API key to use for the remote actor.
+
+        Returns:
+            type: The backend class to use.
+        """
+        if model_src in Agent.ACTOR_MAP:
+            return Agent.ACTOR_MAP[model_src](**model_kwargs, api_key=api_key)
+        return Agent.handle_default(model_src, model_kwargs)
+
+    @staticmethod
+    def handle_default(model_src: str, model_kwargs: dict) -> None:
+        """Default to gradio then httpx backend if the model source is not recognized.
+
+        Args:
+            model_src: The model source to use.
+            model_kwargs: The additional arguments to pass to the model.
+        """
+        try:
+            return GradioBackend(model_src=model_src, **model_kwargs)
+        except Exception as e:
+            logging.error(
+                f"Failed to initialize Gradio backend: {e}. Defaulting to Httpx backend. Ensure that the source is a valid http endpoint.",
+            )
+            try:
+                return HttpxBackend(model_src=model_src, **model_kwargs)
+            except Exception as e:
+                logging.error(f"Failed to initialize Httpx backend: {e}.")
+                raise ValueError(
+                    f"Failed to initialize backend for model source: {model_src}. Pleases select one of {Agent.ACTOR_MAP.keys()} or valid huggingface space or http endpoint.",
+                )
 
     def __init__(
         self,
@@ -48,7 +91,6 @@ class Agent:
         api_key: str = None,
         model_src=None,
         model_kwargs=None,
-        local_only: bool = False,
     ):
         """Initialize the agent, optionally setting up a recorder, remote actor, or loading a local model.
 
@@ -77,15 +119,8 @@ class Agent:
         self.actor = None
         if Path(model_src).exists():
             self.load_model(model_src, **model_kwargs)
-        elif local_only:
-            raise ValueError("'local_only' requested yet model source not found.")
         else:
-            actor_class = self.ACTOR_MAP.get(model_src, GradioBackend)
-            if issubclass(actor_class, GradioBackend):
-                model_kwargs.update({"remote_server": model_src})
-            if api_key is not None:
-                model_kwargs["api_key"] = api_key
-            self.actor = actor_class(**model_kwargs)
+            self.actor: Backend = self.init_backend(model_src, model_kwargs, api_key)
 
     def load_model(self, model: str) -> None:
         """Load a model from a file or path. Required if the model is a weights path.
@@ -126,7 +161,7 @@ class Agent:
         action = self.act(*args, **kwargs)
         if self.recorder is not None:
             observation = self.create_observation_from_args(
-                self.recorder.observation_space, self.act_and_record, args, kwargs
+                self.recorder.observation_space, self.act_and_record, args, kwargs,
             )
             self.recorder.record(observation=observation, action=action)
         return action

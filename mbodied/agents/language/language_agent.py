@@ -114,12 +114,11 @@ class LanguageAgent(Agent):
         model_kwargs: dict = None,  # noqa
         recorder: Literal["default", "omit"] | str = "omit",
         recorder_kwargs: dict = None,  # noqa
-        local_only: bool = False,  # noqa
     ) -> None:
         """LanguageAgent with memory, dataset-recording, and remote infererence support. Always returns a string.
 
         Supported datasets: HDF5, Datasets, JSON, CSV, Parquet.
-        Supported inference backends: OpenAI, Anthropic, Gradio.
+        Supported inference backends: OpenAI, Anthropic, Gradio, Ollama, and OpenAI-compatible http APIs.
 
         Methods:
             - act(instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs) -> str
@@ -128,18 +127,19 @@ class LanguageAgent(Agent):
             - remind_every(prompt: str | Image | Message, n: int) -> None
 
         Args:
-            model: The model or weights path to setup and preload if applicable.
             context: The starting context to use for the conversation. Can be a list of messages, an image, a string,
                 or a message. If a string is provided, it will be interpreted as a user message.
             api_key: The API key to use for the remote actor (if applicable).
             model_src: Any of:
-                1. A path to a model's weights.
-                2. A string or mbodied.agents.backends.openai_backend.OpenAIBackendMixin subclass representing a backend API.
-                3. Any huggingface spaces path (mbodiai/openvla-quantized) or URL hosting a gradio server. See https://www.gradio.app/guides/getting-started-with-the-python-client for more details.
-            model_kwargs: Additional keyword arguments to pass to the model source. See mbodied.agents.backends.
+                1. A local path to a model's weights in which case model_kwargs will be used to load the model.
+                2. A supported backend key (openai, anthropic, ollama, http, gradio). The url must then be provided in model_kwargs.
+                3. Any huggingface spaces path, URL hosting a gradio server, or custom HTTP API URL.
+
+                **Note**: If a url endpoint is provided, Gradio will be used first, then Httpx if Gradio fails.
+
+            model_kwargs: Additional keyword arguments to pass to the model source. See mbodied.agents.backends.backend. Backend for more details.
             recorder: The recorder config or name to use for the agent to record observations and actions.
             recorder_kwargs: Additional keyword arguments to pass to the recorder such as push_to_cloud.
-            local_only: Whether to use the local model only. If True, the agent will not use a remote actor for inference.
         """
         if not LanguageAgent._art_printed:
             print("Welcome to")  # noqa: T201
@@ -155,7 +155,6 @@ class LanguageAgent(Agent):
             model_src=model_src,
             model_kwargs=model_kwargs,
             api_key=api_key,
-            local_only=local_only,
         )
 
         self.context = make_context_list(context)
@@ -226,11 +225,11 @@ class LanguageAgent(Agent):
     ) -> Sample:
         """Responds to the given instruction, image, and context asynchronously and parses the response into a Sample object."""
         return await asyncio.to_thread(
-            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs
+            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs,
         )
 
     def act(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs,
     ) -> str:
         """Responds to the given instruction, image, and context.
 
@@ -268,7 +267,7 @@ class LanguageAgent(Agent):
         message = Message(role="user", content=inputs)
 
         model = model or kwargs.pop("model", None)
-        response = self.actor.act(message, memory, model=model, **kwargs)
+        response = self.actor.predict(message, memory, model=model, **kwargs)
 
         self.context.append(message)
         self.context.append(Message(role="assistant", content=response))
