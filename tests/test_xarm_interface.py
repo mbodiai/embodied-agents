@@ -88,5 +88,26 @@ def test_get_pose(mock_xarm_api, xarm):
     assert pose == hand_pose
 
 
+def test_do_and_record(mock_xarm_api, mocker, xarm):
+    # Mock the necessary methods
+    mocker.patch.object(xarm, "start_recording", autospec=True)
+    mocker.patch.object(xarm, "stop_recording", autospec=True)
+    mocker.patch.object(xarm, "record_final_state", autospec=True)
+    mocker.patch.object(xarm, "do", autospec=True)
+
+    mock_motion = HandControl(
+        pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=MagicMock(value=0.6)
+    )
+
+    instruction = "move to position"
+    xarm.do_and_record(instruction, mock_motion)
+
+    xarm.start_recording.assert_called_once()
+    xarm.stop_recording.assert_called_once()
+    xarm.record_final_state.assert_called_once()
+    xarm.do.assert_called_once_with(mock_motion)
+    assert xarm.current_instruction == instruction
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
