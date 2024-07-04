@@ -18,8 +18,8 @@ import numpy as np
 from gymnasium import spaces
 from pydantic import Field
 
-from mbodied.base.motion import Motion, MotionField
 from mbodied.types.geometry import LocationAngle, Pose, Pose6D
+from mbodied.types.motion import Motion, MotionField
 
 """Motions to control a robot.
 

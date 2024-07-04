@@ -13,11 +13,11 @@
 # limitations under the License.
 
 from .anthropic_backend import AnthropicBackend, AnthropicSerializer
-from .openvla_backend import OpenVLABackend, OpenVLASerializer
+from .gradio_backend import GradioBackend
 from .ollama_backend import OllamaBackend, OllamaSerializer
 from .openai_backend import OpenAIBackendMixin as OpenAIBackend
 from .openai_backend import OpenAISerializer
-from .gradio_backend import GradioBackend
+from .openvla_backend import OpenVLABackend, OpenVLASerializer
 
 __all__ = [
     "AnthropicBackend",

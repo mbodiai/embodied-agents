@@ -18,7 +18,7 @@ embodied agents
    concepts/index
    building_blocks/index
    contributing/index
-   system_components/index
+   deep_dive/index
 
 .. raw:: html
 

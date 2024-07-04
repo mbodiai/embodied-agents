@@ -1,7 +1,6 @@
 mbodied.agents.motion package
 =============================
 
-
 Submodules
 ----------
 

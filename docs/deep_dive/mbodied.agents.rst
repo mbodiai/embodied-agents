@@ -12,6 +12,17 @@ Subpackages
    mbodied.agents.motion
    mbodied.agents.sense
 
+Submodules
+----------
+
+mbodied.agents.agent module
+---------------------------
+
+.. automodule:: mbodied.agents.agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

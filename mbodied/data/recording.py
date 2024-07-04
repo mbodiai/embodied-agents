@@ -25,7 +25,7 @@ import numpy as np
 from gymnasium import spaces
 from h5py import string_dtype
 
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
 
 

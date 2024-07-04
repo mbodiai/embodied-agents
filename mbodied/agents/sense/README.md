@@ -140,8 +140,8 @@ estimator = ObjectPoseEstimator3D(server_url="https://api.mbodi.ai/3d-object-pos
 
 # Call the act method
 scene_data = estimator.act(
-    rgb_image_path="resources/color_image.png",
-    depth_image_path="resources/depth_image.png",
+    rgb_image=Image("path/to/image.jpg"),
+    depth_image=Image("path/to/depth_image.jpg"),
     camera_intrinsics=camera_intrinsics,
     distortion_coeffs=distortion_params,
     aruco_pose_world_frame=aruco_pose_world_frame,

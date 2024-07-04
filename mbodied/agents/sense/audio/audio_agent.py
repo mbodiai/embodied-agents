@@ -27,7 +27,7 @@ except ImportError:
 from openai import OpenAI
 from typing_extensions import Literal
 
-from mbodied.base.agent import Agent
+from mbodied.agents import Agent
 
 
 class AudioAgent(Agent):
@@ -38,9 +38,9 @@ class AudioAgent(Agent):
     It will then take input from the terminal.
 
     Usage:
-        audio_handler = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
-        audio_handler.speak("How can I help you?")
-        message = audio_handler.listen()
+        audio_agent = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
+        audio_agent.speak("How can I help you?")
+        message = audio_agent.listen()
     """
 
     mode = Literal["speak", "type", "speak_or_type"]
@@ -76,6 +76,9 @@ class AudioAgent(Agent):
         if self.client is None:
             self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
             logging.info("OpenAI API key fetched from the environment key.")
+
+    def act(self, *args, **kwargs):
+        return self.listen(*args, **kwargs)
 
     def listen(self, keep_audio: bool = False, mode: str = "speak") -> str:
         """Listens for audio input and transcribes it using OpenAI's API.

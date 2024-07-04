@@ -1,6 +1,14 @@
 mbodied.agents.sense package
 ============================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   mbodied.agents.sense.audio
+
 Submodules
 ----------
 

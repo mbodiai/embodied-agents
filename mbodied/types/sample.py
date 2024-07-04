@@ -12,25 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import OrderedDict
 import json
 import logging
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
-from jsonref import replace_refs
+
 import numpy as np
 import torch
 from datasets import Dataset
 from gymnasium import spaces
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from jsonref import replace_refs
+from pydantic import BaseModel, ConfigDict, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import from_json
 from typing_extensions import Annotated
 
 from mbodied.data.utils import to_features
-from mbodied.types.ndarray import NumpyArray
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 

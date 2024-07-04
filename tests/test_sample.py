@@ -20,7 +20,7 @@ import os
 import tempfile
 
 from mbodied.data.recording import Recorder
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 
 
 def test_from_dict():

@@ -16,7 +16,7 @@ import pytest
 from unittest.mock import MagicMock
 import math
 
-from mbodied.types.motion_controls import HandControl, Pose6D
+from mbodied.types.motion.control import HandControl, Pose6D
 from mbodied.hardware.xarm_interface import XarmInterface
 
 

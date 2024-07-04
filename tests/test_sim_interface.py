@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-from mbodied.types.motion_controls import HandControl, Pose6D, JointControl
+from mbodied.types.motion.control import HandControl, Pose6D, JointControl
 from mbodied.hardware.sim_interface import SimInterface
 
 

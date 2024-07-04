@@ -14,8 +14,8 @@ To create a new Pydantic model for a motion, inherit from the Motion class and d
 function as you would with any other Pydantic field. 
 
 Example:
-    from mbodied_agents.base.motion import Motion, AbsoluteMotionField, MotionField, MotionType, VelocityMotionField
-    from mbodied_agents.base.sample import Sample
+    from mbodied_agents.motion import Motion, AbsoluteMotionField, MotionField, MotionType, VelocityMotionField
+    from mbodied_agents.data.sample import Sample
     
     class Twist(Motion):
         x: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
@@ -38,7 +38,7 @@ from pydantic import ConfigDict, Field
 from pydantic_core import PydanticUndefined
 from typing_extensions import Literal
 
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 
 MotionType = Literal[
     "UNSPECIFIED",

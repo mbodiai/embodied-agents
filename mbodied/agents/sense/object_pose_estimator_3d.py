@@ -1,6 +1,6 @@
 from typing import List
 from gradio_client import Client, handle_file
-from mbodied.base.sample import Sample
+from mbodied.types.sample import Sample
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.geometry import Pose6D
 from mbodied.types.sense.vision import Image
@@ -77,8 +77,8 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ... )
             >>> object_names = ["Remote Control", "Basket", "Fork", "Spoon", "Red Marker"]
             >>> result = estimator.act(
-            ...     rgb_image=Image("resources/color_image.png"),
-            ...     depth_image=Image("resources/depth_image.png"),
+            ...     rgb_image,
+            ...     depth_image,
             ...     camera_intrinsics=camera_intrinsics,
             ...     distortion_coeffs=distortion_params,
             ...     aruco_pose_world_frame=aruco_pose_world_frame,
@@ -87,12 +87,6 @@ class ObjectPoseEstimator3D(SensoryAgent):
             ...     using_realsense=False
             ... )
         """
-        if not isinstance(rgb_image, str):
-            rgb_image.save("resources/color_image.png")
-            
-        if not isinstance(depth_image, str):
-            depth_image.save("resources/depth_image.png")
-
         rgb_image_path = rgb_image.path
         depth_image_path = depth_image.path
 

@@ -20,13 +20,13 @@ from gymnasium import spaces
 from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent
-from mbodied.agents.sense.audio.audio_handler import AudioAgent
-from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
-from mbodied.base.sample import Sample
+from mbodied.agents.sense.audio.audio_agent import AudioAgent
 from mbodied.data.recording import Recorder
 from mbodied.hardware.sim_interface import SimInterface
 from mbodied.types.message import Message
-from mbodied.types.motion_controls import FullJointControl, HandControl, JointControl
+from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
+from mbodied.types.motion.control import FullJointControl, HandControl, JointControl
+from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
 
 

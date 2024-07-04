@@ -179,8 +179,8 @@ pip install mbodied[audio]
 ### Customize a Motion to fit a robot's action space.
 
 ```python
-from mbodied.types.motion_controls import HandControl, FullJointControl
-from mbodied.base.motion import AbsoluteMotionField, RelativeMotionField
+from mbodied.types.motion.control import HandControl, FullJointControl
+from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
 
 class FineGrainedHandControl(HandControl):
     comment: str = Field(None, description="A comment to voice aloud.")
@@ -247,10 +247,13 @@ The Sample class is a base model for serializing, recording, and manipulating ar
 
 To learn more about all of the possibilities with embodied agents, check out the [documentation](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
+
+
 ### 💡 Did you know
 
 - You can `pack` a list of `Sample`s or Dicts into a single `Sample` or `Dict` and `unpack` accordingly?
 - You can `unflatten` any python structure into a `Sample` class so long you provide it with a valid json schema?
+
 
 <details> <summary><h2 style="display: inline-block;">Deep Dive</h2></summary>
 
@@ -455,7 +458,6 @@ for observation, action in replayer:
 │     │  ├─ language/ .. Language based agents modules
 │     │  ├─ motion/ .... Motion based agents modules
 │     │  └─ sense/ ..... Sensory, e.g. audio, processing modules
-│     ├─ base/ ......... Base classes and core infra modules
 │     ├─ data/ ......... Data handling and processing
 │     ├─ hardware/ ..... Hardware interface and interaction
 │     └─ types/ ........ Common types and definitions

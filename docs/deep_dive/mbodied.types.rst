@@ -7,6 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   mbodied.types.language
+   mbodied.types.motion
    mbodied.types.sense
    mbodied.types.utils
 
@@ -21,14 +23,6 @@ mbodied.types.geometry module
    :undoc-members:
    :show-inheritance:
 
-mbodied.types.language\_controls module
----------------------------------------
-
-.. automodule:: mbodied.types.language_controls
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mbodied.types.message module
 ----------------------------
 
@@ -37,18 +31,18 @@ mbodied.types.message module
    :undoc-members:
    :show-inheritance:
 
-mbodied.types.motion\_controls module
--------------------------------------
-
-.. automodule:: mbodied.types.motion_controls
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mbodied.types.ndarray module
 ----------------------------
 
 .. automodule:: mbodied.types.ndarray
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mbodied.types.sample module
+---------------------------
+
+.. automodule:: mbodied.types.sample
    :members:
    :undoc-members:
    :show-inheritance:
