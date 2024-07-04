@@ -149,7 +149,7 @@ class Recorder:
           num_steps (int, optional): Number of steps. Defaults to 10.
           image_keys_to_save (list, optional): List of image keys to save. Defaults to ['image'].
         """
-        logging.info("\nInitializing dataset recorder...")
+        logging.info("\nInitializing dataset recorder, recording to directory: %s", out_dir)
         if image_keys_to_save is None:
             image_keys_to_save = ["image"]
         self.out_dir = out_dir
@@ -176,7 +176,6 @@ class Recorder:
 
         self.image_keys_to_save = image_keys_to_save
         self.index = 0
-        logging.info("Recording dataset to", self.filename)
 
     def configure_root_spaces(self, **spaces: spaces.Dict):
         """Configure the root spaces.
