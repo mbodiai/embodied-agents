@@ -22,14 +22,14 @@ from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.sense.vision import Image
 
 
-class OpenVLASerializer(Serializer):
+class Vision2SeqBackend(Serializer):
     pass
 
 
-class OpenVLABackend:
-    """OpenVLA backend that runs locally to generate robot actions.
+class Vision2SeqBackend:
+    """Vision2SeqBackend backend that runs locally to generate robot actions.
 
-    Beware of the memory requirements of OpenVLA, which is quite large.
+    Beware of the memory requirements of 8B+ parameter models like OpenVLA.
 
     Attributes:
         model_id (str): The model to use for the OpenVLA backend.

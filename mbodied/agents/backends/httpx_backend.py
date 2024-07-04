@@ -56,7 +56,6 @@ class HttpxBackend(OpenAIBackendMixin):
         "stream": False,
         **kwargs
       }
-      print(data)
       with httpx.Client(follow_redirects=True) as client:
           response = client.post(self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60))
           if response.status_code == 200:
