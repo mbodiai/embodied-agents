@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from mbodied.agents.backends.openai_backend import OpenAIBackendMixin
+import os
+from mbodied.agents.backends.httpx_backend import HttpxBackend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
 from mbodied.types.sense.vision import Image
@@ -26,7 +27,7 @@ class OllamaSerializer(Serializer):
     """Serializer for Ollama-specific data formats."""
 
     @classmethod
-    def serialize_image(cls, image: 'Image') -> str:
+    def serialize_image(cls, image: Image) -> str:
         """Serializes an image to the Ollama format."""
         return image.base64
 
@@ -39,65 +40,53 @@ class OllamaSerializer(Serializer):
     def serialize_msg(cls, message: Message) -> dict[str, Any]:
         """Serializes a message to the Ollama format."""
         images = [cls.serialize_image(im) for im in message.content if isinstance(im, Image)]
-        texts = [txt for txt in message.content if isinstance(txt, str)]
+        texts = '.'.join([txt for txt in message.content if isinstance(txt, str)])
         return {
             "role": message.role,
             "content": texts,
             "images": images,
         }
-        
+    
+    @classmethod
+    def extract_response(cls, response: dict[str, Any]) -> str:
+        """Extracts the response from the Ollama format."""
+        return response["message"]["content"]
         
 
-class OllamaBackend(OpenAIBackendMixin):
+class OllamaBackend(HttpxBackend):
     """Backend for interacting with Ollama's API."""
-
     INITIAL_CONTEXT = [
         Message(role="system", content="You are a robot with advanced spatial reasoning."),
     ]
-    DEFAULT_MODEL = "llava"  # Changed to "llava" as it's mentioned in the example
+    DEFAULT_MODEL = "llava"  
+    SERIALIZER = OllamaSerializer
+    DEFAULT_SRC = "http://localhost:11434/api/chat/"
 
-    def __init__(self, model_src: str = "http://localhost:11434", **kwargs):
-        """Initializes the OllamaBackend.
-
-        Args:
-            base_url: The base URL for the Ollama API.
-            **kwargs: Additional keyword arguments.
-        """
-        self.base_url = model_src
-        self.client = httpx.Client(base_url=self.base_url)
-        self.serializer = OllamaSerializer
-
-    def _create_completion(self, messages: List[Message], model: str = DEFAULT_MODEL, stream: bool = False, **kwargs) -> str:
-        """Creates a completion for the given messages using the Ollama API.
-
-        Args:
-            messages: A list of messages to be sent to the completion API.
-            model: The model to be used for the completion.
-            stream: Whether to stream the response. Defaults to False.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            str: The content of the completion response.
-        """
-        serialized_messages = [self.serialized(msg) for msg in messages]
+    def __init__(self, api_key: str | None=None, model_src: str = None):
+        """Initializes an OllamaBackend instance."""
+        print("Initializing OllamaBackend")
+        super().__init__(api_key, model_src=self.DEFAULT_SRC)
         
-        data = {
-            "model": model,
-            "messages": serialized_messages,
-            "stream": stream,
-            **kwargs
-        }
 
-        response = self.client.post("/api/chat", json=data)
-        response.raise_for_status()
-        
-        if stream:
-            return self._handle_stream(response)
-        else:
-            return response.json()["message"]["content"]
 
-    def _handle_stream(self, response):
-        """Handles streaming responses from Ollama API."""
-        for line in response.iter_lines():
-            if line:
-                yield line.decode()
+
+
+if __name__ == "__main__":
+
+    print("Initializing OllamaBackend")
+    # api_key = os.getenv("MBB_API_KEY")
+    wrapper = OllamaBackend()
+    image_url = "https://v0.docs.reka.ai/_images/000000245576.jpg"
+    text = "What animal is this? Answer briefly."
+    print("Sending message to Ollama model...")
+    # Synchronous usage
+    response = wrapper._create_completion([Message(role="user", content=text)], model="llama3")
+    print(response)
+
+    # Asynchronous usage
+    import asyncio
+    # asyncio.run(wrapper.post_message_async(image_url, text))
+
+    # Asynchronous streaming usage
+    for chunk in wrapper._stream_completion([Message(role="user", content="Hello")], "llama3"):
+        print(chunk)

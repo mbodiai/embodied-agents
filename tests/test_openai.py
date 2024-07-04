@@ -63,7 +63,7 @@ class FakeOpenAI:
 # Test the OpenAIBackend create_completion method
 @mock.patch("mbodied.agents.backends.OpenAIBackend.act", return_value=mock_openai_response)
 def test_openai_backend_create_completion(mock_openai_act):
-    backend = OpenAIBackend(api_key="fake_openai_api_key")
+    backend = OpenAIBackend(api_key="fake_openai_api_key", model_src="openai")
     response = backend.act(Message("hi"), context=[])
     assert response == mock_openai_response
 
@@ -71,7 +71,7 @@ def test_openai_backend_create_completion(mock_openai_act):
 # Test the LanguageAgent act method with OpenAI backend
 @mock.patch("openai.OpenAI", return_value=FakeOpenAI())
 def test_language_backend_language_agent_act_openai(openai_api_key):
-    agent = LanguageAgent(api_key=openai_api_key)
+    agent = LanguageAgent(api_key=openai_api_key, model_src="openai")
 
     response = agent.act("Hello, OpenAI!", context=[])
     assert response == mock_openai_response
@@ -80,7 +80,7 @@ def test_language_backend_language_agent_act_openai(openai_api_key):
 # Test the LanguageAgent act method with an image input
 @mock.patch("openai.OpenAI", return_value=FakeOpenAI())
 def test_language_backend_language_agent_act_with_image(openai_api_key):
-    agent = LanguageAgent(api_key=openai_api_key)
+    agent = LanguageAgent(api_key=openai_api_key, model_src="openai")
     resource = Path("resources") / "xarm.jpeg"
     test_image = Image(path=resource)
     response = agent.act("Hi", test_image, context=[])

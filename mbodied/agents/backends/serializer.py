@@ -137,7 +137,7 @@ class Serializer(Sample):
             "role": message.role,
             "content": [self.serialize_sample(c) for c in message.content],
         }
-
+    
     @classmethod
     def serialize_image(cls, image: Image) -> dict[str, Any]:
         """Serializes an Image instance.
@@ -166,3 +166,13 @@ class Serializer(Sample):
 
         """
         return {"type": "text", "text": text}
+
+
+    def __call__(self) -> dict[str, Any] | list[Any]:
+        """Calls the serialize method.
+
+        Returns:
+            A dictionary representing the serialized wrapped content.
+
+        """
+        return self.model_dump()

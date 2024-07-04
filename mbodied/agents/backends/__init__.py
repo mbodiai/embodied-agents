@@ -17,7 +17,7 @@ from .openvla_backend import OpenVLABackend, OpenVLASerializer
 from .ollama_backend import OllamaBackend, OllamaSerializer
 from .openai_backend import OpenAIBackendMixin as OpenAIBackend
 from .openai_backend import OpenAISerializer
-from .reka_backend import RekaBackend, RekaSerializer
+from .httpx_backend import HttpxBackend, HttpxSerializer
 from .gradio_backend import GradioBackend
 
 
@@ -31,6 +31,6 @@ __all__ = [
     "OpenAISerializer",
     "OpenVLASerializer",
     "GradioBackend",
-    "RekaBackend",
-    "RekaSerializer",
+    "HttpxBackend",
+    "HttpxSerializer",
 ]

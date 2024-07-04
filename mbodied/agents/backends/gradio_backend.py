@@ -38,7 +38,7 @@ class GradioBackend:
         return self.client.predict(*args, **kwargs)
 
     def submit(self, *args, api_name="/predict", result_callbacks=None, **kwargs) -> Job:
-        """Asynchronous submit queries to the gradio api endpoint.
+        """Submit queries asynchronously without need of asyncio.
 
         Args:
             *args: The arguments to pass to the gradio server.
