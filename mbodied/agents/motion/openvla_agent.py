@@ -23,7 +23,6 @@ class OpenVlaAgent(MotorAgent):
         recorder_kwargs=None,
         model_src=None,
         model_kwargs=None,
-        local_only: bool = False,
         **kwargs,
     ):
         super().__init__(
@@ -31,7 +30,6 @@ class OpenVlaAgent(MotorAgent):
             recorder_kwargs=recorder_kwargs,
             model_src=model_src,
             model_kwargs=model_kwargs,
-            local_only=local_only,
             **kwargs,
         )
 
