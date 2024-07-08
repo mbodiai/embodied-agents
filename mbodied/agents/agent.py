@@ -34,7 +34,7 @@ class Agent:
 
     Attributes:
         recorder (Recorder): The recorder to record observations and actions.
-        actor (Union[OpenAIBackend, AnthropicBackend, GradioClient]): The remote actor to interact with.
+        actor (Backend): The backend actor to perform actions.
         kwargs (dict): Additional arguments to pass to the recorder.
     """
 
