@@ -10,7 +10,7 @@ from mbodied.agents.backends.gradio_backend import GradioBackend
 def mock_gradio_backend():
     with patch.object(GradioBackend, "__init__", lambda x, model_src=None, **kwargs: None):
         with patch.object(GradioBackend, "predict", return_value="[1 2 3 0 0 0 0]"):
-            yield GradioBackend(model_src="http://1.2.3.4:1234")
+            yield GradioBackend(endpoint="http://1.2.3.4:1234")
 
 
 @pytest.fixture

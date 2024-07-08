@@ -28,15 +28,15 @@ class HttpxBackend(OpenAIBackendMixin):
     DEFAULT_SRC = "https://api.reka.ai/v1/chat"
     DEFAULT_MODEL = "reka-core"
 
-    def __init__(self, api_key=None, model_src: str | None = None, serializer: Serializer | None = None, **kwargs):
+    def __init__(self, api_key=None, endpoint: str | None = None, serializer: Serializer | None = None, **kwargs):
         """Initializes the CompleteBackend. Defaults to using the API key from the environment and.
 
         Args:
             api_key (Optional[str]): The API key for the Complete service.
-            model_src (str): The base URL for the Complete API.
+            endpoint (str): The base URL for the Complete API.
             serializer (Optional[Serializer]): The serializer to use for serializing messages.
         """
-        self.base_url = model_src or self.DEFAULT_SRC
+        self.base_url = endpoint or self.DEFAULT_SRC
         self.api_key = api_key or os.getenv("MBB_API_KEY")
         self.headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
         self.serialized = serializer or self.SERIALIZER
@@ -54,7 +54,10 @@ class HttpxBackend(OpenAIBackendMixin):
                 return None
 
     def _stream_completion(
-        self, messages: List[Message], model: str | None = None, **kwargs,
+        self,
+        messages: List[Message],
+        model: str | None = None,
+        **kwargs,
     ) -> Generator[str, None, None]:
         model = model or self.DEFAULT
         data = {"messages": self.serialized(messages)(), "model": model, "stream": True, **kwargs}

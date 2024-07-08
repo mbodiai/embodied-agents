@@ -60,8 +60,7 @@ class OllamaBackend(HttpxBackend):
     SERIALIZER = OllamaSerializer
     DEFAULT_SRC = "http://localhost:11434/api/chat/"
 
-    def __init__(self, api_key: str | None = None, model_src: str = None):
+    def __init__(self, api_key: str | None = None, endpoint: str = None):
         """Initializes an OllamaBackend instance."""
-        model_sr = model_src or self.DEFAULT_SRC
-        super().__init__(api_key, model_src=model_sr)
-
+        endpoint = endpoint or self.DEFAULT_SRC
+        super().__init__(api_key, endpoint=endpoint)
