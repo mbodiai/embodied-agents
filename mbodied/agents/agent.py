@@ -71,13 +71,13 @@ class Agent:
             model_kwargs: The additional arguments to pass to the model.
         """
         try:
-            return GradioBackend(model_src=model_src, **model_kwargs)
+            return GradioBackend(endpoint=model_src, **model_kwargs)
         except Exception as e:
             logging.error(
                 f"Failed to initialize Gradio backend: {e}. Defaulting to Httpx backend. Ensure that the source is a valid http endpoint.",
             )
             try:
-                return HttpxBackend(model_src=model_src, **model_kwargs)
+                return HttpxBackend(endpoint=model_src, **model_kwargs)
             except Exception as e:
                 logging.error(f"Failed to initialize Httpx backend: {e}.")
                 raise ValueError(

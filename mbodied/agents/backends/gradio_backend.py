@@ -23,11 +23,17 @@ class GradioBackend(Backend):
 
     def __init__(
         self,
-        model_src: str = None,
+        endpoint: str = None,
         **kwargs,
     ) -> None:
-        self.model_src = model_src
-        self.client = Client(src=model_src, **kwargs)
+        """Initializes the GradioBackend.
+
+        Args:
+            endpoint: The url of the gradio server.
+            **kwargs: The keywrod arguments to pass to the gradio client.
+        """
+        self.endpoint = endpoint
+        self.client = Client(src=endpoint, **kwargs)
 
     def predict(self, *args, **kwargs) -> str:
         """Forward queries to the gradio api endpoint `predict`.
