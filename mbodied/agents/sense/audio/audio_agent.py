@@ -51,7 +51,7 @@ class AudioAgent(Agent):
         listen_filename: str = "tmp_listen.wav",
         tmp_speak_filename: str = "tmp_speak.mp3",
         use_pyaudio: bool = True,
-        openai_api_key: str = None,
+        api_key: str = None,
         run_local: bool = False,
     ):
         """Initializes the AudioAgent with specified parameters.
@@ -61,7 +61,7 @@ class AudioAgent(Agent):
             tmp_speak_filename: The filename for storing synthesized speech.
             use_pyaudio: Whether to use PyAudio for playback. Prefer setting to False for Mac.
             client: An optional OpenAI client instance.
-            openai_api_key: The API key for OpenAI.
+            api_key: The API key for OpenAI.
             run_local: Whether to run the whisper model locally instead of using OpenAI.
         """
         self.recording = False
@@ -76,7 +76,7 @@ class AudioAgent(Agent):
             self.run_local = True
             self.model = whisper.load_model("base")
         else:
-            self.client = OpenAI(api_key=openai_api_key or os.getenv("OPENAI_API_KEY"))
+            self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
 
     def act(self, *args, **kwargs):
         return self.listen(*args, **kwargs)
