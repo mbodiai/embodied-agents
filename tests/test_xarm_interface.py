@@ -70,9 +70,9 @@ def test_do(mock_xarm_api, xarm):
         300 + 0.1 * 1000,
         0 + 0.2 * 1000,
         325 + 0.3 * 1000,
-        -3.14 + math.degrees(0.1),
-        0 + math.degrees(0.2),
-        0 + math.degrees(0.3),
+        -3.14 + 0.1,
+        0 + 0.2,
+        0 + 0.3,
     ]
 
     mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=200)
