@@ -79,6 +79,12 @@ class XarmInterface(RecordingHardwareInterface):
 
             self.realse_camera = RealsenseCamera(width=640, height=480, fps=30)
 
+        if use_realsense:
+            self.use_realsense = True
+            from mbodied.hardware.realsense_camera import RealsenseCamera
+
+            self.realse_camera = RealsenseCamera(width=640, height=480, fps=30)
+
     def do(self, motion: HandControl) -> None:
         """Executes a given HandControl motion.
 
