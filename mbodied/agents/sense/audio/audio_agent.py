@@ -28,6 +28,7 @@ from openai import OpenAI
 from typing_extensions import Literal
 
 from mbodied.agents import Agent
+import whisper
 
 
 class AudioAgent(Agent):
@@ -50,8 +51,8 @@ class AudioAgent(Agent):
         listen_filename: str = "tmp_listen.wav",
         tmp_speak_filename: str = "tmp_speak.mp3",
         use_pyaudio: bool = True,
-        client: OpenAI = None,
-        api_key: str = None,
+        openai_api_key: str = None,
+        run_local: bool = False,
     ):
         """Initializes the AudioAgent with specified parameters.
 
@@ -60,7 +61,8 @@ class AudioAgent(Agent):
             tmp_speak_filename: The filename for storing synthesized speech.
             use_pyaudio: Whether to use PyAudio for playback. Prefer setting to False for Mac.
             client: An optional OpenAI client instance.
-            api_key: The API key for OpenAI.
+            openai_api_key: The API key for OpenAI.
+            run_local: Whether to run the whisper model locally instead of using OpenAI.
         """
         self.recording = False
         self.record_lock = threading.Lock()
@@ -69,13 +71,12 @@ class AudioAgent(Agent):
         self.use_pyaudio = use_pyaudio
         if os.getenv("NO_AUDIO"):
             return
-        if api_key:
-            self.client = OpenAI(api_key=api_key)
+        self.run_local = False
+        if run_local:
+            self.run_local = True
+            self.model = whisper.load_model("base")
         else:
-            self.client = client
-        if self.client is None:
-            self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
-            logging.info("OpenAI API key fetched from the environment key.")
+            self.client = OpenAI(api_key=openai_api_key or os.getenv("OPENAI_API_KEY"))
 
     def act(self, *args, **kwargs):
         return self.listen(*args, **kwargs)
@@ -114,15 +115,18 @@ class AudioAgent(Agent):
         transcription = None
         try:
             with open(self.listen_filename, "rb") as audio_file:
-                transcription = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file)
-                return typed_input + transcription.text
+                if self.run_local:
+                    transcription = self.model.transcribe(self.listen_filename)["text"]
+                else:
+                    transcription = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file).text
+                return typed_input + transcription
         except Exception as e:
             logging.error(f"Failed to read or transcribe audio file: {e}")
             return ""
         finally:
             if not keep_audio and os.path.exists(self.listen_filename):
                 os.remove(self.listen_filename)
-            return typed_input + transcription.text if transcription else ""
+            return typed_input + transcription if transcription else ""
 
     def record_audio(self) -> None:
         """Records audio from the microphone and saves it to a file."""

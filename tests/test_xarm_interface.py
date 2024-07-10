@@ -35,6 +35,7 @@ def mock_xarm_api(mocker):
     mock_instance.set_position.return_value = None
     mock_instance.set_gripper_position.return_value = None
     mock_instance.get_position.return_value = (0, [300, 0, 325, -180, 0, 0])
+    mock_instance.get_gripper_position.return_value = (0, 800)
     return mock_instance
 
 

@@ -87,6 +87,8 @@ class XarmInterface(RecordingHardwareInterface):
 
         self.arm.set_position(*current_pos, wait=False, speed=200)
         self.arm.set_gripper_position(motion.grasp.value * 800, wait=False)
+        self.arm.set_collision_sensitivity(3)
+        self.arm.set_self_collision_detection(True)
 
     def set_pose(self, motion: HandControl) -> None:
         """Sets the robot arm to a given absolute HandControl pose."""
@@ -98,7 +100,10 @@ class XarmInterface(RecordingHardwareInterface):
         current_pos[4] = math.degrees(motion.pose.pitch)
         current_pos[5] = math.degrees(motion.pose.yaw)
         self.arm.set_position(*current_pos, wait=True, speed=200)
-        self.arm.set_gripper_position(motion.grasp.value * 800, wait=True)
+        if motion.grasp.value <= 0.5:
+            self.arm.set_gripper_position(0, wait=True)
+        else:
+            self.arm.set_gripper_position(800, wait=True)
 
     def get_pose(self) -> HandControl:
         """Gets the current pose (absolute HandControl) of the robot arm.
@@ -115,7 +120,10 @@ class XarmInterface(RecordingHardwareInterface):
         current_pos[5] = round(math.radians(current_pos[5]), 6)
 
         hand_control = current_pos.copy()
-        hand_control.append(self.arm.get_gripper_position()[1] / 800)
+        if self.arm.get_gripper_position()[1] >= 750:
+            hand_control.append(1)
+        else:
+            hand_control.append(0)
         return HandControl.unflatten(hand_control)
 
     def capture(self) -> Image:

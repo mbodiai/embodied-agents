@@ -45,5 +45,13 @@ def test_do_motion(sim_interface):
     assert sim_interface.get_pose() == expected_pose
 
 
+@pytest.mark.asyncio
+async def test_async_do_motion(sim_interface):
+    motion = HandControl(pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=JointControl(value=0.5))
+    await sim_interface.async_do(motion)
+    expected_pose = [0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.5]
+    assert sim_interface.get_pose() == expected_pose
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])

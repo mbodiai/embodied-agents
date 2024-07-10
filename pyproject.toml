@@ -53,11 +53,13 @@ dependencies = [
 audio = [
   "playsound",
   "pyaudio",
+  "openai-whisper",
 ]
 
 all = [
   "playsound",
   "pyaudio",
+  "openai-whisper",
   "open3d",
   "timm",
   "torchvision",
