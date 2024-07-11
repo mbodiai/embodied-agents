@@ -183,6 +183,12 @@ class LanguageAgent(Agent):
                 forgotten.append(last)
         return forgotten
 
+    def forget_til(self, first_n: int = 1) -> None:
+        """Forget till first_n in the context."""
+        if first_n >= len(self.context):
+            return
+        self.context = self.context[:first_n]
+
     def history(self) -> List[Message]:
         """Return the conversation history."""
         return self.context
@@ -242,7 +248,6 @@ class LanguageAgent(Agent):
             parse_target,
             context,
             model=model,
-            max_retries=max_retries,
             **kwargs,
         )
 

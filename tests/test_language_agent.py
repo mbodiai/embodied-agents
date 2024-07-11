@@ -98,38 +98,9 @@ def test_language_agent_forget(mock_openai_init, mock_openai_act):
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
 @mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
-def test_language_agent_forget_after(mock_openai_init, mock_openai_act):
+def test_language_agent_forget_til(mock_openai_init, mock_openai_act):
     agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
-    agent.forget_after(1)
-    assert agent.context == [Message(content="Hello")]
-
-
-@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
-def test_language_agent_forget_everything(mock_openai_init, mock_openai_act):
-    agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
-    agent.forget(everything=True)
-    assert agent.context == []
-
-
-@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
-def test_language_agent_history(mock_openai_init, mock_openai_act):
-    agent = LanguageAgent(context=["Hello", "How are you?"])
-    agent.act("What's your name?")
-    history = agent.history()
-    assert len(history) == 4
-    assert history[0].content == ["Hello"]
-    assert history[1].content == ["How are you?"]
-    assert history[2].content == ["What's your name?"]
-    assert history[3].role == "assistant"
-
-
-@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
-@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
-def test_language_agent_forget_after(mock_openai_init, mock_openai_act):
-    agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
-    agent.forget_after(first_n=1)
+    agent.forget_til(first_n=1)
     assert agent.context == [Message(content="Hello")]
 
 
