@@ -1,58 +1,23 @@
-import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from timm import create_model
+from timm.loss.asymmetric_loss import AsymmetricLossMultiLabel
+from timm.data.transforms_factory import create_transform
 from x_transformers import TransformerWrapper, Decoder
-from PIL import Image
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms
-from timm.loss import asymmetric_loss
 from transformers import GPT2Tokenizer
+from torch.utils.data import TensorDataset, DataLoader
+from torchvision import transforms
+from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+from einops import pack, unpack, rearrange
+from einops.layers.torch import Rearrange
+from sklearn.preprocessing import MinMaxScaler, KBinsDiscretizer
 from classifier_free_guidance_pytorch import (
     TextConditioner,
     AttentionTextConditioner,
     classifier_free_guidance,
 )
-
-NUM_ACTIONS = 7          # Number of robotic actions (x, y, z, roll, pitch, yaw, grasp)
-ACTION_BINS = 255       # Discretization bins per action
-EMBEDDING_DIM = 384     # Embedding dimension of ViT-Small
-NUM_DECODER_LAYERS = 6
-NUM_DECODER_HEADS = 8
-
-
-class CustomDataset(Dataset):
-    def __init__(self, video_folder, instructions, transform=None):
-        self.video_folder = video_folder
-        self.instructions = instructions
-        self.video_files = os.listdir(video_folder)
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.video_files)
-
-    def __getitem__(self, idx):
-        video_name = os.path.join(self.video_folder, self.video_files[idx])
-        video_frames = self.load_video(video_name)  # Load video frames
-
-        if self.transform:
-            video_frames = self.transform(video_frames)
-
-        instruction = self.instructions[idx]  # Get corresponding instruction
-        return video_frames, instruction
-
-    def load_video(self, video_path):
-        # Dummy implementation to load video frames
-        return torch.randn(10, 3, 224, 224)  # 10 frames of 224x224 RGB images
-
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-])
-
 
 class FilmLayer(nn.Module):
     def __init__(self, dim):
@@ -92,133 +57,60 @@ class CustomDecoder(nn.Module):
         return x
 
 
-# class Residual(nn.Module):
-#     """Implements a residual connection in a transformer block.
+def pack_one(x, pattern):
+    return pack([x], pattern)
 
-#     This allows the gradient to flow more easily through deep networks by adding the input to the output.
-#     """
-#     def __init__(self, fn: nn.Module):
-#         super().__init__()
-#         self.fn = fn
+def unpack_one(x, ps, pattern):
+    return unpack(x, ps, pattern)[0]
 
-#     def forward(self, x, *args, **kwargs):
-#         return self.fn(x, *args, **kwargs) + x
-
-
-# class FilmLayer(nn.Module):
-#     def __init__(self, dim):
-#         super().__init__()
-#         self.gamma = nn.Parameter(torch.ones(dim))
-#         self.beta = nn.Parameter(torch.zeros(dim))
-
-#     def forward(self, x, condition_fn):
-#         gamma = condition_fn(self.gamma)
-#         beta = condition_fn(self.beta)
-#         return x * gamma + beta
-
-
-# class CustomDecoder(nn.Module):
-#     def __init__(self, num_tokens, dim, depth, heads, max_seq_len):
-#         super().__init__()
-#         self.transformer = TransformerWrapper(
-#             num_tokens=num_tokens,
-#             max_seq_len=max_seq_len,
-#             attn_layers=Decoder(dim=dim, depth=depth, heads=heads, cross_attend=True)
-#         )
-
-#         # Create a separate FilmLayer for each decoder layer
-#         self.film_layers = nn.ModuleList([FilmLayer(dim) for _ in range(depth)])
-
-#         # Initialize FilmTextConditioner for the decoder
-#         self.film = FilmTextConditioner(hidden_dims=[dim] * depth, cond_drop_prob=0.2)
-
-#     def forward(self, x, context, instructions):
-#         # Generate per-layer conditioning functions from instructions
-#         condition_fns = self.film(instructions)
-
-#         # Apply transformer layers interleaved with Film layers
-#         for i, layer in enumerate(self.transformer.attn_layers.layers):
-#             x = Residual(layer)(x, context=context)  
-#             x = self.film_layers[i](x, condition_fns[i])  
-#         return x
-
-# class CustomDecoder(nn.Module):
-#     def __init__(self, num_tokens, dim, depth, heads, max_seq_len):
-#         super().__init__()
-#         assert len(dim) == depth, "length of dim must be equal to depth"
-#         self.layers = nn.ModuleList([])
-#         for i in range(depth):
-#             should_cross_attend = i == 0
-#             self.layers.append(nn.ModuleList([
-#                 Residual(Attention(dim, heads = heads, cross_attend=should_cross_attend)),
-#                 Residual(FeedForward(dim)),
-#                 FilmLayer(dim),
-#             ]))
-
-#     def forward(self, x, context, condition_fns):
-#         """Forward pass of the decoder.
-
-#         Args:
-#             x (torch.Tensor): Input sequence of shape (batch_size, seq_len, dim).
-#             context (torch.Tensor): Contextual information from the encoder (e.g., image features).
-#             condition_fns: The conditioning functions generated by the TextConditioner or AttentionTextConditioner for each layer in the ViT
-#         """
-
-#         # Apply transformer layers interleaved with Film layers
-#         for i, (attn, ff, film_layer) in enumerate(self.layers):
-#             x = attn(x, context=context) 
-#             x = ff(x)
-#             x = film_layer(x, condition_fns[i])
-
-#         return x
-
-
-# Tokenize Actions (x, y, z, roll, pitch, yaw, grasp)
-ACTION_TOKENS = {
-    'x': 0,
-    'y': 1,
-    'z': 2,
-    'roll': 3,
-    'pitch': 4,
-    'yaw': 5,
-    'grasp': 6
-}
-
-# Token Learner if needed
 class TokenLearner(nn.Module):
-    def __init__(self, dim, num_output_tokens):
+    def __init__(self, *, dim, ff_mult=2, num_output_tokens=8):
         super().__init__()
-        self.token_learner = nn.Sequential(
-            nn.Linear(dim, num_output_tokens),
+        inner_dim = dim * ff_mult * num_output_tokens
+
+        self.num_output_tokens = num_output_tokens
+        self.net = nn.Sequential(
+            nn.Conv2d(
+                dim * num_output_tokens,
+                inner_dim,
+                1,
+            ),
             nn.GELU(),
-            nn.Linear(num_output_tokens, num_output_tokens)
+            nn.Conv2d(
+                inner_dim,
+                num_output_tokens,
+                1,
+            ),
         )
 
     def forward(self, x):
-        return self.token_learner(x)
+        b, f, d = x.shape  # Get batch size, num_frames, and embedding dimension
+        x = rearrange(x, "b f d -> b d f")  # Reshape for convolution
+        x = x.unsqueeze(-1).unsqueeze(-1)  # Add dummy spatial dimensions
+        attn = self.net(x)                 # Generate attention map
+        attn = attn.softmax(dim=1)         # Apply softmax along the channel dimension
+        
+        # Weighted average pooling using attention map and reshape for decoder
+        x = (x * attn).sum(dim=(2, 3))    
+        x = rearrange(x, "b d g -> b (g d)") # Merge back the output tokens and dimension
+        return x
 
 
-# Define the pattern transformation and integrate into training loop
-class RT1(pl.LightningModule):
-    def __init__(self, encoder, decoder, lr=1e-4, num_actions=7, action_bins=255, use_attn_conditioner=False):
+class RT1(nn.Module):
+    def __init__(self, encoder, decoder, num_actions, action_bins, lr=1e-4, num_frames=5, use_attn_conditioner=False):
         super().__init__()
         self.encoder = encoder
         self.decoder = decoder
-        self.loss_fn = asymmetric_loss() 
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.loss_fn = AsymmetricLossMultiLabel(gamma_neg=4, clip=0.05)
         self.learning_rate = lr
         self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        self.token_learner = TokenLearner(dim=encoder.embed_dim)
         self.action_embedding = nn.Embedding(self.tokenizer.vocab_size, self.encoder.embed_dim)
-        self.num_actions = num_actions
         self.action_bins = action_bins
-        self.logits = None
-        # Add to_logits layer
-        self.to_logits = nn.Sequential(
-            nn.LayerNorm(encoder.embed_dim),  # Normalize the decoder's output
-            nn.Linear(encoder.embed_dim, num_actions * action_bins),
-            nn.ReLU()
-            # Rearrange("... (a b) -> ... a b", b=action_bins), #Reshape logits into the desired format
-        )
-
+        self.num_actions = num_actions
+        self.num_frames = num_frames
+        self.image_size = encoder.default_cfg['input_size']
 
         # Determine which conditioner to use
         film_layer = AttentionTextConditioner if use_attn_conditioner else TextConditioner
@@ -230,23 +122,34 @@ class RT1(pl.LightningModule):
             cond_drop_prob=0.2,
         )
 
+         # Add to_logits layer
+        self.to_logits = nn.Sequential(
+            nn.LayerNorm(encoder.embed_dim),  # Normalize the decoder's output
+            nn.Linear(encoder.embed_dim, self.num_actions * self.action_bins),
+            Rearrange('b (f a c) -> b f a c', f=self.num_frames, a=self.num_actions, c=self.action_bins),
+            nn.ReLU()
+        )
 
     def forward(self, video, instructions, cond_scale=1.0, test=False):
-        # Video should have shape (batch_size, num_frames, channels, height, width)
-        # Instructions should be a list of strings (one per video in the batch)
+        # Video: (batch_size, num_frames, channels, height, width)
+        # Instructions: List of strings (one per video in the batch)
         batch_size = video.shape[0]
-        num_frames = video.shape[2]
+        
+        # Preprocess video
+        video = self.preprocess(video)
 
-        # Preprocessing (add your preprocessing steps here)
-        video = self.preprocess(video) 
+        # Encode video using the ViT
+        encoded_video = self.encoder(video.flatten(0, 1))
 
-        # Flatten the video for the encoder (DINOv2)
-        encoded_video = self.encoder(video.flatten(0, 1))  
-
-        # Tokenize instructions
-        encoded_instructions = self.tokenizer(
-            instructions, padding="longest", return_tensors="pt"
-        ).to(self.device)  # Ensure instructions are on the same device as the model
+        if isinstance(instructions, torch.Tensor):
+            encoded_instructions = {
+                "input_ids": instructions.to(self.device)  
+            }
+        else: 
+            # Tokenize instructions if they are strings
+            encoded_instructions = self.tokenizer(
+                instructions, padding="longest", return_tensors="pt"
+            ).to(self.device)
 
         # Generate per-layer conditioning functions from instructions
         condition_fns = self.conditioner(encoded_instructions["input_ids"])
@@ -257,17 +160,16 @@ class RT1(pl.LightningModule):
         # Apply film layers to each block of the encoder
         conditioned_features = []
         for i, block in enumerate(self.encoder.blocks):
-            for layer in block.layers:
+            for _ in block.layers:
                 encoded_video[:, i] = condition_fns[i](encoded_video[:, i])
             conditioned_features.append(encoded_video[:, i]) # Store conditioned features for later use
 
-        # Token learner (if needed)
-        # ... (I will add token learner here if required)
-
+        learned_tokens = self.token_learner(conditioned_features[-1])
         # Cross-attention decoder
         seq = torch.cat(
             (
                 action_embeddings,  # Use action embeddings
+                learned_tokens, # Include learned tokens in the input
                 conditioned_features[-1],  # Last layer's features
             ),
             dim=1,
@@ -276,7 +178,7 @@ class RT1(pl.LightningModule):
 
         # Classification logits
         logits = self.to_logits(seq)
-        logits = logits.view(-1, num_frames, self.num_actions, self.action_bins)
+        logits = logits.view(batch_size, self.num_frames, self.num_actions, self.action_bins)
 
         if test:
             # Apply classifier-free guidance during inference
@@ -284,50 +186,133 @@ class RT1(pl.LightningModule):
 
         return logits
 
-    def train(self, video, instructions):
-        raise NotImplementedError
+    def preprocess(self, video):
+        """Applies preprocessing steps to the video input."""
+        
+        # Normalize video tensors
+        video = video.float() / 255.0
+        
+        # Standard image augmentations using transforms from timm
+        transform = create_transform(**{"input_size": self.image_size, "is_training": True})
 
-# Load pretrained ViT-g/14 model from timm and setup the model
-def load_vit_model():
-    vit_model = create_model('vit_small_patch14_reg4_dinov2', pretrained=True, features_only=True)
-    return vit_model
+        # Apply transforms to each frame in the video batch
+        transformed_video = []
+        for batch_idx in range(video.shape[0]):
+            # Unbind video into individual frames and create a list
+            frames = [frame for frame in video[batch_idx].unbind(dim=0)]
+            transformed_frames = torch.stack([transform(transforms.ToPILImage()(frame.cpu())) for frame in frames]) #convert to pil image
+            transformed_video.append(transformed_frames)
+        return torch.stack(transformed_video, dim=0)
+
+
+class RT1Trainer(pl.LightningModule):
+    def __init__(self, encoder, decoder, lr=1e-4, num_actions=7, action_bins=255, use_attn_conditioner=False):
+        super().__init__()
+        self.model = RT1(encoder, decoder, num_actions, action_bins, use_attn_conditioner)
+        self.learning_rate = lr
+        self.action_scaler = MinMaxScaler()
+        self.action_discretizer = KBinsDiscretizer(n_bins=ACTION_BINS, encode='ordinal', strategy='uniform')
+
+    def forward(self, video, instructions, actions=None, cond_scale=1.0, test=False):
+        return self.model(video, instructions, actions=actions, cond_scale=cond_scale, test=test)
+
+    def training_step(self, batch):
+        video, instructions, actions = batch
+
+        # Preprocess actions: Scale and Discretize BEFORE forward pass
+        actions = self.action_scaler.transform(actions.cpu().numpy())
+        actions = self.action_discretizer.transform(actions)
+        actions = torch.from_numpy(actions).long().to(self.device)  # Convert back to tensor on the correct device
+
+        logits = self(video, instructions, actions=actions)
+        loss = self.model.loss_fn(logits, actions)
+        self.log("train_loss", loss, prog_bar=True)
+        return loss
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.AdamW(self.parameters(), lr=self.learning_rate)
+        return optimizer
+
+    def predict(self, batch, cond_scale=3.0):
+        video, instructions = batch  # Extract video and instructions from the batch
+        self.model.eval()  # Set the RT1 model to evaluation mode
+        with torch.no_grad():
+            logits = self(video, instructions, cond_scale=cond_scale, test=True)  
+        return logits   # Return the raw logits with shape (b, f, a, bins)
+
+    def prepare_data(self, video_data, instructions, action_labels):
+        """Prepares the data for training by fitting the scalers and discretizers."""
+        
+        # Tokenize instructions
+        encoded_instructions = self.model.tokenizer(
+            instructions, padding="longest", return_tensors="pt"
+        ).to(self.model.device)
+
+        all_actions = action_labels.cpu().numpy()
+
+        # Fit the MinMaxScaler
+        self.action_scaler.fit(all_actions.reshape(-1, self.num_actions)) 
+
+        # Fit the KBinsDiscretizer
+        self.action_discretizer.fit(all_actions.reshape(-1, self.num_actions))
+
+        # Create a PyTorch Dataset and DataLoader
+        dataset = TensorDataset(video_data, encoded_instructions['input_ids'], action_labels) 
+        dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+        return dataloader
+
+
 
 # Example usage
-if __name__ == '__main__':
-    # Data transforms
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-    ])
 
-    # Dummy instructions
-    # instructions = ["move to position (1, 2, 3) with roll 10, pitch 20, yaw 30 and grasp", "another instruction"]
+# Configuration (Adjust as needed)
+NUM_ACTIONS = 7          # Number of robotic actions
+ACTION_BINS = 255       # Discretization bins per action
+EMBEDDING_DIM = 384     # Embedding dimension of ViT-Small
+NUM_DECODER_LAYERS = 6
+NUM_DECODER_HEADS = 8
+NUM_FRAMES = 5
+BATCH_SIZE = 2
 
-    # Dataset and DataLoader
-    # dataset = CustomDataset(video_folder='path_to_your_videos', instructions=instructions, transform=transform)
-    # dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
+# Create sample data
+video_data = torch.randn(BATCH_SIZE, NUM_FRAMES, 3, 224, 224)  # Random video
+action_labels = torch.randint(0, ACTION_BINS, (BATCH_SIZE, NUM_FRAMES, NUM_ACTIONS))  # Random actions
 
-    # Model setup
-    vit_model = load_vit_model()
-    decoder = CustomDecoder(num_tokens=11, dim=vit_model.embed_dim, depth=6, heads=8, max_seq_len=7)
-    model = RT1(encoder=vit_model, decoder=decoder)
+# Create sample instructions (one per video)
+instructions = ["move the red block to the left", "grasp the green object"] * (BATCH_SIZE // 2)
 
-    # Create a random video tensor
-    batch_size = 2    # Simulating a batch of 2 videos
-    num_frames = 10
-    channels = 3      # Assuming RGB images
-    height = 224
-    width = 224
+# Load the pre-trained ViT model
+encoder = create_model('vit_small_patch14_reg4_dinov2', pretrained=True, num_classes=0)
 
-    video = torch.randn(batch_size, channels, num_frames, height, width)
+# Create the decoder model
+decoder = CustomDecoder(
+    num_tokens=NUM_ACTIONS*ACTION_BINS,
+    dim=encoder.embed_dim,
+    depth=NUM_DECODER_LAYERS,
+    heads=NUM_DECODER_HEADS,
+    max_seq_len=1024
+) 
 
-    instructions = [
-    "Pick up the blue cube and place it on the red square.",
-    "Move forward until you see a green triangle, then stop."
-    ]
+# Create the RT1Trainer model
+model = RT1Trainer(encoder, decoder, num_actions=NUM_ACTIONS, action_bins=ACTION_BINS, num_frames=NUM_FRAMES)
 
-    logits = model(video, instructions)  # Training mode (no CFG)
+# Prepare data and get the DataLoader
+dataloader = model.prepare_data(video_data, instructions, action_labels)
 
-    # For inference, you can set test=True
-    logits_inference = model(video, instructions, test=True, cond_scale=3.0)
+# Training 
+trainer = pl.Trainer(max_epochs=2, accelerator="gpu" if torch.cuda.is_available() else "cpu")  # Limit epochs for testing
+trainer.fit(model, dataloader)
+
+# Create sample data for inference (one video)
+test_video = torch.randn(1, NUM_FRAMES, 3, 224, 224)  
+test_instructions = ["perform a series of actions"]
+
+# Create a PyTorch Dataset and DataLoader for inference (batch_size=1)
+inference_dataset = TensorDataset(test_video, test_instructions)  
+inference_dataloader = DataLoader(inference_dataset, batch_size=1, shuffle=False)  # No shuffling during inference
+
+# Predict using PyTorch Lightning Trainer
+predictions = trainer.predict(model, dataloaders=inference_dataloader)
+
+# Post-process predictions (get most likely actions)
+predicted_actions = [logits.argmax(dim=-1) for logits in predictions]
