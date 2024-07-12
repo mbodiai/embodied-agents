@@ -189,3 +189,5 @@ wandb/
 .tmp_listen*
 .tmp_speak*
 saved_datasets/
+env.json
+mbodied/agents/motion/rt_pali/checkpoints/*
