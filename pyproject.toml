@@ -46,6 +46,9 @@ dependencies = [
   "gradio",
   "gradio_client",
   "xarm-python-sdk",
+  "pytorch-lightning",
+  "peft",
+  "wandb"
 ]
 
 [project.optional-dependencies]
