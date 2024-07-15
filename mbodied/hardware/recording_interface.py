@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import threading
 import time
@@ -61,6 +62,12 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
         """Gets the current pose of the hardware."""
         raise NotImplementedError
 
+    def reset_recorder(self) -> None:
+        """Reset the recorder."""
+        while self.recording:
+            time.sleep(0.1)
+        self.recorder.reset()
+
     def do_and_record(self, instruction: str, *args: Any, **kwargs: Any) -> None:
         """Executes the main operation and records pose and image with the instruction.
 
@@ -76,6 +83,16 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
         finally:
             self.stop_recording()
             self.record_final_state()
+
+    async def async_do_and_record(self, instruction: str, *args: Any, **kwargs: Any) -> None:
+        """Asynchronously executes the main operation and records pose and image with the instruction.
+
+        Args:
+            instruction: The instruction to be recorded along with pose and image.
+            *args: Additional arguments to pass to do method.
+            **kwargs: Additional keyword arguments to pass to the do method.
+        """
+        return await asyncio.to_thread(self.do_and_record, instruction, *args, **kwargs)
 
     def record_pose_and_image(self) -> None:
         """Records the current pose and captures an image at the specified frequency."""

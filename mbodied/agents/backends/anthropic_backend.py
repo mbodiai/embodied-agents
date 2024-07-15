@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any
+from typing import Any, List
 
 import anthropic
 
@@ -88,7 +88,9 @@ class AnthropicBackend(OpenAIBackendMixin):
             self.client = anthropic.Anthropic(api_key=self.api_key)
         self.serialized = AnthropicSerializer
 
-    def _create_completion(self, messages: list[Message], model: str = "claude-3-5-sonnet-20240620", **kwargs) -> str:
+    def _create_completion(
+        self, messages: list[Message], model: str | None = "claude-3-5-sonnet-20240620", **kwargs
+    ) -> str:
         """Creates a completion for the given messages using the Anthropic API.
 
         Args:
@@ -101,7 +103,7 @@ class AnthropicBackend(OpenAIBackendMixin):
         """
         if model is None:
             model = self.DEFAULT_MODEL
-        serialized_messages = [self.serialized(msg) for msg in messages]
+        serialized_messages = [self.serialized(msg).serialize() for msg in messages]
         completion = self.client.messages.create(
             model=model,
             max_tokens=1024,
@@ -109,3 +111,10 @@ class AnthropicBackend(OpenAIBackendMixin):
             **kwargs,
         )
         return completion.content[0].text
+
+    async def async_predict(
+        self, message: Message, context: List[Message] | None = None, model: Any | None = None
+    ) -> str:
+        """Asynchronously predict the next message in the conversation."""
+        # For now, we'll use the synchronous method since Anthropic doesn't provide an async API
+        return self.predict(message, context, model)

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from abc import ABC, abstractmethod
 
 
@@ -40,6 +41,15 @@ class HardwareInterface(ABC):
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError
+
+    async def async_do(self, *args, **kwargs) -> None:
+        """Asynchronously executes motion.
+
+        Args:
+            args: Arguments to pass to the hardware interface.
+            kwargs: Additional arguments to pass to the hardware interface.
+        """
+        return await asyncio.to_thread(self.do, *args, **kwargs)
 
     def fetch(self, *args, **kwargs) -> None:
         """Fetches data from the hardware.

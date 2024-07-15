@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import pytest
 from unittest.mock import MagicMock, mock_open
-from mbodied.agents.sense.audio.audio_agent import AudioAgent
+from mbodied.agents.sense.audio.audio_agent import AudioAgent, playsound
 
 
 @pytest.fixture
 def audio_agent(mocker):
     mocker.patch("mbodied.agents.sense.audio.audio_agent.OpenAI")
-    mocker.patch("mbodied.agents.sense.audio.audio_agent.pyaudio.PyAudio")
+    mocker.patch("mbodied.agents.sense.audio.audio_agent.pyaudio", create=True)
     mock_openai = mocker.patch("mbodied.agents.sense.audio.audio_agent.OpenAI").return_value
     mock_openai.audio.transcriptions.create.return_value = MagicMock(text="test transcription")
     handler = AudioAgent(api_key="test-api-key")
@@ -72,13 +73,15 @@ def test_speak(mocker, audio_agent):
 
 @pytest.mark.extras
 def test_play_audio(mocker, audio_agent):
-    mock_playsound = mocker.patch("mbodied.agents.sense.audio.audio_agent.playsound.playsound")
+    if os.environ.get("NO_AUDIO"):
+        pytest.skip("Audio is disabled")
+    mock_playsound = mocker.patch("mbodied.agents.sense.audio.audio_agent.playsound", create=True)
     mocker.patch("mbodied.agents.sense.audio.audio_agent.os.path.exists", return_value=True)
     mock_remove = mocker.patch("mbodied.agents.sense.audio.audio_agent.os.remove")
 
     audio_agent.play_audio("test.mp3")
 
-    mock_playsound.assert_called_once_with("test.mp3")
+    mock_playsound.playsound.assert_called_once_with("test.mp3")
     mock_remove.assert_called_once_with("test.mp3")
 
 

@@ -268,9 +268,7 @@ class Image(Sample):
             # Open the URL and read the image data
             import urllib.request
 
-            user_agent = (
-                "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7"
-            )
+            user_agent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7"
             headers = {
                 "User-Agent": user_agent,
             }
@@ -379,6 +377,7 @@ class Image(Sample):
                 Path(url_path).suffix[1:].lower() if Path(url_path).suffix else validated_values["encoding"]
             )
             validated_values["encoding"] = file_extension
+            validated_values["url"] = values["url"]
             image = cls.load_url(values["url"])
             if image is None:
                 validated_values["array"] = np.zeros((224, 224, 3), dtype=np.uint8)

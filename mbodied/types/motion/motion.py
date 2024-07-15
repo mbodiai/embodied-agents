@@ -85,7 +85,7 @@ def MotionField(  # noqa
     )  # type: ignore
 
 
-def AbsoluteMotionField( # noqa
+def AbsoluteMotionField(  # noqa
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
     shape: tuple[int] | None = None,
@@ -111,7 +111,7 @@ def AbsoluteMotionField( # noqa
     )
 
 
-def RelativeMotionField( # noqa
+def RelativeMotionField(  # noqa
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
     shape: tuple[int] | None = None,
@@ -137,7 +137,7 @@ def RelativeMotionField( # noqa
     )
 
 
-def VelocityMotionField( # noqa
+def VelocityMotionField(  # noqa
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
     shape: tuple[int] | None = None,
@@ -163,7 +163,7 @@ def VelocityMotionField( # noqa
     )
 
 
-def TorqueMotionField( # noqa
+def TorqueMotionField(  # noqa
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
     shape: tuple[int] | None = None,
@@ -189,7 +189,7 @@ def TorqueMotionField( # noqa
     )
 
 
-def OtherMotionField( # noqa
+def OtherMotionField(  # noqa
     default: Any = PydanticUndefined,
     bounds: list[float] | None = None,
     shape: tuple[int] | None = None,

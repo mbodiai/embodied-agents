@@ -177,6 +177,12 @@ class Recorder:
         self.image_keys_to_save = image_keys_to_save
         self.index = 0
 
+    def reset(self) -> None:
+        """Reset the recorder."""
+        self.file.close()
+        copy_and_delete_old(self.filename)
+        self.file = h5py.File(self.filename, "a")
+
     def configure_root_spaces(self, **spaces: spaces.Dict):
         """Configure the root spaces.
 
