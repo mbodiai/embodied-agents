@@ -138,6 +138,11 @@ h1 .headerlink {
         padding: 2px 4px;
         border-radius: 4px;
     }
+
+    .code-block-darkmode {
+        background-color: #e0e0e0;
+        color: #abb2bf;            
+      }
 }
 
 /* Dark mode styles */

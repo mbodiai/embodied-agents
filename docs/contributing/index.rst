@@ -8,12 +8,14 @@ Ensure that you use tools like gitlens (preferred), easycode, or write good comm
 When pulling changes from the main branch, always use ``--rebase`` or ``--ff-only``:
 
 .. code-block:: bash
+    :class: code-block-darkmode
 
     git pull --rebase
 
 To set up your Git configuration for a smoother workflow:
 
 .. code-block:: bash
+    :class: code-block-darkmode
 
     git config --global pull.ff only
     git config --global pull.rebase true
