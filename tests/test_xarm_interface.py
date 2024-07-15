@@ -76,7 +76,7 @@ def test_do(mock_xarm_api, xarm):
     ]
 
     mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=200)
-    mock_xarm_api.set_gripper_position.assert_called_with(480.0, wait=False)
+    mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
 
 def test_get_pose(mock_xarm_api, xarm):
