@@ -84,7 +84,7 @@
 
 ## Overview
 
-This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of the central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent has an `act` method that can be overriden and satisfies:
+This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of the central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent has an `act` method that can be overridden and satisfies:
 
 - **Language Agents** always return a string.
 - **Motor Agents** always return a `Motion`.
