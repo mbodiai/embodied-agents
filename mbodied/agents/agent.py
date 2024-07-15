@@ -17,7 +17,7 @@ import asyncio
 import logging
 from inspect import signature
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Generator, AsyncGenerator
 
 from mbodied.agents.backends import AnthropicBackend, GradioBackend, HttpxBackend, OllamaBackend, OpenAIBackend
 from mbodied.data.recording import Recorder

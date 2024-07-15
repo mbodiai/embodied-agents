@@ -28,7 +28,6 @@ from openai import OpenAI
 from typing_extensions import Literal
 
 from mbodied.agents import Agent
-import whisper
 
 
 class AudioAgent(Agent):
@@ -73,11 +72,14 @@ class AudioAgent(Agent):
             return
         self.run_local = False
         if run_local:
+            try:
+                import whisper
+            except ImportError:
+                logging.warning("whisper is not installed. Please run `pip install openai-whisper` to install.")
             self.run_local = True
             self.model = whisper.load_model("base")
         else:
-            self.client = OpenAI(
-                api_key=api_key or os.getenv("OPENAI_API_KEY"))
+            self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
 
     def act(self, *args, **kwargs):
         return self.listen(*args, **kwargs)
@@ -94,8 +96,7 @@ class AudioAgent(Agent):
         """
         logging.debug(f"Listening with mode: {mode}")
         if os.getenv("NO_AUDIO") or mode in ["type", "speak_or_type"]:
-            user_input = input(
-                "Please type your input [Type 'exit' to exit]: ") + "\n##\n"
+            user_input = input("Please type your input [Type 'exit' to exit]: ") + "\n##\n"
             if os.getenv("NO_AUDIO") or mode == "type":
                 return user_input
         else:
@@ -118,11 +119,9 @@ class AudioAgent(Agent):
         try:
             with open(self.listen_filename, "rb") as audio_file:
                 if self.run_local:
-                    transcription = self.model.transcribe(
-                        self.listen_filename)["text"]
+                    transcription = self.model.transcribe(self.listen_filename)["text"]
                 else:
-                    transcription = self.client.audio.transcriptions.create(
-                        model="whisper-1", file=audio_file).text
+                    transcription = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file).text
                 return typed_input + transcription
         except Exception as e:
             logging.error(f"Failed to read or transcribe audio file: {e}")
@@ -139,11 +138,7 @@ class AudioAgent(Agent):
         channels = 1
         fs = 44100
         p = pyaudio.PyAudio()
-        stream = p.open(format=sample_format,
-                        channels=channels,
-                        rate=fs,
-                        frames_per_buffer=chunk,
-                        input=True)
+        stream = p.open(format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
         frames = []
 
         try:
@@ -164,10 +159,7 @@ class AudioAgent(Agent):
         except Exception as e:
             logging.error(f"Failed to save audio: {e}")
 
-    def speak(self,
-              message: str,
-              voice: str = "onyx",
-              api_key: str = None) -> None:
+    def speak(self, message: str, voice: str = "onyx", api_key: str = None) -> None:
         """Synthesizes speech from text using OpenAI's API and plays it back.
 
         Args:
@@ -178,15 +170,14 @@ class AudioAgent(Agent):
         if os.environ.get("NO_AUDIO"):
             return
         try:
-            client = self.client or OpenAI(
-                api_key=api_key or os.environ.get("OPENAI_API_KEY"))
+            client = self.client or OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
             with (
-                    client.with_streaming_response.audio.speech.create(
-                        model="tts-1",
-                        voice=voice,
-                        input=message,
-                    ) as response,
-                    open(self.speak_filename, "wb") as out_file,
+                client.with_streaming_response.audio.speech.create(
+                    model="tts-1",
+                    voice=voice,
+                    input=message,
+                ) as response,
+                open(self.speak_filename, "wb") as out_file,
             ):
                 for chunk in response.iter_bytes():
                     out_file.write(chunk)
@@ -194,8 +185,7 @@ class AudioAgent(Agent):
             logging.error(f"Failed to create or save speech: {e}")
             return
 
-        self.playback_thread = threading.Thread(target=self.play_audio,
-                                                args=(self.speak_filename, ))
+        self.playback_thread = threading.Thread(target=self.play_audio, args=(self.speak_filename,))
         self.playback_thread.start()
 
     def play_audio(self, filename: str) -> None:

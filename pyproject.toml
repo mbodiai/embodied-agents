@@ -49,7 +49,6 @@ audio = [
   "playsound",
   "pyaudio",
   "openai-whisper",
-]
 
 ]
 all = [
