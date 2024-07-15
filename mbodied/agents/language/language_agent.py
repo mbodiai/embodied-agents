@@ -47,7 +47,7 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
-from typing import List, Literal, TypeAlias
+from typing import AsyncGenerator, Generator, List, Literal, TypeAlias
 
 from art import text2art
 from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
@@ -166,13 +166,22 @@ class LanguageAgent(Agent):
         except IndexError:
             logging.warning("No message to forget in the context")
 
-    def forget(self, everything=False, last_n: int = -1) -> None:
+    def forget_after(self, first_n: int) -> None:
+        """Forget after the first n messages in the context."""
+        self.context = self.context[:first_n]
+
+    def forget(self, everything=False, last_n: int = -1) -> List[Message]:
         """Forget the last n messages in the context."""
         if everything:
+            context = self.context
             self.context = []
-            return
+            return context
+        forgotten = []
         for _ in range(last_n):
-            self.forget_last()
+            last = self.forget_last()
+            if last:
+                forgotten.append(last)
+        return forgotten
 
     def history(self) -> List[Message]:
         """Return the conversation history."""
@@ -193,26 +202,27 @@ class LanguageAgent(Agent):
         self,
         instruction: str,
         image: Image = None,
-        parse_target: Sample = Sample,
+        parse_target: type[Sample] = Sample,
         context: list | str | Image | Message = None,
         model=None,
+        max_retries: int = 1,
         **kwargs,
     ) -> Sample:
         """Responds to the given instruction, image, and context and parses the response into a Sample object."""
-        response = self.act(instruction, image, context, model, **kwargs)
-        response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
-        try:
-            response = parse_target.model_validate_json(response)
-        except Exception as e:
-            error = f"Error parsing response: {e}"
-            logging.error(error)
-            logging.info(f"Recieved response: {response}. Retrying with error message.")
-
-            instruction = instruction + "avoid the following error: " + error
+        original_instruction = instruction
+        for attempt in range(max_retries + 1):
             response = self.act(instruction, image, context, model, **kwargs)
-            response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
-            response = parse_target.model_validate_json(response)
-        return response
+            response = response[response.find("{") : response.rfind("}") + 1]
+            try:
+                return parse_target.model_validate_json(response)
+            except Exception as e:
+                if attempt == max_retries:
+                    raise ValueError(f"Failed to parse response after {max_retries + 1} attempts") from e
+                error = f"Error parsing response: {e}"
+                instruction = original_instruction + f". Avoid the following error: {error}"
+                self.forget(last_n=2)
+                logging.warning(f"\nReceived response: {response}.\n Retrying with error message: {instruction}")
+        raise ValueError(f"Failed to parse response after {max_retries + 1} attempts")
 
     async def async_act_and_parse(
         self,
@@ -221,15 +231,53 @@ class LanguageAgent(Agent):
         parse_target: Sample = Sample,
         context: list | str | Image | Message = None,
         model=None,
+        max_retries: int = 1,
         **kwargs,
     ) -> Sample:
         """Responds to the given instruction, image, and context asynchronously and parses the response into a Sample object."""
         return await asyncio.to_thread(
-            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs,
+            self.act_and_parse,
+            instruction,
+            image,
+            parse_target,
+            context,
+            model=model,
+            max_retries=max_retries,
+            **kwargs,
         )
 
+    def prepare_inputs(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None
+    ) -> tuple[Message, list[Message]]:
+        self._check_for_reminders()
+        memory = self.context
+        if context and all(isinstance(c, Message) for c in context):
+            memory += context
+            context = []
+
+        # Prepare the inputs
+        inputs = [instruction]
+        if image is not None:
+            inputs.append(image)
+        if context:
+            inputs.extend(context if isinstance(context, list) else [context])
+        message = Message(role="user", content=inputs)
+
+        return message, memory
+
+    def postprocess_response(self, response: str, message: Message, memory: list[Message], **kwargs) -> str:
+        """Postprocess the response."""
+        self.context.append(message)
+        self.context.append(Message(role="assistant", content=response))
+        return response
+
     def act(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs,
+        self,
+        instruction: str,
+        image: Image = None,
+        context: list | str | Image | Message = None,
+        model=None,
+        **kwargs,
     ) -> str:
         """Responds to the given instruction, image, and context.
 
@@ -252,23 +300,32 @@ class LanguageAgent(Agent):
             >>> agent.act("Return a plan to pickup the object as a python list.", Image("scene.jpeg"))
             "['Move left arm to the object', 'Move right arm to the object']"
         """
-        self._check_for_reminders()
-        memory = self.context
-        if context and all(isinstance(c, Message) for c in context):
-            memory += context
-            context = []
-
-        # Prepare the inputs
-        inputs = [instruction]
-        if image is not None:
-            inputs.append(image)
-        if context:
-            inputs.extend(context if isinstance(context, list) else [context])
-        message = Message(role="user", content=inputs)
-
+        message, memory = self.prepare_inputs(instruction, image, context)
         model = model or kwargs.pop("model", None)
         response = self.actor.predict(message, memory, model=model, **kwargs)
+        return self.postprocess_response(response, message, memory, **kwargs)
 
-        self.context.append(message)
-        self.context.append(Message(role="assistant", content=response))
-        return response
+    def act_and_stream(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+    ) -> Generator[str, None, str]:
+        """Responds to the given instruction, image, and context and streams the response."""
+        message, memory, model = self.prepare_inputs(instruction, image, context)
+        response = ""
+        model = model or kwargs.pop("model", None)
+        for chunk in self.actor.stream(memory + [message], model=model, **kwargs):
+            response += chunk
+            yield chunk
+        return self.postprocess_response(response, message, memory, **kwargs)
+
+    async def async_act_and_stream(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+    ) -> AsyncGenerator[str, None]:
+        # TODO(sebastian): fix this. Response is None maybe due to three nested async yields.
+        raise NotImplementedError("Async streaming is not supported for this agent.")
+        # message, memory, model = self.prepare_inputs(instruction, image, context, model)
+        # model = model or kwargs.pop("model", None)
+        # response = ""
+        # async for chunk in self.actor.astream(memory + [message], model=model, **kwargs):
+        #     response += chunk
+        #     yield chunk
+        # self.postprocess_response(response, message, memory, **kwargs)

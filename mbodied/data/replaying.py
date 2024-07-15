@@ -319,24 +319,16 @@ def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> Non
     """
     r = FolderReplayer(folder)
     data = list(r.__iter__())
-
-    def list_of_dicts_to_dict(data: List[dict]) -> dict:
-        if not data:
-            return {}
-        columnar_data = {key: [] for key in data[0]}
-        for item in data:
-            for key, value in item.items():
-                columnar_data[key].append(value)
-        return columnar_data
-
     features = Features(
         {
             "observation": {"image": Image(), "instruction": Value("string")},
             "action": infer_features(data[0]["action"]),
+            "episode": Value("int32"),
         },
     )
 
-    data = list_of_dicts_to_dict(data)
+    # Convert list of dicts to dict of lists, preserving order
+    data_dict = {key: [item[key] for item in data] for key in data[0]}
     info = DatasetInfo(
         description=description,
         license="Apache-2.0",
@@ -345,10 +337,9 @@ def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> Non
         features=features,
     )
 
-    ds = Dataset.from_dict(data, info=info)
+    ds = Dataset.from_dict(data_dict, info=info)
     ds = ds.with_format("pandas")
-    login(os.getenv("HF_TOKEN"))
-    ds.push_to_hub(name, **kwargs)
+    ds.push_to_hub(name, private=True, **kwargs)
 
 
 def parse_slice(s: str) -> int | slice:

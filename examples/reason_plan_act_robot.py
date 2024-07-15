@@ -37,7 +37,10 @@ def get_image_from_camera() -> Image:
 @click.option("--backend_api_key", default=None, help="The API key for the backend, i.e. OpenAI, Anthropic")
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
 @click.option(
-    "--record_dataset", default="default", help="Recording action to take", type=click.Choice(["default", "omit"]),
+    "--record_dataset",
+    default="default",
+    help="Recording action to take",
+    type=click.Choice(["default", "omit"]),
 )
 def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset: bool) -> None:
     """Example for layered robotic control.

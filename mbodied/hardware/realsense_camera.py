@@ -39,7 +39,7 @@ class RealsenseCamera:
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_stream(rs.stream.depth, self.width, self.height, rs.format.z16, self.fps)
-        self.config.enable_stream(rs.stream.color, self.width, self.height, rs.format.bgr8, self.fps)
+        self.config.enable_stream(rs.stream.color, self.width, self.height, rs.format.rgb8, self.fps)
         self.profile = self.pipeline.start(self.config)
         self.depth_sensor = self.profile.get_device().first_depth_sensor()
         self.depth_scale = self.depth_sensor.get_depth_scale()
@@ -52,30 +52,22 @@ class RealsenseCamera:
             tuple: color_image (np.ndarray), depth_image (np.ndarray),
                    intrinsics (rs.intrinsics), intrinsics_matrix (np.ndarray)
         """
-        try:
-            while True:
-                frames = self.pipeline.wait_for_frames()
-                aligned_frames = self.align.process(frames)
-                aligned_depth_frame = aligned_frames.get_depth_frame()
-                color_frame = aligned_frames.get_color_frame()
+        while True:
+            frames = self.pipeline.wait_for_frames()
+            aligned_frames = self.align.process(frames)
+            aligned_depth_frame = aligned_frames.get_depth_frame()
+            color_frame = aligned_frames.get_color_frame()
 
-                if not aligned_depth_frame or not color_frame:
-                    continue
+            if not aligned_depth_frame or not color_frame:
+                continue
 
-                depth_image = np.asanyarray(aligned_depth_frame.get_data())
-                color_image = np.asanyarray(color_frame.get_data())
+            depth_image = np.asanyarray(aligned_depth_frame.get_data())
+            color_image = np.asanyarray(color_frame.get_data())
 
-                intrinsics = color_frame.profile.as_video_stream_profile().get_intrinsics()
-                intrinsics.model = rs.distortion.inverse_brown_conrady
+            intrinsics = color_frame.profile.as_video_stream_profile().get_intrinsics()
+            intrinsics.model = rs.distortion.inverse_brown_conrady
 
-                intrinsics_matrix = np.array(
-                    [[intrinsics.fx, 0, intrinsics.ppx], [0, intrinsics.fy, intrinsics.ppy], [0, 0, 1]],
-                )
-
-                return color_image, depth_image, intrinsics, intrinsics_matrix
-
-        finally:
-            self.pipeline.stop()
+            return color_image, depth_image, intrinsics
 
     @staticmethod
     def serialize_intrinsics(intrinsics: rs.intrinsics) -> dict:
@@ -103,7 +95,9 @@ class RealsenseCamera:
                 intrinsics_dict[key] = value.tolist()
             elif isinstance(value, bytes | bytearray):
                 intrinsics_dict[key] = value.decode()
-            elif isinstance(value, object) and not isinstance(value, int | float | str | list | dict | bool | type(None)):
+            elif isinstance(value, object) and not isinstance(
+                value, int | float | str | list | dict | bool | type(None)
+            ):
                 intrinsics_dict[key] = str(value)
 
         return intrinsics_dict
@@ -158,7 +152,10 @@ class RealsenseCamera:
 
     @staticmethod
     def matrix_and_distortion_to_intrinsics(
-        image_height: int, image_width: int, matrix: np.ndarray, coeffs: np.ndarray,
+        image_height: int,
+        image_width: int,
+        matrix: np.ndarray,
+        coeffs: np.ndarray,
     ) -> rs.intrinsics:
         """Convert a 3x3 intrinsic matrix and a 1x5 distortion coefficients array to an rs.intrinsics object.
 

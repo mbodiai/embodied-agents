@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import os
 from typing import Any, List
 
 import backoff
@@ -64,6 +65,7 @@ class OpenAISerializer(Serializer):
         """
         return {"type": "text", "text": text}
 
+
 class OpenAIBackendMixin:
     """Backend for interacting with OpenAI's API.
 
@@ -88,13 +90,13 @@ class OpenAIBackendMixin:
             response_format: The format for the response.
             **kwargs: Additional keyword arguments.
         """
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("MBODI_API_KEY")
         self.client = client
         if self.client is None:
             from openai import OpenAI
 
             kwargs.pop("model_src", None)
-            self.client = OpenAI(api_key=self.api_key, **kwargs)
+            self.client = OpenAI(api_key=self.api_key or "any_key", **kwargs)
         self.serialized = OpenAISerializer
         self.response_format = response_format
 
@@ -110,7 +112,7 @@ class OpenAIBackendMixin:
         Returns:
             str: The content of the completion response.
         """
-        serialized_messages = [self.serialized(msg) for msg in messages]
+        serialized_messages = [self.serialized(msg).serialize() for msg in messages]
 
         completion = self.client.chat.completions.create(
             model=model,
@@ -127,8 +129,11 @@ class OpenAIBackendMixin:
         backoff.expo,
         ERRORS,
         max_tries=3,
+        on_backoff=lambda details: print(f"Backing off {details['wait']:.1f} seconds after {details['tries']} tries."),  # noqa
     )
-    def predict(self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs) -> str:
+    def predict(
+        self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs
+    ) -> str:
         """Create a completion based on the given message and context.
 
         Args:

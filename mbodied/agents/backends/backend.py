@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import abstractmethod
+from typing import Generator
 
 
 class Backend:
@@ -19,4 +20,8 @@ class Backend:
 
     @abstractmethod
     def predict(self, *args, **kwargs) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    def stream(self, *args, **kwargs) -> Generator[str, None, None]:
         raise NotImplementedError

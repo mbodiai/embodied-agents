@@ -15,6 +15,7 @@
 import pytest
 from mbodied.agents.backends import AnthropicBackend
 from mbodied.types.message import Message
+from mbodied.types.sense.vision import Image
 
 
 mock_anthropic_response = "Anthropic response text"
@@ -50,6 +51,24 @@ def anthropic_backend(anthropic_api_key):
 
 def test_anthropic_backend_create_completion(anthropic_backend):
     response = anthropic_backend.predict(Message("hi"), context=[])
+    assert response == mock_anthropic_response
+
+
+def test_anthropic_backend_with_context(anthropic_backend):
+    context = [Message("Hello"), Message("How are you?")]
+    response = anthropic_backend.predict(Message("What's the weather like?"), context=context)
+    assert response == mock_anthropic_response
+
+
+def test_anthropic_backend_with_image(anthropic_backend):
+    image = Image(size=(224, 224))
+    response = anthropic_backend.predict(Message(["Describe this image", image]), context=[])
+    assert response == mock_anthropic_response
+
+
+@pytest.mark.asyncio
+async def test_anthropic_backend_async_predict(anthropic_backend):
+    response = await anthropic_backend.async_predict(Message("hi"), context=[])
     assert response == mock_anthropic_response
 
 

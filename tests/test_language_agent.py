@@ -98,6 +98,43 @@ def test_language_agent_forget(mock_openai_init, mock_openai_act):
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
 @mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
+def test_language_agent_forget_after(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
+    agent.forget_after(1)
+    assert agent.context == [Message(content="Hello")]
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
+def test_language_agent_forget_everything(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
+    agent.forget(everything=True)
+    assert agent.context == []
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
+def test_language_agent_history(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent(context=["Hello", "How are you?"])
+    agent.act("What's your name?")
+    history = agent.history()
+    assert len(history) == 4
+    assert history[0].content == ["Hello"]
+    assert history[1].content == ["How are you?"]
+    assert history[2].content == ["What's your name?"]
+    assert history[3].role == "assistant"
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
+def test_language_agent_forget_after(mock_openai_init, mock_openai_act):
+    agent = LanguageAgent(context=["Hello", "How are you?", "What's your name?"])
+    agent.forget_after(first_n=1)
+    assert agent.context == [Message(content="Hello")]
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_act(mock_openai_init, mock_openai_act):
     agent = LanguageAgent()
     response = agent.act("Hello, world!")
@@ -159,6 +196,73 @@ async def test_language_agent_async_act_with_context(mock_openai_init, mock_open
     assert len(agent.context) == 3
     assert agent.context[2].role == "assistant"
     assert agent.context[2].content[0] == response
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value='{"key": "value"}')
+def test_language_agent_act_and_parse(mock_openai_init, mock_openai_act):
+    from mbodied.types.sample import Sample
+
+    class TestSample(Sample):
+        key: str
+
+    agent = LanguageAgent()
+    response = agent.act_and_parse("Parse this", parse_target=TestSample)
+    assert isinstance(response, TestSample)
+    assert response.key == "value"
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value='{"key": "value"}')
+@pytest.mark.asyncio
+async def test_language_agent_async_act_and_parse(mock_init, mock_openai_act):
+    from mbodied.types.sample import Sample
+
+    class TestSample(Sample):
+        key: str
+
+    agent = LanguageAgent()
+    response = await agent.async_act_and_parse("Parse this", parse_target=TestSample)
+    assert isinstance(response, TestSample)
+    assert response.key == "value"
+
+
+@mock.patch(
+    "mbodied.agents.language.language_agent.LanguageAgent.act", side_effect=['{"invalid": "json"}', '{"key": "value"}']
+)
+def test_language_agent_act_and_parse_retry(mock_act):
+    from mbodied.types.sample import Sample
+
+    class TestSample(Sample):
+        key: str
+
+    agent = LanguageAgent()
+    response = agent.act_and_parse("Parse this", parse_target=TestSample, max_retries=1)
+    assert isinstance(response, TestSample)
+    assert response.key == "value"
+    assert mock_act.call_count == 2, f"Expected 2 calls, but got {mock_act.call_count}"
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", side_effect=['{"invalid": "json"}', '{"key": "value"}'])
+def test_language_agent_act_and_parse_retry_history(mock_act):
+    from mbodied.types.sample import Sample
+
+    class TestSample(Sample):
+        key: str
+
+    agent = LanguageAgent()
+    response = agent.act_and_parse("Parse this", parse_target=TestSample, max_retries=1)
+
+    assert isinstance(response, TestSample)
+    assert response.key == "value"
+    assert mock_act.call_count == 2, f"Expected 2 calls, but got {mock_act.call_count}"
+
+    history = agent.history()
+    assert len(history) == 2, f"Expected 2 messages in history, but got {len(history)}"
+    assert history[0].content == [
+        "Parse this. Avoid the following error: Error parsing response: 1 validation error for TestSample\nkey\n  Field required [type=missing, input_value={'invalid': 'json'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.8/v/missing"
+    ]
+    assert history[1].content == ['{"key": "value"}']
 
 
 if __name__ == "__main__":

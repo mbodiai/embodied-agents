@@ -34,7 +34,8 @@ def mock_xarm_api(mocker):
     mock_instance.set_gripper_speed.return_value = None
     mock_instance.set_position.return_value = None
     mock_instance.set_gripper_position.return_value = None
-    mock_instance.get_position.return_value = (0, [300, 0, 325, -180, 0, 0])
+    mock_instance.get_position.return_value = (0, [300, 0, 325, -3.14, 0, 0])
+    mock_instance.get_gripper_position.return_value = (0, 800)
     return mock_instance
 
 
@@ -52,8 +53,8 @@ def test_initialization(mock_xarm_api, xarm):
     mock_xarm_api.set_state.assert_called_with(0)
     mock_xarm_api.set_gripper_mode.assert_called_with(0)
     mock_xarm_api.set_gripper_enable.assert_called_with(True)
-    mock_xarm_api.set_gripper_speed.assert_called_with(1000)
-    mock_xarm_api.set_position.assert_called_with(300, 0, 325, -180, 0, 0, wait=True, speed=200)
+    mock_xarm_api.set_gripper_speed.assert_called_with(2000)
+    mock_xarm_api.set_position.assert_called_with(300, 0, 325, math.radians(180), 0, 0, wait=True, speed=200)
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
 
@@ -61,7 +62,7 @@ def test_do(mock_xarm_api, xarm):
     mock_motion = HandControl(
         pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=MagicMock(value=0.6)
     )
-    mock_xarm_api.get_position.return_value = (0, [300, 0, 325, -180, 0, 0])
+    mock_xarm_api.get_position.return_value = (0, [300, 0, 325, -3.14, 0, 0])
 
     xarm.do(mock_motion)
 
@@ -69,9 +70,9 @@ def test_do(mock_xarm_api, xarm):
         300 + 0.1 * 1000,
         0 + 0.2 * 1000,
         325 + 0.3 * 1000,
-        -180 + math.degrees(0.1),
-        0 + math.degrees(0.2),
-        0 + math.degrees(0.3),
+        -3.14 + 0.1,
+        0 + 0.2,
+        0 + 0.3,
     ]
 
     mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=200)
@@ -79,11 +80,11 @@ def test_do(mock_xarm_api, xarm):
 
 
 def test_get_pose(mock_xarm_api, xarm):
-    mock_xarm_api.get_position.return_value = (0, [300, 0, 325, -180, 0, 0])
+    mock_xarm_api.get_position.return_value = (0, [300, 0, 325, 3.14, 0, 0])
 
     pose = xarm.get_pose()
 
-    expected_pose = [0.3, 0.0, 0.325, round(math.radians(-180), 6), 0.0, 0.0, 1.0]
+    expected_pose = [0.3, 0.0, 0.325, 3.14, 0.0, 0.0, 1.0]
     hand_pose = HandControl.unflatten(expected_pose)
     assert pose == hand_pose
 

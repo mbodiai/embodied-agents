@@ -161,7 +161,10 @@ class Agent:
         action = self.act(*args, **kwargs)
         if self.recorder is not None:
             observation = self.create_observation_from_args(
-                self.recorder.observation_space, self.act_and_record, args, kwargs,
+                self.recorder.observation_space,
+                self.act_and_record,
+                args,
+                kwargs,
             )
             self.recorder.record(observation=observation, action=action)
         return action
