@@ -68,8 +68,11 @@ class XarmInterface(RecordingHardwareInterface):
         self.arm.set_gripper_speed(2000)
 
         self.home_pos = [300, 0, 325, math.radians(180), 0, 0]
-        self.arm.set_position(*self.home_pos, wait=True, speed=200)
+        self.arm_speed = 200
+        self.arm.set_position(*self.home_pos, wait=True, speed=self.arm_speed)
         self.arm.set_gripper_position(800, wait=True)
+        self.arm.set_collision_sensitivity(3)
+        self.arm.set_self_collision_detection(True)
 
         if use_realsense:
             self.use_realsense = True
@@ -92,11 +95,8 @@ class XarmInterface(RecordingHardwareInterface):
         current_pos[3] += motion.pose.roll
         current_pos[4] += motion.pose.pitch
         current_pos[5] += motion.pose.yaw
-
-        self.arm.set_position(*current_pos, wait=False, speed=200)
-        self.arm.set_gripper_position(motion.grasp.value * 800, wait=False)
-        self.arm.set_collision_sensitivity(3)
-        self.arm.set_self_collision_detection(True)
+        self.arm.set_position(*current_pos, wait=False, speed=self.arm_speed)
+        self.arm.set_gripper_position(0 if motion.grasp.value <= 0.5 else 800, wait=True)
 
     def set_pose(self, motion: HandControl) -> None:
         """Sets the robot arm to a given absolute HandControl pose."""
@@ -107,11 +107,8 @@ class XarmInterface(RecordingHardwareInterface):
         current_pos[3] = motion.pose.roll
         current_pos[4] = motion.pose.pitch
         current_pos[5] = motion.pose.yaw
-        self.arm.set_position(*current_pos, wait=True, speed=200)
-        if motion.grasp.value <= 0.5:
-            self.arm.set_gripper_position(0, wait=True)
-        else:
-            self.arm.set_gripper_position(800, wait=True)
+        self.arm.set_position(*current_pos, wait=True, speed=self.arm_speed)
+        self.arm.set_gripper_position(0 if motion.grasp.value <= 0.5 else 800, wait=True)
 
     def get_pose(self) -> HandControl:
         """Gets the current pose (absolute HandControl) of the robot arm.
