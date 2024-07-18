@@ -48,7 +48,7 @@ class CentralNervousSystem:
         """
         self.agents = agents
         self.tasks = {task.name: task for task in tasks}
-        self.states = self.initialize_states()
+        self.states, self.state_locks = self.initialize_states()
 
         self.stop_event = threading.Event()
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -59,21 +59,24 @@ class CentralNervousSystem:
             for name, task in self.tasks.items()
         }
 
-    def initialize_states(self) -> Dict[str, Any]:
+    def initialize_states(self) -> (Dict[str, Any], Dict[str, threading.Lock]):
         """Initialize the states for inputs and outputs.
 
         Returns:
-            Dict[str, Any]: A dictionary mapping state names to their initial values.
+            Tuple[Dict[str, Any], Dict[str, threading.Lock]]: A dictionary mapping state names to their initial values and their locks.
         """
         states = {}
+        state_locks = {}
         for task in self.tasks.values():
             for output in task.outputs:
                 if output not in states:
                     states[output] = Queue() if task.is_queue else None
+                    state_locks[output] = threading.Lock()
             for input_ in task.inputs:
                 if input_ not in states:
                     states[input_] = None
-        return states
+                    state_locks[input_] = threading.Lock()
+        return states, state_locks
 
     def create_thread(self, agent, inputs, outputs, func) -> Callable:
         """Create a function to be run in a thread for a given task.
@@ -96,17 +99,18 @@ class CentralNervousSystem:
 
                     # Check availability of all input values
                     for input_ in inputs:
-                        if isinstance(self.states[input_], Queue):
-                            if self.states[input_].empty():
-                                all_available = False
-                                break
-                            input_values.append(self.states[input_].get())
-                        else:
-                            if self.states[input_] is None:
-                                all_available = False
-                                break
-                            input_values.append(self.states[input_])
-                            self.states[input_] = None
+                        with self.state_locks[input_]:
+                            if isinstance(self.states[input_], Queue):
+                                if self.states[input_].empty():
+                                    all_available = False
+                                    break
+                                input_values.append(self.states[input_].get())
+                            else:
+                                if self.states[input_] is None:
+                                    all_available = False
+                                    break
+                                input_values.append(self.states[input_])
+                                self.states[input_] = None
 
                     # If not all inputs are available, wait and continue
                     if not all_available:
@@ -117,11 +121,14 @@ class CentralNervousSystem:
                     output_value = func(self.agents[agent], *input_values)
                     if not isinstance(output_value, tuple):
                         output_value = (output_value,)
+
                     for output, value in zip(outputs, output_value):
-                        if isinstance(self.states[output], Queue):
-                            self.states[output].put(value)
-                        else:
-                            self.states[output] = value
+                        with self.state_locks[output]:
+                            if isinstance(self.states[output], Queue):
+                                self.states[output].put(value)
+                            else:
+                                self.states[output] = value
+
                 except Exception as e:
                     logging.error(f"{agent} thread error: {e}", exc_info=True)
                     self.stop_event.set()
