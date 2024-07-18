@@ -74,8 +74,8 @@ class XarmInterface(RecordingHardwareInterface):
         self.arm.set_collision_sensitivity(3)
         self.arm.set_self_collision_detection(True)
 
+        self.use_realsense = use_realsense
         if use_realsense:
-            self.use_realsense = True
             from mbodied.hardware.realsense_camera import RealsenseCamera
 
             self.realse_camera = RealsenseCamera(width=640, height=480, fps=30)
