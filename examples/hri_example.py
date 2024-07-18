@@ -2,9 +2,9 @@ import logging
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.agents.sense.audio.audio_agent import AudioAgent
+from mbodied.cns import AgentTask, CentralNervousSystem
 from mbodied.hardware.sim_interface import SimInterface
 from mbodied.hardware.xarm_interface import XarmInterface
-from mbodied.hri.hri import HRI, AgentTask
 from mbodied.types.motion.control import HandControl
 
 if __name__ == "__main__":
@@ -24,5 +24,5 @@ if __name__ == "__main__":
         AgentTask(name="robot_task", agent="robot", inputs=["motion"], outputs=[], is_queue=False, func=lambda robot, motion: robot.do(motion)),
     ]
 
-    hri = HRI(agents, tasks)
-    hri.run()
+    cns = CentralNervousSystem(agents, tasks)
+    cns.run()
