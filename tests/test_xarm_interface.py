@@ -75,7 +75,7 @@ def test_do(mock_xarm_api, xarm):
         0 + 0.3,
     ]
 
-    mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=200)
+    mock_xarm_api.set_position.assert_called_with(*expected_position, wait=True, speed=200)
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
 
@@ -93,7 +93,7 @@ def test_do_and_record(mock_xarm_api, mocker, xarm):
     # Mock the necessary methods
     mocker.patch.object(xarm, "start_recording", autospec=True)
     mocker.patch.object(xarm, "stop_recording", autospec=True)
-    mocker.patch.object(xarm, "record_final_state", autospec=True)
+    mocker.patch.object(xarm, "record_last_state", autospec=True)
     mocker.patch.object(xarm, "do", autospec=True)
 
     mock_motion = HandControl(
@@ -105,7 +105,7 @@ def test_do_and_record(mock_xarm_api, mocker, xarm):
 
     xarm.start_recording.assert_called_once()
     xarm.stop_recording.assert_called_once()
-    xarm.record_final_state.assert_called_once()
+    xarm.record_last_state.assert_called_once()
     xarm.do.assert_called_once_with(mock_motion)
     assert xarm.current_instruction == instruction
 

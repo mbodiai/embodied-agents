@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 
 from mbodied.hardware.interface import HardwareInterface
 from mbodied.types.motion.control import HandControl
@@ -35,21 +36,24 @@ class SimInterface(HardwareInterface):
         self.home_pos = [0, 0, 0, 0, 0, 0, 0]
         self.current_pos = self.home_pos
 
-    def do(self, motion: HandControl) -> list[float]:
+    def do(self, motion: HandControl | list[HandControl]) -> list[float]:
         """Executes a given HandControl motion and returns the new position of the robot arm.
 
         Args:
-            motion: The HandControl motion to be executed.
+            motion: The HandControl motion or list of HandControl to be executed.
         """
-        print("Executing motion:", motion)  # noqa: T201
-        self.current_pos[0] += motion.pose.x
-        self.current_pos[1] += motion.pose.y
-        self.current_pos[2] += motion.pose.z
-        self.current_pos[3] += motion.pose.roll
-        self.current_pos[4] += motion.pose.pitch
-        self.current_pos[5] += motion.pose.yaw
-        self.current_pos[6] = motion.grasp.value
-        print("New position:", self.current_pos)  # noqa: T201
+        if not isinstance(motion, list):
+            motion = [motion]
+        for m in motion:
+            print("Executing motion:", motion)  # noqa: T201
+            self.current_pos[0] = round(self.current_pos[0] + m.pose.x, 5)
+            self.current_pos[1] = round(self.current_pos[1] + m.pose.y, 5)
+            self.current_pos[2] = round(self.current_pos[2] + m.pose.z, 5)
+            self.current_pos[3] = round(self.current_pos[3] + m.pose.roll, 5)
+            self.current_pos[4] = round(self.current_pos[4] + m.pose.pitch, 5)
+            self.current_pos[5] = round(self.current_pos[5] + m.pose.yaw, 5)
+            self.current_pos[6] = round(m.grasp.value, 5)
+            print("New position:", self.current_pos)  # noqa: T201
 
         return self.current_pos
 
@@ -63,4 +67,5 @@ class SimInterface(HardwareInterface):
 
     def capture(self, **_) -> Image:
         """Captures an image."""
-        return Image(size=(224, 224))
+        resource = Path("resources") / "xarm.jpeg"
+        return Image(resource, size=(224, 224))

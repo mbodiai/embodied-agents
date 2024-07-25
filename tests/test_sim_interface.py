@@ -45,6 +45,17 @@ def test_do(sim_interface):
     assert sim_interface.get_pose() == expected_pose
 
 
+def test_do_list(sim_interface):
+    """Test that the do method updates the current position correctly."""
+    motion_list = [
+        HandControl(pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=JointControl(value=0.0)),
+        HandControl(pose=Pose6D(x=0.2, y=0.4, z=0.5, roll=0.5, pitch=0.6, yaw=0.7), grasp=JointControl(value=0.5)),
+    ]
+    sim_interface.do(motion_list)
+    expected_pose = [0.3, 0.6, 0.8, 0.6, 0.8, 1.0, 0.5]
+    assert sim_interface.get_pose() == expected_pose
+
+
 @pytest.mark.asyncio
 async def test_async_do(sim_interface):
     motion = HandControl(pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=JointControl(value=0.5))

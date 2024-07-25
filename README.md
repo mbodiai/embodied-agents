@@ -65,10 +65,10 @@
   - [The Sample Class](#the-sample-class)
     - [💡 Did you know](#-did-you-know)
   - [Building Blocks](#building-blocks)
-      - [Creating a Sample](#creating-a-sample)
-      - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
-      - [Converting to Different Containers](#converting-to-different-containers)
-      - [Gym Space Integration](#gym-space-integration)
+    - [Creating a Sample](#creating-a-sample)
+    - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
+    - [Converting to Different Containers](#converting-to-different-containers)
+    - [Gym Space Integration](#gym-space-integration)
     - [Message](#message)
     - [Backend](#backend)
     - [Agent](#agent)
@@ -201,17 +201,17 @@ from mbodied.hardware.sim_interface import SimInterface
 
 cognition = LanguageAgent(
   context="You are an embodied planner that responds with a python list of strings and nothing else.",
-  api_key=os.getenv("ANTHROPIC_API_KEY"), # Or use OpenAI
-  model_src="anthropic", model_kwargs={"model": "claude-3-5-sonnet-20240620"},
+  api_key=os.getenv("OPENAI_API_KEY"),
+  model_src="openai",
   recorder="auto",
 )
-speech = AudioAgent(use_pyaudio=False) # pyaudio is buggy on mac
+audio = AudioAgent(use_pyaudio=False, api_key=os.getenv("OPENAI_API_KEY")) # pyaudio is buggy on mac
 motion = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
 # Subclass and override do() and capture() methods.
 hardware_interface = SimInterface()
 
-instruction = speech.listen()
+instruction = audio.listen()
 plan = cognition.act(instruction, hardware_interface.capture())
 
 for step in plan.strip('[]').strip().split(','):
@@ -223,18 +223,17 @@ for step in plan.strip('[]').strip().split(','):
 
 Example Scripts:
 
-- [examples/simple_robot_agent.py](examples/simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output actions.
-- [examples/full_example.py](examples/full_example.py): Full example of languaged based cognitive and motor agent executing task.
-- [examples/motor_example_openvla.py](examples/motor_example_openvla.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
-- [examples/reason_plan_act_robot.py](examples/reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
+- [examples/1_simple_robot_agent.py](examples/1_simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output voice and actions.
+- [examples/2_openvla_motor_agent_example.py](examples/2_openvla_motor_agent_example.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
+- [examples/3_reason_plan_act_robot.py](examples/3_reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
+- [examples/4_language_reason_plan_act_robot.py](examples/4_language_reason_plan_act_robot.py): Full example of all languaged based cognitive and motor agent executing task.
+- [examples/5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py): Example of collecting dataset on robot's action at a specific frequency by just yelling at the robot!
 
 ### Notebooks
 
 Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing)
 
 Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing)
-
-MotorAgent with OpenVLA: [examples/motor_example_openvla.py](examples/motor_example_openvla.py)
 
 ## The [Sample](mbodied/base/sample.py) Class
 
@@ -261,6 +260,7 @@ To learn more about all of the possibilities with embodied agents, check out the
 Creating a Sample requires just wrapping a python dictionary with the `Sample` class. Additionally, they can be made from kwargs, Gym Spaces, and Tensors to name a few.
 
 ```python
+from mbodied.types.sample import Sample
 # Creating a Sample instance
 sample = Sample(observation=[1,2,3], action=[4,5,6])
 
@@ -335,6 +335,8 @@ The [Message](mbodied/types/message.py) class represents a single completion sam
 You can create a `Message` in versatile ways. They can all be understood by mbodi's backend.
 
 ```python
+from mbodied.types.message import Message
+
 Message(role="user", content="example text")
 Message(role="user", content=["example text", Image("example.jpg"), Image("example2.jpg")])
 Message(role="user", content=[Sample("Hello")])
@@ -352,11 +354,13 @@ The [Backend](mbodied/base/backend.py) class is an abstract base class for Backe
 
 The [Language Agent](mbodied/agents/language/language_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
-Currently supported API services are OpenAI and Anthropic. Upcoming API services includes Gemini, Ollama, and HuggingFace.
+Natively supports API services: OpenAI, Anthropic, vLLM, Ollama, HTTPX, or any gradio endpoints. More upcoming!
 
 To use OpenAI for your robot backend:
 
 ```python
+from mbodied.agents.language import LanguageAgent
+
 robot_agent = LanguageAgent(context=context_prompt, model_src="openai")
 ```
 
@@ -364,7 +368,7 @@ robot_agent = LanguageAgent(context=context_prompt, model_src="openai")
 
 ```python
 context_prompt = "you are a robot"
-# OR
+# OR (note that anthropic doesn't take system message)
 context_prompt = [
     Message(role="system", content="you are a robot"),
     Message(role="user", content=["example text", Image("example.jpg")]),
@@ -394,7 +398,7 @@ response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct
 ### Motor Agent
 
 [Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
-Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](mbodied/agents/motion/openvla_example_server.py)
+Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
 
 ### Sensory Agent
 
@@ -406,15 +410,26 @@ For example, [object_pose_estimator_3d](mbodied/agents/sense/object_pose_estimat
 
 The [motion_controls](mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
 
-### Hardware Interface
+### Hardware Interface (Robot)
 
-Mapping robot actions from a model to an action is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](mbodied/hardware/xarm_interface.py) as an example.
+Mapping robot actions from a model to an action is very easy. In our example script, we use a [mock hardware interface](mbodied/hardware/sim_interface.py). We also have an [XArm interface](mbodied/hardware/xarm_interface.py) as an example.
+
+#### Recording dataset on robot
+
+Subclassing [RecordingInterface](mbodied/hardware/recording_interface.py) makes it very easy to record dataset at a frequency when robot is executing actions. This dataset is good for training robotic transformers that takes in observation and output action.
+
+See [SimRecordingInterface](mbodied/hardware/sim_recording_interface.py) as an implementation example. See [examples/5_teach_robot_record_dataset](examples/5_teach_robot_record_dataset.py) on how to collect data on a robot by just yelling at the robot!
 
 ### Recorder
 
 Dataset [Recorder](mbodied/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
 
 ```python
+from mbodied.data.recording import Recorder
+from mbodied.types.motion.control import HandControl
+from mbodied.types.sense.vision import Image
+from gymnasium import spaces
+
 observation_space = spaces.Dict({
     'image': Image(size=(224, 224)).space(),
     'instruction': spaces.Text(1000)
@@ -435,6 +450,8 @@ The [Replayer](mbodied/data/replaying.py) class is designed to process and manag
 Example for iterating through a dataset from Recorder with Replayer:
 
 ```python
+from mbodied.data.replaying import Replayer
+
 replayer = Replayer(path=str("path/to/dataset.h5"))
 for observation, action in replayer:
    ...
