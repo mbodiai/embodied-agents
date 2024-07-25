@@ -14,7 +14,7 @@ Each section provides a comprehensive look at the modular components of the mbod
    mbodied.agents.sense
    mbodied.agents.sense.audio
    mbodied.data
-   mbodied.hardware
+   mbodied.robot
    mbodied.types
    mbodied.types.language
    mbodied.types.motion

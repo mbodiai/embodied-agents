@@ -14,5 +14,5 @@ Each building block represents a distinct function or service within the Mbodied
    motor_agent/index
    sensory_agent/index
    motion_controls/index
-   hardware_interface/index
+   robot/index
    recorder/index

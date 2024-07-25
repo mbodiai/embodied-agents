@@ -36,14 +36,6 @@ mbodied.agents.backends.openai\_backend module
    :undoc-members:
    :show-inheritance:
 
-mbodied.agents.backends.openvla\_backend module
------------------------------------------------
-
-.. automodule:: mbodied.agents.backends.openvla_backend
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mbodied.agents.backends.serializer module
 -----------------------------------------
 

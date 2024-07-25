@@ -132,7 +132,7 @@ class Recorder:
 
     def __init__(
         self,
-        name: str,
+        name: str = "dataset.h5",
         observation_space: spaces.Dict | str | None = None,
         action_space: spaces.Dict | str | None = None,
         supervision_space: spaces.Dict | str | None = None,

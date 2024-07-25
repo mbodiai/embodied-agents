@@ -10,28 +10,28 @@ Run a robotics transformer model on a robot
     from mbodied.agents import LanguageAgent
     from mbodied.agents.motion import OpenVlaAgent
     from mbodied.agents.sense.audio import AudioAgent
-    from mbodied.hardware.sim_interface import SimInterface
+    from mbodied.robots import SimRobot
 
     cognition = LanguageAgent(
       context="You are an embodied planner that responds with a python list of strings and nothing else.",
-      api_key=os.getenv("ANTHROPIC_API_KEY"), # Or use OpenAI
-      model_src="anthropic", model_kwargs={"model": "claude-3-5-sonnet-20240620"},
+      api_key=os.getenv("OPENAI_API_KEY"),
+      model_src="openai",
       recorder="auto",
     )
-    speech = AudioAgent(use_pyaudio=False) # pyaudio is buggy on mac
+    audio = AudioAgent(use_pyaudio=False, api_key=os.getenv("OPENAI_API_KEY")) # pyaudio is buggy on mac
     motion = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
     # Subclass and override do() and capture() methods.
-    hardware_interface = SimInterface()
+    robot = SimRobot()
 
-    instruction = speech.listen()
-    plan = cognition.act(instruction, hardware_interface.capture())
+    instruction = audio.listen()
+    plan = cognition.act(instruction, robot.capture())
 
     for step in plan.strip('[]').strip().split(','):
       print("\nMotor agent is executing step: ", step, "\n")
       for _ in range(10):
-        hand_control = motion.act(step, hardware_interface.capture())
-        hardware_interface.do(hand_control)
+        hand_control = motion.act(step, robot.capture())
+        robot.do(hand_control)
 
 Example Scripts
 ---------------
