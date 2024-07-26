@@ -117,7 +117,7 @@ class Agent:
 
         model_kwargs = model_kwargs or {}
         self.actor = None
-        if Path(model_src).exists():
+        if isinstance(model_src, str) and Path(model_src[:120]).exists():
             self.load_model(model_src, **model_kwargs)
         else:
             self.actor: Backend = self.init_backend(model_src, model_kwargs, api_key)

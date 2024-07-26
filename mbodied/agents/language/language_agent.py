@@ -101,45 +101,45 @@ class LanguageAgent(Agent):
 
     _art_printed = False
 
-    def __init__(  # noqa
+    def __init__(
         self,
-        model_src: Literal["openai", "anthropic"]
-        | SupportsOpenAI
+        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http"]
         | AnyUrl
         | FilePath
         | DirectoryPath
         | NewPath = "openai",
         context: list | Image | str | Message = None,
         api_key: str | None = os.getenv("OPENAI_API_KEY"),
-        model_kwargs: dict = None,  # noqa
+        model_kwargs: dict = None,
         recorder: Literal["default", "omit"] | str = "omit",
-        recorder_kwargs: dict = None,  # noqa
+        recorder_kwargs: dict = None,
     ) -> None:
-        """LanguageAgent with memory, dataset-recording, and remote infererence support. Always returns a string.
-
-        Supported datasets: HDF5, Datasets, JSON, CSV, Parquet.
-        Supported inference backends: OpenAI, Anthropic, Gradio, Ollama, and OpenAI-compatible http APIs.
-
-        Methods:
-            - act(instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs) -> str
-            - forget_last() -> Message
-            - forget(everything=False, last_n: int = -1) -> None
-            - remind_every(prompt: str | Image | Message, n: int) -> None
+        """Agent with memory, dataset-recording, asynchronous remote acting, and automatic data recording.
+        
+         Additionally supports asynchronous remote inference, 
+            supporting multiple platforms including OpenAI, Anthropic, and Gradio, and Ollama.
 
         Args:
-            context: The starting context to use for the conversation. Can be a list of messages, an image, a string,
-                or a message. If a string is provided, it will be interpreted as a user message.
-            api_key: The API key to use for the remote actor (if applicable).
-            model_src: Any of:
-                1. A local path to a model's weights in which case model_kwargs will be used to load the model.
-                2. A supported backend key (openai, anthropic, ollama, http, gradio). The url must then be provided in model_kwargs.
-                3. Any huggingface spaces path, URL hosting a gradio server, or custom HTTP API URL.
-
-                **Note**: If a url endpoint is provided, Gradio will be used first, then Httpx if Gradio fails.
-
-            model_kwargs: Additional keyword arguments to pass to the model source. See mbodied.agents.backends.backend. Backend for more details.
-            recorder: The recorder config or name to use for the agent to record observations and actions.
-            recorder_kwargs: Additional keyword arguments to pass to the recorder such as push_to_cloud.
+            model_src: The source of the model to use for inference. It can be one of the following:
+                - "openai": Use the OpenAI backend.
+                - "anthropic": Use the Anthropic backend.
+                - "gradio": Use the Gradio backend.
+                - "ollama": Use the Ollama backend.
+                - "http": Use a custom HTTP API backend.
+                - AnyUrl: A URL pointing to the model source.
+                - FilePath: A local path to the model's weights.
+                - DirectoryPath: A local directory containing the model's weights.
+                - NewPath: A new path object representing the model source.
+            context (Union[list, Image, str, Message], optional): The starting context to use for the conversation.
+                    It can be a list of messages, an image, a string, or a message.
+                    If a string is provided, it will be interpreted as a user message. Defaults to None.
+            api_key (str, optional): The API key to use for the remote actor (if applicable).
+                 Defaults to the value of the OPENAI_API_KEY environment variable.
+            model_kwargs (dict, optional): Additional keyword arguments to pass to the model source. 
+                See the documentation of the specific backend for more details. Defaults to None.
+            recorder (Union[str, Literal["default", "omit"]], optional): 
+                The recorder configuration or name or action. Defaults to "omit".
+            recorder_kwargs (dict, optional): Additional keyword arguments to pass to the recorder. Defaults to None.
         """
         if not LanguageAgent._art_printed:
             print("Welcome to")  # noqa: T201
