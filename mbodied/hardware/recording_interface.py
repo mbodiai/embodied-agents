@@ -112,8 +112,6 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
         """Records the current pose and captures an image at the specified frequency."""
         while self.recording:
             self.record_current_state()
-            print("wtf")
-            print(self.record_frequency)
             time.sleep(1.0 / self.record_frequency)
 
     def start_recording(self) -> None:
