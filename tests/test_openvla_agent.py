@@ -37,3 +37,11 @@ def test_openvla_agent_act(openvla_agent):
     expected_action = HandControl(pose=Pose6D(x=1, y=2, z=3, roll=0, pitch=0, yaw=0), grasp=JointControl(value=0))
 
     assert result == expected_action
+
+
+@pytest.mark.network
+def test_real_openvla_agent_act(openvla_agent):
+    openvla_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
+    image = Image("resources/xarm.jpeg")
+    response = openvla_agent.act("move forward", image)
+    assert isinstance(response, HandControl)
