@@ -60,7 +60,7 @@ class SimRecordingInterface(RecordingHardwareInterface):
         print("New position:", self.current_pos)  # noqa: T201
         return self.current_pos
 
-    def get_pose(self) -> HandControl:
+    def get_robot_state(self) -> HandControl:
         """Gets the current pose of the robot arm.
 
         Returns:

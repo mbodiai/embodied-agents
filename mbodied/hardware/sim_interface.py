@@ -57,7 +57,7 @@ class SimInterface(HardwareInterface):
 
         return self.current_pos
 
-    def get_pose(self) -> list[float]:
+    def get_robot_state(self) -> list[float]:
         """Gets the current pose of the robot arm.
 
         Returns:

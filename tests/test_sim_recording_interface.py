@@ -22,7 +22,7 @@ def sim_recording_interface(tempdir):
         "action_space": HandControl().space(),
         "out_dir": tempdir,
     }
-    return SimRecordingInterface(recorder_kwargs)
+    return SimRecordingInterface(record_frequency=5, recorder_kwargs=recorder_kwargs)
 
 
 def test_initialization(sim_recording_interface):

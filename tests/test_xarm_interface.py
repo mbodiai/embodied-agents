@@ -79,10 +79,10 @@ def test_do(mock_xarm_api, xarm):
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
 
-def test_get_pose(mock_xarm_api, xarm):
+def test_get_robot_state(mock_xarm_api, xarm):
     mock_xarm_api.get_position.return_value = (0, [300, 0, 325, 3.14, 0, 0])
 
-    pose = xarm.get_pose()
+    pose = xarm.get_robot_state()
 
     expected_pose = [0.3, 0.0, 0.325, 3.14, 0.0, 0.0, 1.0]
     hand_pose = HandControl.unflatten(expected_pose)

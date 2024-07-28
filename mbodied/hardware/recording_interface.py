@@ -20,7 +20,7 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
     thread to handle the recording asynchronously, ensuring that the main operations of the
     hardware are not blocked.
 
-    Subclass must implement the `do`, `capture`, `get_pose`, and `calculate_action` methods.
+    Subclass must implement the `do`, `capture`, `get_robot_state`, and `calculate_action` methods.
     Subclass should call the `do_and_record` method to execute the main operation and record.
 
     Note that we are recording the absolute pose of the hardware, not the relative motion.
@@ -60,7 +60,7 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_pose(self) -> Sample:
+    def get_robot_state(self) -> Sample:
         """Gets the current pose of the hardware."""
         raise NotImplementedError
 
@@ -112,6 +112,8 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
         """Records the current pose and captures an image at the specified frequency."""
         while self.recording:
             self.record_current_state()
+            print("wtf")
+            print(self.record_frequency)
             time.sleep(1.0 / self.record_frequency)
 
     def start_recording(self) -> None:
@@ -137,7 +139,7 @@ class RecordingHardwareInterface(HardwareInterface, ABC):
 
     def record_current_state(self) -> None:
         """Records the current pose and image if the pose has changed."""
-        pose = self.get_pose()
+        pose = self.get_robot_state()
         # This is the beginning of the episode
         if self.last_recorded_pose is None:
             self.last_recorded_pose = pose

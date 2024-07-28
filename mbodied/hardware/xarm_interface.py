@@ -117,7 +117,7 @@ class XarmInterface(RecordingHardwareInterface):
         self.arm.set_position(*current_pos, wait=True, speed=self.arm_speed)
         self.arm.set_gripper_position(0 if motion.grasp.value <= 0.5 else 800, wait=True)
 
-    def get_pose(self) -> HandControl:
+    def get_robot_state(self) -> HandControl:
         """Gets the current pose (absolute HandControl) of the robot arm.
 
         Returns:
