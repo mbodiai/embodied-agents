@@ -21,9 +21,9 @@
 
 📖 **Docs**: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
 
-🚀 **Simple Robot Agent Example:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) </br>
-💻 **Simulation Example with [SimplerEnv](https://github.com/simpler-env/SimplerEnv):** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing) </br>
-🤖 **Motor Agent using OpenVLA:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1anbOd4snFw84Zf0AvLrWReVdx61TfAIC?usp=sharing)
+🚀 **Simple Robot Agent Example:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing) </br>
+💻 **Simulation Example with [SimplerEnv](https://github.com/simpler-env/SimplerEnv):** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/18oiuw1yTxO5x-eT7Z8qNyWtjyYd8cECI?usp=sharing) </br>
+🤖 **Motor Agent using OpenVLA:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1flnMrqyepGOO8J9rE6rehzaLdZPsw6lX?usp=sharing)
 
 🫡 **Support, Discussion, and How-To's** **:** </br>
 [![](https://dcbadge.limes.pink/api/server/BPQ7FEGxNb?theme=discord&?logoColor=pink)](https://discord.gg/BPQ7FEGxNb)
@@ -79,7 +79,7 @@ A call to `act` or `async_act` can perform local or remote inference synchronous
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
-Jump to [getting started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) or [simulation](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing). Be sure to join our [Discord](https://discord.gg/BPQ7FEGxNb) for 🥇-winning discussions :)
+Jump to [getting started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing) or [simulation](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing). Be sure to join our [Discord](https://discord.gg/BPQ7FEGxNb) for 🥇-winning discussions :)
 
 **⭐ Give us a star on GitHub if you like us!**
 
@@ -219,9 +219,11 @@ Example Scripts:
 
 ### Notebooks
 
-Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing)
+Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing)
 
-Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing)
+Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18oiuw1yTxO5x-eT7Z8qNyWtjyYd8cECI?usp=sharing)
+
+Run OpenVLA with embodied-agents in simulation: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1flnMrqyepGOO8J9rE6rehzaLdZPsw6lX?usp=sharing)
 
 ## The [Sample](mbodied/base/sample.py) Class
 
@@ -343,12 +345,12 @@ To use OpenAI for your robot backend:
 from mbodied.agents.language import LanguageAgent
 
 agent = LanguageAgent(context="You are a robot agent.", model_src="openai")
-resposne = aget.act("Return a plan 
 ```
 
 To execute an instruction:
 
 ```python
+instruction = "pick up the fork"
 response = robot_agent.act(instruction, image)
 ```
 
