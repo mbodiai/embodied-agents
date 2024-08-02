@@ -145,6 +145,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - All gradio endpoints hosted on HuggingFace spaces.
 
 ### Roadmap
+
 - [ ] More Motor Agents
 - [ ] Yolo, SAM2, DepthAnything Sensory Agents
 - [ ] FineTuning Scripts
@@ -295,8 +296,6 @@ print(sample_np) # Output: array([1, 2, 3, 4, 5, 6])
 # Converting to a PyTorch tensor
 sample_pt = sample.to("pt")
 print(sample_pt) # Output: tensor([1, 2, 3, 4, 5, 6])
-
-
 ```
 
 #### Gym Space Integration
@@ -395,9 +394,13 @@ robot = SimRobot()
 robot_recorder = RobotRecorder(robot, record_frequency=5)
 
 robot_recorder.start_recording(task="pick up the fork")
-motion = HandControl(x=0,y=0,z=-1,grasp=0 # Close gripper)
+motion = HandControl(x=0, y=0, z=-1, grasp=0) # Close gripper
 robot.do(motion)
 robot_recorder.stop_recording()
+
+# Alternatively, use context manager:
+with robot_recorder.task_context("pick up the fork") as recorder:
+    robot.do(motion)
 ```
 
 ### Recorder

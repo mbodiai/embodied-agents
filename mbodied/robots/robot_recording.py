@@ -34,6 +34,12 @@ class RobotRecorder:
         robot.do(motion2)
         robot_recorder.stop_recording()
         # Then you got the dataset in the out_dir!
+
+        # Alternatively, you can use the RobotRecorder as a context manager:
+        with robot_recorder.task_context("pick up the fork") as recorder:
+            # Recording automatically starts here
+            robot.do(motion1)
+            robot.do(motion2)
     """
 
     def __init__(self, robot: Robot, record_frequency: int = 5, recorder_kwargs: dict[str, Any] = {}):
@@ -62,6 +68,20 @@ class RobotRecorder:
 
         self._worker_thread = threading.Thread(target=self._process_queue, daemon=True)
         self._worker_thread.start()
+
+    def __enter__(self) -> "RobotRecorder":
+        """Enter the context manager, starting the recording."""
+        self.start_recording(self.task)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """Exit the context manager, stopping the recording."""
+        self.stop_recording()
+
+    def task_context(self, task: str) -> "RobotRecorder":
+        """Set the task and return the context manager."""
+        self.task = task
+        return self
 
     def reset_recorder(self) -> None:
         """Reset the recorder."""

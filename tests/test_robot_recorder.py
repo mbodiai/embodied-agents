@@ -55,5 +55,30 @@ def test_robot_recorder_record(tempdir):
         assert observation["instruction"] == "pick up the fork"
 
 
+def test_robot_recorder_record_context_manager(tempdir):
+    robot = SimRobot()
+    recorder_kwargs = {
+        "name": "sim_record.h5",
+        "observation_space": spaces.Dict(
+            {"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)},
+        ),
+        "action_space": HandControl().space(),
+        "out_dir": tempdir,
+    }
+    robot_recorder = RobotRecorder(robot=robot, record_frequency=5, recorder_kwargs=recorder_kwargs)
+
+    with robot_recorder.task_context("pick up the fork") as recorder:
+        robot.do(HandControl.unflatten([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]))
+
+    assert robot_recorder.task == "pick up the fork"
+    assert robot_recorder.recording is False
+
+    # Replay the dataset and verify the recorded data.
+    replayer = Replayer(Path(tempdir) / "sim_record.h5")
+    assert replayer.size > 0
+    for observation, action in replayer:
+        assert observation["instruction"] == "pick up the fork"
+
+
 if __name__ == "__main__":
     pytest.main()
