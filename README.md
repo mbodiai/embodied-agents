@@ -342,7 +342,7 @@ To use OpenAI for your robot backend:
 from mbodied.agents.language import LanguageAgent
 
 agent = LanguageAgent(context="You are a robot agent.", model_src="openai")
-resposne = aget.act("Return a plan 
+resposne = aget.act("Return a plan
 ```
 
 To execute an instruction:
@@ -388,13 +388,13 @@ Recording dataset on robot is very easy using [RobotRecorder](mbodied/robot/robo
 ```python
 from mbodied.robots import SimRobot
 from mbodied.robots.robot_recording import RobotRecorder
-from mbodied.types.motion.control import HandControl
+from mbodied.types.motion.control import HandControl, Pose6D, JointControl
 
 robot = SimRobot()
 robot_recorder = RobotRecorder(robot, record_frequency=5)
 
 robot_recorder.start_recording(task="pick up the fork")
-motion = HandControl(x=0, y=0, z=-1, grasp=0) # Close gripper
+motion = HandControl(pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=JointControl(value=1.0))
 robot.do(motion)
 robot_recorder.stop_recording()
 
