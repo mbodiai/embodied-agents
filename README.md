@@ -223,7 +223,7 @@ Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/
 
 Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18oiuw1yTxO5x-eT7Z8qNyWtjyYd8cECI?usp=sharing)
 
-Run OpenVLA with embodied-agents in Simulation: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]()
+Run OpenVLA with embodied-agents in simulation: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1flnMrqyepGOO8J9rE6rehzaLdZPsw6lX?usp=sharing)
 
 ## The [Sample](mbodied/base/sample.py) Class
 
