@@ -42,7 +42,13 @@ class RobotRecorder:
             robot.do(motion2)
     """
 
-    def __init__(self, robot: Robot, record_frequency: int = 5, recorder_kwargs: dict[str, Any] = {}):
+    def __init__(
+        self,
+        robot: Robot,
+        record_frequency: int = 5,
+        recorder_kwargs: dict[str, Any] = {},
+        record_on_static: bool = False,
+    ) -> None:
         """Initializes the RobotRecorder.
 
         This constructor sets up the recording mechanism on the given robot, including the recorder instance,
@@ -53,6 +59,7 @@ class RobotRecorder:
             robot: The robot hardware interface to record.
             record_frequency: Frequency at which to record pose and image data (in Hz).
             recorder_kwargs: Keyword arguments to pass to the Recorder constructor.
+            record_on_static: Whether to record when the robot is not moving.
         """
         self.robot = robot
 
@@ -64,6 +71,7 @@ class RobotRecorder:
 
         self.recording = False
         self.record_frequency = record_frequency
+        self.record_on_static = record_on_static
         self.recording_queue = Queue()
 
         self._worker_thread = threading.Thread(target=self._process_queue, daemon=True)
@@ -125,7 +133,7 @@ class RobotRecorder:
             self.last_image = self.robot.capture()
             return
 
-        if pose != self.last_recorded_pose:
+        if pose != self.last_recorded_pose or self.record_on_static:
             action = self.robot.calculate_action(self.last_recorded_pose, pose)
             image = self.robot.capture()  # Capture an image
             self.recording_queue.put(
