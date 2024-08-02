@@ -144,11 +144,10 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - Open Weights: OpenVLA, Idefics2, Llava-1.6-Mistral, Phi-3-vision-128k-instruct
 - All gradio endpoints hosted on HuggingFace spaces.
 
-### To Do
-
+### Roadmap
 - [ ] More Motor Agents
-- [ ] More Data Augmentation
-- [ ] More Evaluation on Latency, Accuracy, and Prompting
+- [ ] Yolo, SAM2, DepthAnything Sensory Agents
+- [ ] FineTuning Scripts
 
 ## Installation
 
@@ -175,8 +174,6 @@ from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
 
 class FineGrainedHandControl(HandControl):
     comment: str = Field(None, description="A comment to voice aloud.")
-
-    # Any attempted validation will fail if the bounds and shape are not satisfied.
     index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
     thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
 ```
@@ -299,13 +296,6 @@ print(sample_np) # Output: array([1, 2, 3, 4, 5, 6])
 sample_pt = sample.to("pt")
 print(sample_pt) # Output: tensor([1, 2, 3, 4, 5, 6])
 
-# Converting to a HuggingFace Dataset
-sample_hf = sample.to("hf")
-print(sample_hf)
-# Output: Dataset({
-#     features: ['observation', 'action'],
-#     num_rows: 3
-# })
 
 ```
 
@@ -343,7 +333,7 @@ The [Backend](mbodied/base/backend.py) class is an abstract base class for Backe
 
 ### Language Agent
 
-The [Language Agent](mbodied/agents/language/language_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
+The [Language Agent](mbodied/agents/language/language_agent.py) can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
 Natively supports API services: OpenAI, Anthropic, vLLM, Ollama, HTTPX, or any gradio endpoints. More upcoming!
 
@@ -352,27 +342,14 @@ To use OpenAI for your robot backend:
 ```python
 from mbodied.agents.language import LanguageAgent
 
-robot_agent = LanguageAgent(context=context_prompt, model_src="openai")
-```
-
-`context` can be either a string or a list, for example:
-
-```python
-context_prompt = "you are a robot"
-# OR (note that anthropic doesn't take system message)
-context_prompt = [
-    Message(role="system", content="you are a robot"),
-    Message(role="user", content=["example text", Image("example.jpg")]),
-    Message(role="assistant", content="Understood."),
-]
+agent = LanguageAgent(context="You are a robot agent.", model_src="openai")
+resposne = aget.act("Return a plan 
 ```
 
 To execute an instruction:
 
 ```python
-response = robot_agent.act(instruction, image)[0]
-# You can also pass an arbituary number of text and image to the agent:
-response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
+response = robot_agent.act(instruction, image)
 ```
 
 Language Agent can connect to vLLM as well. For example, suppose you are running a vLLM server Mistral-7B on 1.2.3.4:1234. All you need to do is:
@@ -389,11 +366,11 @@ response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct
 ### Motor Agent
 
 [Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
-Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
+Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, may be challenging to run without quantization. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
 
 ### Sensory Agent
 
-These agents interact with the environment to collect sensory data. They always return a `SensorReading`, which can be various forms of processed sensory input such as images, depth data, or audio signals.
+These agents interact with the environment to collect sensor data. They always return a `SensorReading`, which can be various forms of processed sensory input such as images, depth data, or audio signals.
 
 For example, [object_pose_estimator_3d](mbodied/agents/sense/object_pose_estimator_3d.py) is a sensory agent that senses objects' 3d coordinates as the robot sees.
 
@@ -405,7 +382,7 @@ The [motion_controls](mbodied/types/motion_controls.py) module defines various m
 
 You can integrate your custom robot hardware by subclassing [Robot](mbodied/robot/robot.py) quite easily. You only need to implement `do()` function to perform actions (and some additional methods if you want to record dataset on the robot). In our examples, we use a [mock robot](mbodied/robot/sim_robot.py). We also have an [XArm robot](mbodied/robot/xarm_robot.py) as an example.
 
-#### Recording dataset on robot
+#### Recording to a Dataset on a Robot
 
 Recording dataset on robot is very easy using [RobotRecorder](mbodied/robot/robot_recording.py). All you need to do is specify recorder arguments and you can start and stop record anytime you want on the robot! See examples/5_teach_robot_record_dataset.py for more details!
 
@@ -418,14 +395,14 @@ robot = SimRobot()
 robot_recorder = RobotRecorder(robot, record_frequency=5)
 
 robot_recorder.start_recording(task="pick up the fork")
-motion = HandControl.unflatten([0.1, 0.2, 0.0, 0.0, 0.0, 0.0, 1.0])
+motion = HandControl(x=0,y=0,z=-1,grasp=0 # Close gripper)
 robot.do(motion)
 robot_recorder.stop_recording()
 ```
 
 ### Recorder
 
-Dataset [Recorder](mbodied/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
+Dataset [Recorder](mbodied/data/recording.py) is a lower level recorder to record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder. See [gymnasium](https://github.com/Farama-Foundation/Gymnasium) for more details about spaces.
 
 ```python
 from mbodied.data.recording import Recorder
