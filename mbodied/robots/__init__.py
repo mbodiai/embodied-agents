@@ -12,4 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "1.0.7"
+from .robot import Robot
+from .sim_robot import SimRobot
+from .xarm_robot import XarmRobot
+
+__all__ = ["Robot", "SimRobot", "XarmRobot"]

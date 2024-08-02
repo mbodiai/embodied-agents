@@ -17,13 +17,13 @@ from unittest.mock import MagicMock
 import math
 
 from mbodied.types.motion.control import HandControl, Pose6D
-from mbodied.hardware.xarm_interface import XarmInterface
+from mbodied.robots import XarmRobot
 
 
 @pytest.fixture
 def mock_xarm_api(mocker):
-    # Mock the XArmAPI methods that are used in XarmInterface
-    mock = mocker.patch("mbodied.hardware.xarm_interface.XArmAPI")
+    # Mock the XArmAPI methods that are used in XarmRobot
+    mock = mocker.patch("mbodied.robots.xarm_robot.XArmAPI")
     mock_instance = mock.return_value
     mock_instance.motion_enable.return_value = None
     mock_instance.clean_error.return_value = None
@@ -41,8 +41,8 @@ def mock_xarm_api(mocker):
 
 @pytest.fixture
 def xarm(mock_xarm_api):
-    # Explicitly initialize XarmInterface to trigger the mocked calls
-    return XarmInterface(ip="192.168.1.228")
+    # Explicitly initialize XarmRobot to trigger the mocked calls
+    return XarmRobot(ip="192.168.1.228")
 
 
 def test_initialization(mock_xarm_api, xarm):
@@ -75,39 +75,18 @@ def test_do(mock_xarm_api, xarm):
         0 + 0.3,
     ]
 
-    mock_xarm_api.set_position.assert_called_with(*expected_position, wait=False, speed=200)
+    mock_xarm_api.set_position.assert_called_with(*expected_position, wait=True, speed=200)
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
 
-def test_get_pose(mock_xarm_api, xarm):
+def test_get_robot_state(mock_xarm_api, xarm):
     mock_xarm_api.get_position.return_value = (0, [300, 0, 325, 3.14, 0, 0])
 
-    pose = xarm.get_pose()
+    pose = xarm.get_robot_state()
 
     expected_pose = [0.3, 0.0, 0.325, 3.14, 0.0, 0.0, 1.0]
     hand_pose = HandControl.unflatten(expected_pose)
     assert pose == hand_pose
-
-
-def test_do_and_record(mock_xarm_api, mocker, xarm):
-    # Mock the necessary methods
-    mocker.patch.object(xarm, "start_recording", autospec=True)
-    mocker.patch.object(xarm, "stop_recording", autospec=True)
-    mocker.patch.object(xarm, "record_final_state", autospec=True)
-    mocker.patch.object(xarm, "do", autospec=True)
-
-    mock_motion = HandControl(
-        pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=MagicMock(value=0.6)
-    )
-
-    instruction = "move to position"
-    xarm.do_and_record(instruction, mock_motion)
-
-    xarm.start_recording.assert_called_once()
-    xarm.stop_recording.assert_called_once()
-    xarm.record_final_state.assert_called_once()
-    xarm.do.assert_called_once_with(mock_motion)
-    assert xarm.current_instruction == instruction
 
 
 if __name__ == "__main__":

@@ -20,14 +20,6 @@ mbodied.agents.motion.openvla\_agent module
    :undoc-members:
    :show-inheritance:
 
-mbodied.agents.motion.openvla\_example\_server module
------------------------------------------------------
-
-.. automodule:: mbodied.agents.motion.openvla_example_server
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

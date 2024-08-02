@@ -12,27 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
+"""This scripts provides a minimal exmaple to run robotic transformers, i.e. OpenVLA, as motor agent on the robot."""
 
 from mbodied.agents.motion.openvla_agent import OpenVlaAgent
-from mbodied.hardware.sim_interface import SimInterface
-from mbodied.types.sense.vision import Image
+from mbodied.robots import SimRobot
 
 
 def main() -> None:
+    # Use the remote gradio server as the agent actor.
     motor_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
-    # Subclass HardwareInterface and implement the do() method for your specific hardware.
-    hardware_interface = SimInterface()
+    # Subclass Robot and implement the do() method for your specific hardware.
+    robot = SimRobot()
 
     # Use the same instruction throughout.
     instruction = input("Your instruction:")
 
     while True:
         # Image can be initialized with most image types, including file paths.
-        image = Image(Path("resources") / "xarm.jpeg")
-        hand_control = motor_agent.act(instruction, image)
-        hardware_interface.do(hand_control)
+        hand_control = motor_agent.act(instruction, robot.capture())
+        robot.do(hand_control)
 
 
 if __name__ == "__main__":

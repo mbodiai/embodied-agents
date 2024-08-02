@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Example for layered (chained) robotic control with two language agents.
+
+One language agent act as planner and the other as motor agent.
+"""
+
 import os
 from pathlib import Path
 
@@ -21,27 +26,25 @@ from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.agents.sense.audio.audio_agent import AudioAgent
-from mbodied.hardware.sim_interface import SimInterface
+from mbodied.robots import SimRobot
 from mbodied.types.message import Message
 from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
 from mbodied.types.motion.control import FullJointControl, HandControl
 from mbodied.types.sense.vision import Image
 
 
-@click.command("hri")
+@click.command()
 @click.option("--backend", default="openai", help="The backend to use", type=click.Choice(["anthropic", "openai"]))
 @click.option("--backend_api_key", default=None, help="The API key for the backend, i.e. OpenAI, Anthropic")
 @click.option("--disable_audio", default=False, help="Disable audio input/output")
-@click.option("--record_dataset", default="auto", help="Recording action to take", type=click.Choice(["auto", "omit"]))
-def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset: bool) -> None:
-    os.environ["NO_AUDIO"] = "1" if disable_audio else "0"
+def main(backend: str, backend_api_key: str, disable_audio: bool) -> None:
+    if disable_audio:
+        os.environ["NO_AUDIO"] = "1"
 
-    # Customize a  Motion by adding or overriding fields.
     class FineGrainedHandControl(HandControl):
         """Custom HandControl with an additional field."""
 
         comment: str = Field(None, description="A comment to voice aloud.")
-
         # Any attempted validation will fail if the bounds are not satisfied.
         index: FullJointControl = AbsoluteMotionField([0, 0, 0], bounds=[-3.14, 3.14], shape=(3,))
         thumb: FullJointControl = RelativeMotionField([0, 0, 0], bounds=[-3.14, 3.14], shape=(3,))
@@ -72,26 +75,25 @@ def main(backend: str, backend_api_key: str, disable_audio: bool, record_dataset
         recorder_kwargs={"observation_space": observation_space, "action_space": action_space},
     )
 
-    # Subclass HardwareInterface and implement the do() method for your specific hardware.
-    hardware_interface = SimInterface()
+    # Subclass Robot and implement the do() method for your specific hardware.
+    robot = SimRobot()
     audio = AudioAgent(use_pyaudio=False)  # PyAudio is buggy on Mac.
 
     # Recieve inputs.
-    image = Image(Path("resources") / "xarm.jpeg")
     instruction = audio.listen()
 
     # Get the plan.
-    plan = cognition.act(instruction, image)
+    plan = cognition.act(instruction, robot.capture())
 
     for instruction in plan.strip("[]").split(","):
         # Pydantic de-serializes and validates json under the hood.
-        response = motion.act_and_parse(instruction, image, parse_target=FineGrainedHandControl)
+        response = motion.act_and_parse(instruction, robot.capture(), parse_target=FineGrainedHandControl)
 
         # Listen to the robot's reasoning.
         if response.comment:
             audio.speak(response.comment)
 
-        hardware_interface.do(response)
+        robot.do(response)
 
 
 if __name__ == "__main__":

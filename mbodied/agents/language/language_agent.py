@@ -101,45 +101,45 @@ class LanguageAgent(Agent):
 
     _art_printed = False
 
-    def __init__(  # noqa
+    def __init__(
         self,
-        model_src: Literal["openai", "anthropic"]
-        | SupportsOpenAI
+        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http"]
         | AnyUrl
         | FilePath
         | DirectoryPath
         | NewPath = "openai",
         context: list | Image | str | Message = None,
         api_key: str | None = os.getenv("OPENAI_API_KEY"),
-        model_kwargs: dict = None,  # noqa
+        model_kwargs: dict = None,
         recorder: Literal["default", "omit"] | str = "omit",
-        recorder_kwargs: dict = None,  # noqa
+        recorder_kwargs: dict = None,
     ) -> None:
-        """LanguageAgent with memory, dataset-recording, and remote infererence support. Always returns a string.
+        """Agent with memory,  asynchronous remote acting, and automatic dataset recording.
 
-        Supported datasets: HDF5, Datasets, JSON, CSV, Parquet.
-        Supported inference backends: OpenAI, Anthropic, Gradio, Ollama, and OpenAI-compatible http APIs.
-
-        Methods:
-            - act(instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs) -> str
-            - forget_last() -> Message
-            - forget(everything=False, last_n: int = -1) -> None
-            - remind_every(prompt: str | Image | Message, n: int) -> None
+         Additionally supports asynchronous remote inference,
+            supporting multiple platforms including OpenAI, Anthropic, vLLM, Gradio, and Ollama.
 
         Args:
-            context: The starting context to use for the conversation. Can be a list of messages, an image, a string,
-                or a message. If a string is provided, it will be interpreted as a user message.
-            api_key: The API key to use for the remote actor (if applicable).
-            model_src: Any of:
-                1. A local path to a model's weights in which case model_kwargs will be used to load the model.
-                2. A supported backend key (openai, anthropic, ollama, http, gradio). The url must then be provided in model_kwargs.
-                3. Any huggingface spaces path, URL hosting a gradio server, or custom HTTP API URL.
-
-                **Note**: If a url endpoint is provided, Gradio will be used first, then Httpx if Gradio fails.
-
-            model_kwargs: Additional keyword arguments to pass to the model source. See mbodied.agents.backends.backend. Backend for more details.
-            recorder: The recorder config or name to use for the agent to record observations and actions.
-            recorder_kwargs: Additional keyword arguments to pass to the recorder such as push_to_cloud.
+            model_src: The source of the model to use for inference. It can be one of the following:
+                - "openai": Use the OpenAI backend (or vLLM).
+                - "anthropic": Use the Anthropic backend.
+                - "gradio": Use the Gradio backend.
+                - "ollama": Use the Ollama backend.
+                - "http": Use a custom HTTP API backend.
+                - AnyUrl: A URL pointing to the model source.
+                - FilePath: A local path to the model's weights.
+                - DirectoryPath: A local directory containing the model's weights.
+                - NewPath: A new path object representing the model source.
+            context (Union[list, Image, str, Message], optional): The starting context to use for the conversation.
+                    It can be a list of messages, an image, a string, or a message.
+                    If a string is provided, it will be interpreted as a user message. Defaults to None.
+            api_key (str, optional): The API key to use for the remote actor (if applicable).
+                 Defaults to the value of the OPENAI_API_KEY environment variable.
+            model_kwargs (dict, optional): Additional keyword arguments to pass to the model source.
+                See the documentation of the specific backend for more details. Defaults to None.
+            recorder (Union[str, Literal["default", "omit"]], optional):
+                The recorder configuration or name or action. Defaults to "omit".
+            recorder_kwargs (dict, optional): Additional keyword arguments to pass to the recorder. Defaults to None.
         """
         if not LanguageAgent._art_printed:
             print("Welcome to")  # noqa: T201
@@ -167,11 +167,20 @@ class LanguageAgent(Agent):
             logging.warning("No message to forget in the context")
 
     def forget_after(self, first_n: int) -> None:
-        """Forget after the first n messages in the context."""
+        """Forget after the first n messages in the context.
+
+        Args:
+            first_n: The number of messages to keep.
+        """
         self.context = self.context[:first_n]
 
     def forget(self, everything=False, last_n: int = -1) -> List[Message]:
-        """Forget the last n messages in the context."""
+        """Forget the last n messages in the context.
+
+        Args:
+            everything: Whether to forget everything.
+            last_n: The number of messages to forget.
+        """
         if everything:
             context = self.context
             self.context = []
@@ -188,7 +197,12 @@ class LanguageAgent(Agent):
         return self.context
 
     def remind_every(self, prompt: str | Image | Message, n: int) -> None:
-        """Remind the agent of the prompt every n messages."""
+        """Remind the agent of the prompt every n messages.
+
+        Args:
+            prompt: The prompt to remind the agent of.
+            n: The frequency of the reminder.
+        """
         message = Message([prompt]) if not isinstance(prompt, Message) else prompt
         self.reminders.append(Reminder(message, n))
 
@@ -206,12 +220,28 @@ class LanguageAgent(Agent):
         context: list | str | Image | Message = None,
         model=None,
         max_retries: int = 1,
+        record=False,
         **kwargs,
     ) -> Sample:
-        """Responds to the given instruction, image, and context and parses the response into a Sample object."""
+        """Responds to the given instruction, image, and context and parses the response into a Sample object.
+
+        Args:
+            instruction: The instruction to be processed.
+            image: The image to be processed.
+            parse_target: The target type to parse the response into.
+            context: Additonal context to include in the response. If context is a list of messages, it will be interpreted
+                as new memory.
+            model: The model to use for the response.
+            max_retries: The maximum number of retries to parse the response.
+            record: Whether to record the interaction for training.
+            **kwargs: Additional keyword arguments.
+        """
         original_instruction = instruction
         for attempt in range(max_retries + 1):
-            response = self.act(instruction, image, context, model, **kwargs)
+            if record:
+                response = self.act_and_record(instruction, image, context, model, **kwargs)
+            else:
+                response = self.act(instruction, image, context, model, **kwargs)
             response = response[response.find("{") : response.rfind("}") + 1]
             try:
                 return parse_target.model_validate_json(response)
@@ -249,6 +279,14 @@ class LanguageAgent(Agent):
     def prepare_inputs(
         self, instruction: str, image: Image = None, context: list | str | Image | Message = None
     ) -> tuple[Message, list[Message]]:
+        """Helper method to prepare the inputs for the agent.
+
+        Args:
+            instruction: The instruction to be processed.
+            image: The image to be processed.
+            context: Additonal context to include in the response. If context is a list of messages, it will be interpreted
+                as new memory.
+        """
         self._check_for_reminders()
         memory = self.context
         if context and all(isinstance(c, Message) for c in context):
