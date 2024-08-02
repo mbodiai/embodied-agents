@@ -67,7 +67,7 @@ def test_robot_recorder_record_context_manager(tempdir):
     }
     robot_recorder = RobotRecorder(robot=robot, record_frequency=5, recorder_kwargs=recorder_kwargs)
 
-    with robot_recorder.task_context("pick up the fork") as recorder:
+    with robot_recorder.record("pick up the fork") as recorder:
         robot.do(HandControl.unflatten([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]))
 
     assert robot_recorder.task == "pick up the fork"

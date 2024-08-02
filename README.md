@@ -401,7 +401,7 @@ robot.do(motion)
 robot_recorder.stop_recording()
 
 # Alternatively, use context manager:
-with robot_recorder.task_context("pick up the fork") as recorder:
+with robot_recorder.record("pick up the fork") as recorder:
     robot.do(motion)
 ```
 
