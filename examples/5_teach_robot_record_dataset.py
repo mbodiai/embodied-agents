@@ -78,7 +78,7 @@ def main(task: str, backend: str, backend_api_key: str, disable_audio: bool) -> 
     replayer = Replayer("example_dataset/example_record.h5")
     print("Replaying recorded actions in dataset:")  # noqa: T201
     for observation, action in replayer:
-        print("Observation:", observation)  # noqa: T201
+        print("Observation:", type(observation))  # noqa: T201
         print("Action:", action)  # noqa: T201
 
 
