@@ -63,21 +63,16 @@ def main(task: str, backend: str, backend_api_key: str, disable_audio: bool) -> 
 
     # Use sim robot for this example.
     robot = SimRobot()
+    robot_recorder = RobotRecorder(robot, frequency_hz=5)
 
-    robot_recorder = RobotRecorder(robot, record_frequency=5)
-
-    # You can start recording the dataset by calling start_recording wherever you want.
-    robot_recorder.start_recording(task)
-
-    # You can say something like "move forward by 0.5 meters".
-    # We are recording a single action here. You can put this in a while loop to record multiple actions.
-    instruction = audio.listen()
-    print("Instruction:", instruction)  # noqa
-
-    action = cognitive_agent.act_and_parse(instruction, robot.capture(), HandControl)
-    robot.do(action)
-
-    robot_recorder.stop_recording()
+    with robot_recorder.record(task):
+        # Recording automatically starts here
+        # You can say something like "move forward by 0.5 meters".
+        # We are recording a single action here. You can put this in a while loop to record multiple actions.
+        instruction = audio.listen()
+        print("Instruction:", instruction)  # noqa
+        action = cognitive_agent.act_and_parse(instruction, robot.capture(), HandControl)
+        robot.do(action)
 
     # Let's look at the dataset we just collected!
     replayer = Replayer("example_dataset/example_record.h5")

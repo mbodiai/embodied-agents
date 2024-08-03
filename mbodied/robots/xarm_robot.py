@@ -35,29 +35,13 @@ class XarmRobot(Robot):
         home_pos: The home position of the robot arm.
     """
 
-    def __init__(
-        self, ip: str = "192.168.1.228", record=False, record_frequency=4, recorder_kwargs=None, use_realsense=False
-    ):
+    def __init__(self, ip: str = "192.168.1.228", use_realsense=False):
         """Initializes the XarmRobot and sets up the robot arm.
 
         Args:
             ip: The IP address of the xArm robot.
-            record: Whether to record the state of the robot arm to dataset.
-            record_frequency: Frequency at which to record the state of the robot arm (in Hz).
-            recorder_kwargs: Additional arguments to pass to the recorder.
             use_realsense: Whether to use a RealSense camera for capturing images
         """
-        if record:
-            if recorder_kwargs is None:
-                recorder_kwargs = {
-                    "name": "xarm_record",
-                    "observation_space": spaces.Dict(
-                        {"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)},
-                    ),
-                    "action_space": HandControl().space(),
-                    "out_dir": "xarm_dataset",
-                }
-            super().__init__(record_frequency=record_frequency, recorder_kwargs=recorder_kwargs)
         self.ip = ip
 
         self.arm = XArmAPI(self.ip, is_radian=True)
@@ -109,7 +93,7 @@ class XarmRobot(Robot):
         """Gets the current pose (absolute HandControl) of the robot arm.
 
         Returns:
-            A list of the current pose values [x, y, z, r, p, y].
+            The current pose of the robot arm.
         """
         current_pos = self.arm.get_position()[1]
         current_pos[0] = round(current_pos[0] / 1000, 5)
