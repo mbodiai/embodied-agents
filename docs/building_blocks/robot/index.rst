@@ -11,7 +11,7 @@ Recording datasets on the robot is very easy using `RobotRecorder <mbodied/robot
 .. code-block:: python
 
     robot = SimRobot()
-    robot_recorder = RobotRecorder(robot, record_frequency=5)
+    robot_recorder = RobotRecorder(robot, frequency_hz=5)
 
     robot_recorder.start_recording(task="pick up the fork")
     robot.do(motion1)

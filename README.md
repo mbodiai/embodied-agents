@@ -145,6 +145,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - All gradio endpoints hosted on HuggingFace spaces.
 
 ### Roadmap
+
 - [ ] More Motor Agents
 - [ ] Yolo, SAM2, DepthAnything Sensory Agents
 - [ ] FineTuning Scripts
@@ -297,8 +298,6 @@ print(sample_np) # Output: array([1, 2, 3, 4, 5, 6])
 # Converting to a PyTorch tensor
 sample_pt = sample.to("pt")
 print(sample_pt) # Output: tensor([1, 2, 3, 4, 5, 6])
-
-
 ```
 
 #### Gym Space Integration
@@ -391,15 +390,14 @@ Recording dataset on robot is very easy using [RobotRecorder](mbodied/robot/robo
 ```python
 from mbodied.robots import SimRobot
 from mbodied.robots.robot_recording import RobotRecorder
-from mbodied.types.motion.control import HandControl
+from mbodied.types.motion.control import HandControl, Pose
 
 robot = SimRobot()
-robot_recorder = RobotRecorder(robot, record_frequency=5)
+robot_recorder = RobotRecorder(robot, frequency_hz=5)
 
-robot_recorder.start_recording(task="pick up the fork")
-motion = HandControl(x=0,y=0,z=-1,grasp=0 # Close gripper)
-robot.do(motion)
-robot_recorder.stop_recording()
+with robot_recorder.record("pick up the fork"):
+  motion = HandControl(pose=Pose(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3))
+  robot.do(motion)
 ```
 
 ### Recorder

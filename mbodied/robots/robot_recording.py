@@ -1,7 +1,7 @@
 import threading
 import time
 from queue import Queue
-from typing import Any
+from typing import Any, Literal
 
 from mbodied.data.recording import Recorder
 from mbodied.robots import Robot
@@ -27,16 +27,22 @@ class RobotRecorder:
         }
 
         robot = SomeRobot()
-        robot_recorder = RobotRecorder(robot, record_frequency=5, recorder_kwargs=recorder_kwargs)
+        robot_recorder = RobotRecorder(robot, frequency_hz=5, recorder_kwargs=recorder_kwargs)
+        with robot_recorder.record("pick up the fork"):
+            # Recording automatically starts here
+            robot.do(motion1)
+            robot.do(motion2)
 
-        robot_recorder.start_recording(task="pick up the fork")
-        robot.do(motion1)
-        robot.do(motion2)
-        robot_recorder.stop_recording()
-        # Then you got the dataset in the out_dir!
+    Alternatively, you can use the start_recording() and stop_recording() methods to start and stop recording manually.
     """
 
-    def __init__(self, robot: Robot, record_frequency: int = 5, recorder_kwargs: dict[str, Any] = {}):
+    def __init__(
+        self,
+        robot: Robot,
+        frequency_hz: int = 5,
+        recorder_kwargs: dict[str, Any] = {},
+        on_static: Literal["record", "omit"] = "omit",
+    ) -> None:
         """Initializes the RobotRecorder.
 
         This constructor sets up the recording mechanism on the given robot, including the recorder instance,
@@ -45,8 +51,9 @@ class RobotRecorder:
 
         Args:
             robot: The robot hardware interface to record.
-            record_frequency: Frequency at which to record pose and image data (in Hz).
+            frequency_hz: Frequency at which to record pose and image data (in Hz).
             recorder_kwargs: Keyword arguments to pass to the Recorder constructor.
+            on_static: Whether to record on static poses or not. If "record", it will record when the robot is not moving.
         """
         self.robot = robot
 
@@ -57,11 +64,25 @@ class RobotRecorder:
         self.last_image = None
 
         self.recording = False
-        self.record_frequency = record_frequency
+        self.frequency_hz = frequency_hz
+        self.record_on_static = on_static == "record"
         self.recording_queue = Queue()
 
         self._worker_thread = threading.Thread(target=self._process_queue, daemon=True)
         self._worker_thread.start()
+
+    def __enter__(self):
+        """Enter the context manager, starting the recording."""
+        self.start_recording(self.task)
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """Exit the context manager, stopping the recording."""
+        self.stop_recording()
+
+    def record(self, task: str) -> "RobotRecorder":
+        """Set the task and return the context manager."""
+        self.task = task
+        return self
 
     def reset_recorder(self) -> None:
         """Reset the recorder."""
@@ -72,8 +93,12 @@ class RobotRecorder:
     def record_pose_and_image(self) -> None:
         """Records the current pose and captures an image at the specified frequency."""
         while self.recording:
+            start_time = time.perf_counter()
             self.record_current_state()
-            time.sleep(1.0 / self.record_frequency)
+            elapsed_time = time.perf_counter() - start_time
+            # Sleep for the remaining time to maintain the desired frequency
+            sleep_time = max(0, (1.0 / self.frequency_hz) - elapsed_time)
+            time.sleep(sleep_time)
 
     def start_recording(self, task: str = "") -> None:
         """Starts the recording of pose and image."""
@@ -99,15 +124,16 @@ class RobotRecorder:
     def record_current_state(self) -> None:
         """Records the current pose and image if the pose has changed."""
         pose = self.robot.get_robot_state()
+        image = self.robot.capture()
+
         # This is the beginning of the episode
         if self.last_recorded_pose is None:
             self.last_recorded_pose = pose
-            self.last_image = self.robot.capture()
+            self.last_image = image
             return
 
-        if pose != self.last_recorded_pose:
+        if pose != self.last_recorded_pose or self.record_on_static:
             action = self.robot.calculate_action(self.last_recorded_pose, pose)
-            image = self.robot.capture()  # Capture an image
             self.recording_queue.put(
                 (
                     self.last_image,
