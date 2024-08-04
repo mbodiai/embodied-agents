@@ -1,46 +1,31 @@
 import threading
 import time
 from queue import Queue
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 from mbodied.data.recording import Recorder
-from mbodied.robots import Robot
 
 
 class RobotRecorder:
     """A class for recording robot observation and actions.
 
-    Recording the observation and action of a robot hardware interface on the given robot
-    from the constructor at a specified frequency. It leverages a queue and a worker
+    Recording at a specified frequency on the observation and action of a robot. It leverages a queue and a worker
     thread to handle the recording asynchronously, ensuring that the main operations of the
     robot are not blocked.
 
-    Robot class must implement the `get_robot_state` and `calculate_action` methods.` for the recorder to work.
-    get_robot_state() gets the current state/pose of the robot. calculate_action() calculates the action between
-    the new and old states.
-
-    Usage:
-        # Optional: Specify the kwargs for the recorder explicitly.
-        recorder_kwargs = {
-            "observation_space": spaces.Dict({"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)}),
-            "action_space": HandControl().space(),
-        }
-
-        robot = SomeRobot()
-        robot_recorder = RobotRecorder(robot, frequency_hz=5, recorder_kwargs=recorder_kwargs)
-        with robot_recorder.record("pick up the fork"):
-            # Recording automatically starts here
-            robot.do(motion1)
-            robot.do(motion2)
-
-    Alternatively, you can use the start_recording() and stop_recording() methods to start and stop recording manually.
+    Robot class must pass in the `get_state`, `get_observation`, `prepare_action` methods.`
+    get_state() gets the current state/pose of the robot.
+    get_observation() captures the observation/image of the robot.
+    prepare_action() calculates the action between the new and old states.
     """
 
     def __init__(
         self,
-        robot: Robot,
+        get_state: Callable,
+        get_observation: Callable,
+        prepare_action: Callable,
         frequency_hz: int = 5,
-        recorder_kwargs: dict[str, Any] = {},
+        recorder_kwargs: dict = None,
         on_static: Literal["record", "omit"] = "omit",
     ) -> None:
         """Initializes the RobotRecorder.
@@ -50,13 +35,15 @@ class RobotRecorder:
         initializes attributes to track the last recorded pose and the current instruction.
 
         Args:
-            robot: The robot hardware interface to record.
+            get_state: A function that returns the current state of the robot.
+            get_observation: A function that captures the observation/image of the robot.
+            prepare_action: A function that calculates the action between the new and old states.
             frequency_hz: Frequency at which to record pose and image data (in Hz).
             recorder_kwargs: Keyword arguments to pass to the Recorder constructor.
             on_static: Whether to record on static poses or not. If "record", it will record when the robot is not moving.
         """
-        self.robot = robot
-
+        if recorder_kwargs is None:
+            recorder_kwargs = {}
         self.recorder = Recorder(**recorder_kwargs)
         self.task = None
 
@@ -67,6 +54,10 @@ class RobotRecorder:
         self.frequency_hz = frequency_hz
         self.record_on_static = on_static == "record"
         self.recording_queue = Queue()
+
+        self.get_state = get_state
+        self.get_observation = get_observation
+        self.prepare_action = prepare_action
 
         self._worker_thread = threading.Thread(target=self._process_queue, daemon=True)
         self._worker_thread.start()
@@ -123,8 +114,8 @@ class RobotRecorder:
 
     def record_current_state(self) -> None:
         """Records the current pose and image if the pose has changed."""
-        pose = self.robot.get_robot_state()
-        image = self.robot.capture()
+        pose = self.get_state()
+        image = self.get_observation()
 
         # This is the beginning of the episode
         if self.last_recorded_pose is None:
@@ -133,7 +124,7 @@ class RobotRecorder:
             return
 
         if pose != self.last_recorded_pose or self.record_on_static:
-            action = self.robot.calculate_action(self.last_recorded_pose, pose)
+            action = self.prepare_action(self.last_recorded_pose, pose)
             self.recording_queue.put(
                 (
                     self.last_image,

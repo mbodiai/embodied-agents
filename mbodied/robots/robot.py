@@ -15,21 +15,41 @@
 import asyncio
 from abc import ABC, abstractmethod
 
+from mbodied.robots.robot_recording import RobotRecorder
 from mbodied.types.sample import Sample
 
 
 class Robot(ABC):
     """Abstract base class for robot hardware interfaces.
 
-    This class provides a template for creating robot hardware interfaces that can
-    control robots or other hardware devices.
+    This class serves as a blueprint for creating interfaces to control robot hardware
+    or other devices. It provides essential methods and guidelines to implement
+    functionalities such as executing motions, capturing observations, and recording
+    robot data, which can be used for training models.
 
-    Methods:
-        do (required): Executes motion on the robot.
-        fetch: Fetches data from the hardware.
-        capture: Captures continuous data from the hardware i.e. image.
-        get_robot_state: Gets the current pose of the hardware, optional for robot recorder.
-        calculate_action: Calculates the action between two robot states, optional for robot recorder.
+    Key Features:
+    - organize your hardware interface in a modular fashion
+    - support asynchronous dataset creation
+
+    **Recording Capabilities:**
+    To enable data recording for model training, the following methods need implementation:
+    - `get_observation()`: Captures the current observation/image of the robot.
+    - `get_state()`: Retrieves the current state (pose) of the robot.
+    - `prepare_action()`: Computes the action performed between two robot states.
+
+    **Example Usage:**
+    ```python
+    robot = MyRobot()
+    robot.init_recorder(frequency_hz=5, recorder_kwargs={...})
+    with robot.record("pick up the remote"):
+        robot.do(motion1)
+        robot.do(motion2)
+        ...
+    ```
+    When ``with robot.record`` is called, it starts recording the robot's observation and actions
+    at the desired frequency. It stops when the context manager exits.
+
+    Alternatively, you can manage recordings with `start_recording()` and `stop_recording()` methods.
     """
 
     @abstractmethod
@@ -78,14 +98,21 @@ class Robot(ABC):
         """
         raise NotImplementedError
 
-    def get_robot_state(self) -> Sample:
+    def get_observation(self) -> Sample:
+        """(Optional for robot recorder): Captures the observation/image of the robot.
+
+        This will be used by the robot recorder to record the current observation/image of the robot.
+        """
+        raise NotImplementedError
+
+    def get_state(self) -> Sample:
         """(Optional for robot recorder): Gets the current state (pose) of the robot.
 
         This will be used by the robot recorder to record the current state of the robot.
         """
         raise NotImplementedError
 
-    def calculate_action(self, old_state: Sample, new_state: Sample) -> Sample:
+    def prepare_action(self, old_state: Sample, new_state: Sample) -> Sample:
         """(Optional for robot recorder): Calculates the the action between two robot states.
 
         For example, substract old from new hand position and use absolute value for grasp, etc.
@@ -95,3 +122,38 @@ class Robot(ABC):
             new_state: The new state (pose) of the robot.
         """
         raise NotImplementedError
+
+    def init_recorder(
+        self,
+        frequency_hz: int = 5,
+        recorder_kwargs: dict = None,
+        on_static: str = "omit",
+    ) -> None:
+        """Initializes the recorder for the robot."""
+        self.robot_recorder = RobotRecorder(
+            self.get_state,
+            self.get_observation,
+            self.prepare_action,
+            frequency_hz,
+            recorder_kwargs,
+            on_static=on_static,
+        )
+
+    def record(self, task: str) -> RobotRecorder:
+        """Start recording with the given task with context manager.
+
+        Usage:
+            with robot.record("pick up the remote"):
+                robot.do(motion1)
+                robot.do(motion2)
+                ...
+        """
+        return self.robot_recorder.record(task)
+
+    def start_recording(self, task: str) -> None:
+        """Start recording with the given task."""
+        self.robot_recorder.start_recording(task)
+
+    def stop_recording(self) -> None:
+        """Stop recording."""
+        self.robot_recorder.stop_recording()

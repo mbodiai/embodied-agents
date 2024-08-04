@@ -89,7 +89,7 @@ class XarmRobot(Robot):
             self.arm.set_position(*current_pos, wait=True, speed=self.arm_speed)
             self.arm.set_gripper_position(0 if m.grasp.value <= 0.5 else 800, wait=True)
 
-    def get_robot_state(self) -> HandControl:
+    def get_state(self) -> HandControl:
         """Gets the current pose (absolute HandControl) of the robot arm.
 
         Returns:
@@ -110,7 +110,7 @@ class XarmRobot(Robot):
             hand_control.append(0)
         return HandControl.unflatten(hand_control)
 
-    def calculate_action(self, old_pose: HandControl, new_pose: HandControl) -> HandControl:
+    def prepare_action(self, old_pose: HandControl, new_pose: HandControl) -> HandControl:
         """Calculates the action between two poses.
 
         Args:
@@ -127,8 +127,12 @@ class XarmRobot(Robot):
         return HandControl.unflatten(result)
 
     def capture(self) -> Image:
-        """Captures an image from the robot camera. Placeholder for real camera input."""
+        """Captures an image from the robot camera."""
         if self.use_realsense:
             rgb_image, _, _ = self.realsense_camera.capture_realsense_images()
             return Image(rgb_image, size=(224, 224))
         return Image(size=(224, 224))
+
+    def get_observation(self) -> Image:
+        """Captures an image for recording."""
+        return self.capture()

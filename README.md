@@ -383,19 +383,17 @@ The [motion_controls](mbodied/types/motion_controls.py) module defines various m
 
 You can integrate your custom robot hardware by subclassing [Robot](mbodied/robot/robot.py) quite easily. You only need to implement `do()` function to perform actions (and some additional methods if you want to record dataset on the robot). In our examples, we use a [mock robot](mbodied/robot/sim_robot.py). We also have an [XArm robot](mbodied/robot/xarm_robot.py) as an example.
 
-#### Recording to a Dataset on a Robot
+#### Recording a Dataset
 
-Recording dataset on robot is very easy using [RobotRecorder](mbodied/robot/robot_recording.py). All you need to do is specify recorder arguments and you can start and stop record anytime you want on the robot! See examples/5_teach_robot_record_dataset.py for more details!
+Recording a dataset on a robot is very easy! All you need to do is implement the `get_observation()`, `get_state()`, and `prepare_action()` methods for your robot. After that, you can record a dataset on your robot anytime you want. See [examples/5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py) for more details.
 
 ```python
 from mbodied.robots import SimRobot
-from mbodied.robots.robot_recording import RobotRecorder
 from mbodied.types.motion.control import HandControl, Pose
 
 robot = SimRobot()
-robot_recorder = RobotRecorder(robot, frequency_hz=5)
-
-with robot_recorder.record("pick up the fork"):
+robot.init_recorder(frequency_hz=5)
+with robot.record("pick up the fork"):
   motion = HandControl(pose=Pose(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3))
   robot.do(motion)
 ```
