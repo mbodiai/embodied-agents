@@ -47,7 +47,7 @@ class RobotRecorder:
         self.recorder = Recorder(**recorder_kwargs)
         self.task = None
 
-        self.last_recorded_pose = None
+        self.last_recorded_state = None
         self.last_image = None
 
         self.recording = False
@@ -81,7 +81,7 @@ class RobotRecorder:
             time.sleep(0.1)
         self.recorder.reset()
 
-    def record_pose_and_image(self) -> None:
+    def record_from_robot(self) -> None:
         """Records the current pose and captures an image at the specified frequency."""
         while self.recording:
             start_time = time.perf_counter()
@@ -96,7 +96,7 @@ class RobotRecorder:
         if not self.recording:
             self.task = task
             self.recording = True
-            self.recording_thread = threading.Thread(target=self.record_pose_and_image)
+            self.recording_thread = threading.Thread(target=self.record_from_robot)
             self.recording_thread.start()
 
     def stop_recording(self) -> None:
@@ -108,32 +108,34 @@ class RobotRecorder:
     def _process_queue(self) -> None:
         """Processes the recording queue asynchronously."""
         while True:
-            image, action, instruction = self.recording_queue.get()
+            image, instruction, action, state = self.recording_queue.get()
+            # TODO: Add support for recording state as well.
             self.recorder.record(observation={"image": image, "instruction": instruction}, action=action)
             self.recording_queue.task_done()
 
     def record_current_state(self) -> None:
         """Records the current pose and image if the pose has changed."""
-        pose = self.get_state()
+        state = self.get_state()
         image = self.get_observation()
 
         # This is the beginning of the episode
-        if self.last_recorded_pose is None:
-            self.last_recorded_pose = pose
+        if self.last_recorded_state is None:
+            self.last_recorded_state = state
             self.last_image = image
             return
 
-        if pose != self.last_recorded_pose or self.record_on_static:
-            action = self.prepare_action(self.last_recorded_pose, pose)
+        if state != self.last_recorded_state or self.record_on_static:
+            action = self.prepare_action(self.last_recorded_state, state)
             self.recording_queue.put(
                 (
                     self.last_image,
-                    action,
                     self.task,
+                    action,
+                    self.last_recorded_state,
                 ),
             )
             self.last_image = image
-            self.last_recorded_pose = pose
+            self.last_recorded_state = state
 
     def record_last_state(self) -> None:
         """Records the final pose and image after the movement completes."""

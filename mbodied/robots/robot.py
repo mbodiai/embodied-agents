@@ -113,9 +113,10 @@ class Robot(ABC):
         raise NotImplementedError
 
     def prepare_action(self, old_state: Sample, new_state: Sample) -> Sample:
-        """(Optional for robot recorder): Calculates the the action between two robot states.
+        """(Optional for robot recorder): Prepare the the action between two robot states.
 
-        For example, substract old from new hand position and use absolute value for grasp, etc.
+        This is what you are recording as the action. For example, substract old from new hand position
+        and use absolute value for grasp, etc.
 
         Args:
             old_state: The old state (pose) of the robot.
