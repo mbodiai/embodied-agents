@@ -109,8 +109,7 @@ class RobotRecorder:
         """Processes the recording queue asynchronously."""
         while True:
             image, instruction, action, state = self.recording_queue.get()
-            # TODO: Add support for recording state as well.
-            self.recorder.record(observation={"image": image, "instruction": instruction}, action=action)
+            self.recorder.record(observation={"image": image, "instruction": instruction}, action=action, state=state)
             self.recording_queue.task_done()
 
     def record_current_state(self) -> None:

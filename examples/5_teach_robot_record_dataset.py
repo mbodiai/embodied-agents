@@ -70,9 +70,10 @@ def main(task: str, api_key: str) -> None:
     # Let's look at the dataset we just collected!
     replayer = Replayer("example_dataset/example_record.h5")
     print("Replaying recorded actions in dataset:")  # noqa: T201
-    for observation, action in replayer:
+    for observation, action, state in replayer:
         print("Observation:", type(observation))  # noqa: T201
         print("Action:", action)  # noqa: T201
+        print("State:", state)  # noqa: T201
 
 
 if __name__ == "__main__":

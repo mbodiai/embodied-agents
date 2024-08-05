@@ -52,7 +52,7 @@ def test_robot_recorder_record(tempdir):
     # Replay the dataset and verify the recorded data.
     replayer = Replayer(Path(tempdir) / "sim_record.h5")
     assert replayer.size > 0
-    for observation, action in replayer:
+    for observation, action, state in replayer:
         assert observation["instruction"] == "pick up the fork"
 
 
@@ -77,7 +77,7 @@ def test_robot_recorder_record_context_manager(tempdir):
     # Replay the dataset and verify the recorded data.
     replayer = Replayer(Path(tempdir) / "sim_record.h5")
     assert replayer.size > 0
-    for observation, action in replayer:
+    for observation, action, state in replayer:
         assert observation["instruction"] == "pick up the fork"
 
 
