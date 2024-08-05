@@ -100,10 +100,15 @@ class Recorder:
       action_space = spaces.Dict({
           'gripper_position': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
           'gripper_action': spaces.Discrete(2)
-      }).
+      })
+
+      state_space = spaces.Dict({
+          'position': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
+          'velocity': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32)
+      })
 
       # Create a recorder instance
-      recorder = Recorder(name='test_recorder', observation_space=observation_space, action_space=action_space)
+      recorder = Recorder(name='test_recorder', observation_space=observation_space, action_space=action_space, state_space=state_space)
 
       # Generate some sample data
       num_steps = 10
@@ -116,7 +121,11 @@ class Recorder:
               'gripper_position': np.zeros((3,), dtype=np.float32),
               'gripper_action': 1
           }
-          recorder.record(observation, action)
+          state = {
+              'position': np.random.rand(3).astype(np.float32),
+              'velocity': np.random.rand(3).astype(np.float32)
+          }
+          recorder.record(observation, action, state=state)
 
       # Save the statistics
       recorder.save_stats()
@@ -135,6 +144,7 @@ class Recorder:
         name: str = "dataset.h5",
         observation_space: spaces.Dict | str | None = None,
         action_space: spaces.Dict | str | None = None,
+        state_space: spaces.Dict | str | None = None,
         supervision_space: spaces.Dict | str | None = None,
         out_dir: str = "saved_datasets",
         image_keys_to_save: list = None,
@@ -145,8 +155,9 @@ class Recorder:
           name (str): Name of the file.
           observation_space (spaces.Dict): Observation space.
           action_space (spaces.Dict): Action space.
+          state_space (spaces.Dict): State space.
+          supervision_space (spaces.Dict): Supervision space.
           out_dir (str, optional): Directory of the output file. Defaults to 'saved_datasets'.
-          num_steps (int, optional): Number of steps. Defaults to 10.
           image_keys_to_save (list, optional): List of image keys to save. Defaults to ['image'].
         """
         logging.info("\nInitializing dataset recorder, recording to directory: %s", out_dir)
@@ -167,10 +178,12 @@ class Recorder:
 
         self.observation_space = observation_space
         self.action_space = action_space
+        self.state_space = state_space
         self.supervision_space = supervision_space
         self.root_keys, self.root_spaces = self.configure_root_spaces(
             observation=observation_space,
             action=action_space,
+            state=state_space,
             supervision=supervision_space,
         )
 
@@ -189,6 +202,7 @@ class Recorder:
         Args:
           observation_space (spaces.Dict): Observation space.
           action_space (spaces.Dict): Action space.
+          state_space (spaces.Dict): State space.
           supervision_space (spaces.Dict): Supervision space.
         """
         root_keys = []
@@ -251,12 +265,13 @@ class Recorder:
                 dataset.resize((2 * index, *dataset.shape[1:]))
             dataset[index] = value
 
-    def record(self, observation: Any | None = None, action: Any | None = None, supervision: Any | None = None) -> None:
+    def record(self, observation: Any | None = None, action: Any | None = None, state: Any | None = None, supervision: Any | None = None) -> None:
         """Record a timestep.
 
         Args:
           observation (Any): Observation to record.
           action (Any): Action to record.
+          state (Any): State to record.
           supervision (Any): Supervision to record.
         """
 
@@ -290,6 +305,16 @@ class Recorder:
                 self.root_keys += new_root_keys
                 self.root_spaces += new_root_spaces
             self.record_timestep(self.file["action"], action, self.index)
+        if state is not None:
+            if not hasattr(state, "dict"):
+                state = Sample(state)
+                state = recursive_setarray(state)  # Bug hacky fix for Image recording.
+            if "state" not in self.file:
+                logging.warning("Recorder: state not in file, creating new group")
+                new_root_keys, new_root_spaces = self.configure_root_spaces(state=state.space())
+                self.root_keys += new_root_keys
+                self.root_spaces += new_root_spaces
+            self.record_timestep(self.file["state"], state, self.index)
         if supervision is not None:
             if not hasattr(supervision, "dict"):
                 supervision = Sample(supervision)

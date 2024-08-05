@@ -72,7 +72,11 @@ class SimRobot(Robot):
         resource = Path("resources") / "xarm.jpeg"
         return Image(resource, size=(224, 224))
 
-    def get_robot_state(self) -> HandControl:
+    def get_observation(self) -> Image:
+        """Alias of capture for recording."""
+        return self.capture()
+
+    def get_state(self) -> HandControl:
         """Gets the current pose of the robot arm.
 
         Returns:
@@ -80,7 +84,7 @@ class SimRobot(Robot):
         """
         return HandControl.unflatten(self.current_pos)
 
-    def calculate_action(self, old_pose: HandControl, new_pose: HandControl) -> HandControl:
+    def prepare_action(self, old_pose: HandControl, new_pose: HandControl) -> HandControl:
         """Calculates the action between two poses."""
         # Calculate the difference between the old and new poses. Use absolute value for grasp.
         old = list(old_pose.flatten())
