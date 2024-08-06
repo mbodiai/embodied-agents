@@ -30,8 +30,8 @@ class BBox3D(NamedTuple):
 class PixelCoords(NamedTuple):
     """Model for Pixel Coordinates."""
 
-    u: int
-    v: int
+    x: int
+    y: int
 
 
 class SceneObject(Sample):
