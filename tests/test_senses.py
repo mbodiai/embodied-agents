@@ -135,10 +135,8 @@ def test_image_model_dump_load():
 def test_image_model_dump_load_with_base64():
     array = np.random.randint(0, 256, (480, 640, 3), dtype=np.uint8)
     img = Image(array, encoding="png")
-    print(img.array[10][10])
     json = img.model_dump_json(round_trip=True)
     reconstructed_img = Image.model_validate_json(json)
-    print(reconstructed_img.array[10][10])
     assert np.array_equal(reconstructed_img.array, array)
 
 
