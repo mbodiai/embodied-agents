@@ -74,7 +74,7 @@ class HttpxBackend(OpenAIBackendMixin):
         self.serialized = serializer or self.SERIALIZER
         self.kwargs = kwargs
 
-    def _create_completion(self, messages: List[Message], model: str | None = None, **kwargs) -> str:
+    def predict(self, messages: List[Message], model: str | None = None, **kwargs) -> str:
         model = model or self.DEFAULT_MODEL
         data = {
             "messages": [self.serialized(msg).serialize() for msg in messages],
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     client = HttpxBackend()
     image_url = "https://v0.docs.reka.ai/_images/000000245576.jpg"
     text = "What animal is this? Answer briefly."
-    run = client._create_completion([Message(role="user", content=[text, Image(url=image_url)])])
+    run = client.predict([Message(role="user", content=[text, Image(url=image_url)])])
     print(run)
 
     async def runner():

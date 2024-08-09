@@ -88,13 +88,18 @@ class AnthropicBackend(OpenAIBackendMixin):
             self.client = anthropic.Anthropic(api_key=self.api_key)
         self.serialized = AnthropicSerializer
 
-    def _create_completion(
-        self, messages: list[Message], model: str | None = "claude-3-5-sonnet-20240620", **kwargs
+    def predict(
+        self,
+        message: Message,
+        context: List[Message] | None = None,
+        model: str | None = "claude-3-5-sonnet-20240620",
+        **kwargs,
     ) -> str:
         """Creates a completion for the given messages using the Anthropic API.
 
         Args:
-            messages: A list of messages to be sent to the completion API.
+            message: the message to be sent to the completion API.
+            context: The context for the completion.
             model: The model to be used for the completion.
             **kwargs: Additional keyword arguments.
 
@@ -103,7 +108,7 @@ class AnthropicBackend(OpenAIBackendMixin):
         """
         if model is None:
             model = self.DEFAULT_MODEL
-        serialized_messages = [self.serialized(msg).serialize() for msg in messages]
+        serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
         completion = self.client.messages.create(
             model=model,
             max_tokens=1024,
