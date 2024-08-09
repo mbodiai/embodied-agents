@@ -68,6 +68,19 @@ class Reminder:
     prompt: str | Image | Message
     n: int
 
+    def __iter__(self):
+        yield self.prompt
+        yield self.n
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.prompt
+        elif key == 1:
+            return self.n
+        else:
+            raise IndexError("Invalid index")
+
+
 
 def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
     """Convert the context to a list of messages."""
