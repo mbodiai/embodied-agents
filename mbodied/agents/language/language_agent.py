@@ -360,7 +360,7 @@ class LanguageAgent(Agent):
         self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
     ) -> Generator[str, None, str]:
         """Responds to the given instruction, image, and context and streams the response."""
-        message, memory, model = self.prepare_inputs(instruction, image, context)
+        message, memory = self.prepare_inputs(instruction, image, context)
         response = ""
         model = model or kwargs.pop("model", None)
         for chunk in self.actor.stream(memory + [message], model=model, **kwargs):
