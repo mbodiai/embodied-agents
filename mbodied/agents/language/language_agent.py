@@ -81,7 +81,6 @@ class Reminder:
             raise IndexError("Invalid index")
 
 
-
 def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
     """Convert the context to a list of messages."""
     if isinstance(context, list):
@@ -352,7 +351,7 @@ class LanguageAgent(Agent):
             "['Move left arm to the object', 'Move right arm to the object']"
         """
         message, memory = self.prepare_inputs(instruction, image, context)
-        model = model or kwargs.pop("model", None)
+        model = model or self.actor.DEFAULT_MODEL
         response = self.actor.predict(message, memory, model=model, **kwargs)
         return self.postprocess_response(response, message, memory, **kwargs)
 
@@ -362,8 +361,10 @@ class LanguageAgent(Agent):
         """Responds to the given instruction, image, and context and streams the response."""
         message, memory = self.prepare_inputs(instruction, image, context)
         response = ""
-        model = model or kwargs.pop("model", None)
-        for chunk in self.actor.stream(memory + [message], model=model, **kwargs):
+        model = model or self.actor.DEFAULT_MODEL
+        kwargs.update({"model": model})
+
+        for chunk in self.actor.stream(message, memory, **kwargs):
             response += chunk
             yield chunk
         return self.postprocess_response(response, message, memory, **kwargs)
@@ -372,11 +373,33 @@ class LanguageAgent(Agent):
         self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
     ) -> AsyncGenerator[str, None]:
         # TODO(sebastian): fix this. Response is None maybe due to three nested async yields.
-        raise NotImplementedError("Async streaming is not supported for this agent.")
-        # message, memory, model = self.prepare_inputs(instruction, image, context, model)
-        # model = model or kwargs.pop("model", None)
-        # response = ""
-        # async for chunk in self.actor.astream(memory + [message], model=model, **kwargs):
-        #     response += chunk
-        #     yield chunk
-        # self.postprocess_response(response, message, memory, **kwargs)
+        # raise NotImplementedError("Async streaming is not supported for this agent.")
+        message, memory = self.prepare_inputs(instruction, image, context)
+        model = model or self.actor.DEFAULT_MODEL
+        kwargs.update({"model": model})
+        response = ""
+        async for chunk in self.actor.astream(message, memory, **kwargs):
+            response += chunk
+            yield chunk
+        self.postprocess_response(response, message, memory, **kwargs)
+
+
+def main():
+    agent = LanguageAgent(model_src="openai")
+    resp = ""
+    for chunk in agent.act_and_stream("Hello, world!"):
+        resp += chunk
+        print(resp)
+
+
+async def async_main():
+    agent = LanguageAgent(model_src="openai", model_kwargs={"aclient": True})
+    resp = ""
+    async for chunk in agent.async_act_and_stream("Hello, world!"):
+        resp += chunk
+        print(resp)
+
+
+if __name__ == "__main__":
+    main()
+    asyncio.run(async_main())

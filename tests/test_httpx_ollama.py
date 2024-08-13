@@ -98,7 +98,7 @@ def test_completion():
     text = "What animal is this? Answer briefly."
     print("Sending message to Ollama model...")
     # Synchronous usage
-    response = wrapper._create_completion([Message(role="user", content=text)], model="llama3")
+    response = wrapper.predict([Message(role="user", content=text)], model="llama3")
     assert response == mock_response
 
 
@@ -117,7 +117,7 @@ mock_response = "Ollama response text"
 def test_completion():
     wrapper = OllamaBackend()
     text = "What is the capital of France?"
-    response = wrapper._create_completion([Message(role="user", content=text)], model="llama2")
+    response = wrapper.predict([Message(role="user", content=text)], model="llama2")
     assert response == mock_response
 
 

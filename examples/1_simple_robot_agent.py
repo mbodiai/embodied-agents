@@ -90,7 +90,8 @@ def main(backend: str, backend_api_key: str, disable_audio: bool) -> None:
             audio.speak(answer_actions.answer)
 
         # Execute the actions with the robot interface.
-        robot.do(answer_actions.actions)
+        if answer_actions.actions:
+            robot.do(answer_actions.actions)
 
 
 if __name__ == "__main__":
