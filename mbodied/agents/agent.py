@@ -139,10 +139,13 @@ class Agent:
         """
         raise NotImplementedError("Subclass should implement this method.")
 
+    def submit_act(self, *args, **kwargs) -> asyncio.Future:
+        """Call act() and return a Future immediately for asynchronous operation."""
+        loop = asyncio.get_event_loop()
+        return loop.run_in_executor(None, self.act, *args, **kwargs)
+
     async def async_act(self, *args, **kwargs) -> Sample:
         """Act asynchronously based on the observation.
-
-        Subclass should implement this method.
 
         For remote actors, this method should call actor.async_act() correctly to perform the actions.
         """

@@ -14,10 +14,12 @@
 
 from unittest import mock
 import pytest
+import asyncio
 from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.agents.language.language_agent import LanguageAgent
 from mbodied.types.sense.vision import Image
+from mbodied.types.sample import Sample
 
 # Mock responses for the API calls
 mock_openai_response = "OpenAI response text"
@@ -263,6 +265,20 @@ def test_language_agent_act_and_parse_retry_history(mock_act):
         "Parse this. Avoid the following error: Error parsing response: 1 validation error for TestSample\nkey\n  Field required [type=missing, input_value={'invalid': 'json'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.8/v/missing"
     ]
     assert history[1].content == ['{"key": "value"}']
+
+
+@pytest.mark.asyncio
+async def test_language_agent_submit_act():
+    agent = LanguageAgent()
+
+    with mock.patch.object(agent, "act", return_value=Sample()) as mock_act:
+        future = agent.submit_act("Test input")
+
+        assert isinstance(future, asyncio.Future), "submit_act should return a Future."
+        result = await future
+
+        assert isinstance(result, Sample), "The result from submit_act should be an instance of Sample."
+        mock_act.assert_called_once_with("Test input")
 
 
 if __name__ == "__main__":
