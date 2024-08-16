@@ -26,7 +26,7 @@ def test_segmentation_agent_act_with_coordinates(segmentation_agent):
     mock_image = MagicMock(spec=Image)
     mock_image.base64 = "base64encodedimage"
     
-    pixel_coords = PixelCoords(x=800, y=100)
+    pixel_coords = PixelCoords(u=800, v=100)
     result_image, masks = segmentation_agent.act(mock_image, pixel_coords)
     assert isinstance(result_image, Image)
     assert isinstance(masks, np.ndarray)
@@ -44,7 +44,7 @@ def test_segmentation_agent_act_with_bounding_boxes(segmentation_agent):
 def test_real_segmentation_agent_act_with_coordinates():
     agent = SegmentationAgent(model_src="https://api.mbodi.ai/sense/")
     image = Image("resources/bridge_example.jpeg")
-    pixel_coords = PixelCoords(x=800, y=100)
+    pixel_coords = PixelCoords(u=800, v=100)
     result_image, masks = agent.act(image=image, input_data=pixel_coords)
     assert isinstance(result_image, Image)
     assert isinstance(masks, np.ndarray)

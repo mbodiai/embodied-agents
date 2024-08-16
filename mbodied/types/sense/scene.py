@@ -3,6 +3,7 @@ from typing import List, NamedTuple
 from pydantic import Field
 
 from mbodied.types.geometry import Pose
+from mbodied.types.ndarray import NumpyArray
 from mbodied.types.sample import Sample
 from mbodied.types.sense import Image
 
@@ -30,8 +31,8 @@ class BBox3D(NamedTuple):
 class PixelCoords(NamedTuple):
     """Model for Pixel Coordinates."""
 
-    x: int
-    y: int
+    u: int
+    v: int
 
 
 class SceneObject(Sample):
@@ -50,6 +51,7 @@ class SceneObject(Sample):
     bbox_3d: BBox3D | None = None
     pose: Pose | None = None
     pixel_coords: PixelCoords | None = None
+    mask: NumpyArray | None = None
 
 
 class Scene(Sample):
