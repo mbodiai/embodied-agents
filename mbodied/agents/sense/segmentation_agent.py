@@ -49,7 +49,7 @@ class SegmentationAgent(SensoryAgent):
 
         if isinstance(input_data, PixelCoords):
             input_type = "Coordinates"
-            input_data_str = f"{input_data.x},{input_data.y}"
+            input_data_str = f"{input_data.u},{input_data.v}"
         elif isinstance(input_data, BBox2D):
             input_type = "Bounding Boxes"
             input_data_str = json.dumps([[input_data.x1, input_data.y1, input_data.x2, input_data.y2]])
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print("Masks shape", masks.shape)
     mask_image.pil.show()
 
-    pixel_coords = PixelCoords(x=800, y=100)
+    pixel_coords = PixelCoords(u=800, v=100)
     mask_image, masks = agent.act(image=Image("resources/bridge_example.jpeg"), input_data=pixel_coords)
     print("Masks shape", masks.shape)
     mask_image.pil.show()
