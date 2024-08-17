@@ -19,7 +19,7 @@ from transformers import AutoModelForVision2Seq, AutoProcessor
 
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class Vision2SeqBackend(Serializer):

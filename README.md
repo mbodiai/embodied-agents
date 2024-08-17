@@ -424,7 +424,7 @@ Dataset [Recorder](mbodied/data/recording.py) is a lower level recorder to recor
 ```python
 from mbodied.data.recording import Recorder
 from mbodied.types.motion.control import HandControl
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from gymnasium import spaces
 
 observation_space = spaces.Dict({

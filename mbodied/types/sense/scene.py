@@ -5,7 +5,7 @@ from pydantic import Field
 from mbodied.types.geometry import Pose
 from mbodied.types.ndarray import NumpyArray
 from mbodied.types.sample import Sample
-from mbodied.types.sense import Image
+from mbodied.types.sense.image import Image
 
 
 class BBox2D(NamedTuple):

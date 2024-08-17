@@ -2,13 +2,13 @@ import pytest
 import numpy as np
 from unittest.mock import patch, MagicMock
 from mbodied.types.sense.scene import BBox2D, PixelCoords
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.agents.sense.segmentation_agent import SegmentationAgent
 
 @pytest.fixture
 def mock_gradio_backend():
     with patch("mbodied.agents.backends.gradio_backend.GradioBackend.__init__", lambda x, model_src=None, **kwargs: None):
-        with patch("mbodied.agents.backends.gradio_backend.GradioBackend.predict", return_value=(Image((224, 224)), {"data": [[0]]})):
+        with patch("mbodied.agents.backends.gradio_backend.GradioBackend.predict", return_value=(Image(size=(224, 224)), {"data": [[0]]})):
             from mbodied.agents.backends.gradio_backend import GradioBackend
             yield GradioBackend(endpoint="http://1.2.3.4:1234")
 

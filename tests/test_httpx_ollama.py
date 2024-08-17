@@ -19,14 +19,14 @@ import pytest
 from mbodied.agents.backends import OllamaBackend
 from mbodied.agents.backends.httpx_backend import HttpxSerializer
 from mbodied.types.message import Message
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from pydantic import BaseModel
 
 # Mock responses for the API callss
 mock_response = "OpenAI response text"
 
 
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class Response(BaseModel):
@@ -96,7 +96,6 @@ class FakeAsyncHttpxClient:
 def test_completion():
     wrapper = OllamaBackend()
     text = "What animal is this? Answer briefly."
-    print("Sending message to Ollama model...")
     # Synchronous usage
     response = wrapper.predict([Message(role="user", content=text)], model="llama3")
     assert response == mock_response
@@ -170,7 +169,7 @@ def test_serializer():
 
 def test_serializer_with_image():
     serializer = HttpxSerializer()
-    image = Image(url="http://example.com/image.jpg", size=(224, 224))
+    image = Image(size=(224, 224))
     messages = [Message(role="user", content=["Describe this image", image])]
     serialized = serializer(messages)
     assert len(serialized) == 1

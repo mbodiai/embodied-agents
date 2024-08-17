@@ -24,7 +24,7 @@ from openai._exceptions import RateLimitError as OpenAIRateLimitError
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 ERRORS = (
     OpenAIRateLimitError,

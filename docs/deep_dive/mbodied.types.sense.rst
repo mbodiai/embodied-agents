@@ -12,10 +12,18 @@ mbodied.types.sense.sensor\_reading module
    :undoc-members:
    :show-inheritance:
 
-mbodied.types.sense.vision module
+mbodied.types.sense.image module
 ---------------------------------
 
-.. automodule:: mbodied.types.sense.vision
+.. automodule:: mbodied.types.sense.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mbodied.types.sense.depth module
+---------------------------------
+
+.. automodule:: mbodied.types.sense.depth
    :members:
    :undoc-members:
    :show-inheritance:

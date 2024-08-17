@@ -27,7 +27,7 @@ from PIL import Image as PILImage
 
 from mbodied.data.utils import infer_features
 from mbodied.types.sample import Sample
-from mbodied.types.sense.vision import Image as MbImage
+from mbodied.types.sense.image import Image as MbImage
 
 
 class Replayer:

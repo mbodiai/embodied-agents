@@ -112,6 +112,13 @@ class Sample(BaseModel):
         """
         return self.model_dump(exclude_none=exclude_none, exclude=exclude)
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """Return the value of the attribute with the specified key or the default value if it does not exist."""
+        try:
+            return self[key]
+        except Exception:
+            return default
+
     @classmethod
     def unflatten(cls, one_d_array_or_dict, schema=None) -> "Sample":
         """Unflatten a one-dimensional array or dictionary into a Sample instance.

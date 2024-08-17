@@ -5,7 +5,7 @@ import numpy as np
 
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.sense.scene import BBox2D, PixelCoords
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class SegmentationAgent(SensoryAgent):

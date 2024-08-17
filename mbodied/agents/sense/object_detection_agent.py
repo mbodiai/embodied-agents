@@ -14,7 +14,7 @@
 
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.sense.scene import Scene
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class ObjectDetectionAgent(SensoryAgent):

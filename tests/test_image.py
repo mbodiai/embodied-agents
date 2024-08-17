@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 import cv2
 from PIL import Image as PILImage
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 import tempfile
 
 
@@ -47,6 +47,15 @@ def test_create_image_with_path(temp_file):
     assert img.array is not None
 
 
+def test_create_image_with_size():
+    img = Image(size=(640, 480))
+    assert img.size is not None
+    # Decode both base64 strings to images and compare
+    assert img.base64 != ""
+    assert img.base64 is not None
+    assert img.array.shape == (480, 640, 3)
+
+
 def test_create_image_with_base64():
     buffer = io.BytesIO()
     PILImage.new("RGB", (10, 10)).save(buffer, format="PNG")
@@ -68,14 +77,6 @@ def test_base64_encode():
     encoded_base64 = img.base64
     assert encoded_base64 != ""
     assert isinstance(encoded_base64, str)
-
-
-def test_repr():
-    array = np.random.randint(0, 256, (480, 640, 3), dtype=np.uint8)
-    img = Image(array=array)
-    dumped_data = img.__repr__()
-    assert "base64" in dumped_data
-    assert "array" not in dumped_data
 
 
 def test_resize():

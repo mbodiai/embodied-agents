@@ -15,7 +15,7 @@
 import pytest
 from mbodied.agents.backends import AnthropicBackend
 from mbodied.types.message import Message
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 mock_anthropic_response = "Anthropic response text"
