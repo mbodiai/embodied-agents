@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.agents.sense.depth_estimation_agent import DepthEstimationAgent
 from mbodied.agents.sense.object_detection_agent import ObjectDetectionAgent
 from mbodied.agents.backends.gradio_backend import GradioBackend
@@ -10,7 +10,7 @@ from mbodied.types.sense.world import World
 @pytest.fixture
 def mock_gradio_backend():
     with patch.object(GradioBackend, "__init__", lambda x, model_src=None, **kwargs: None):
-        with patch.object(GradioBackend, "predict", return_value=(Image((224, 224)), World().dict())):
+        with patch.object(GradioBackend, "predict", return_value=(Image(size=(224, 224)), World().dict())):
             yield GradioBackend(endpoint="http://1.2.3.4:1234")
 
 

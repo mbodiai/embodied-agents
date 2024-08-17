@@ -60,7 +60,7 @@ from mbodied.agents import Agent
 from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.types.sample import Sample
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 SupportsOpenAI: TypeAlias = OpenAIBackend
 

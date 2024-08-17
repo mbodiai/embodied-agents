@@ -18,7 +18,7 @@ from typing import Any
 from mbodied.agents.backends.httpx_backend import HttpxBackend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class OllamaSerializer(Serializer):

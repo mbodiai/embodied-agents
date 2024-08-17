@@ -16,7 +16,7 @@ from pathlib import Path
 
 from mbodied.robots import Robot
 from mbodied.types.motion.control import HandControl
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class SimRobot(Robot):

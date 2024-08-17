@@ -17,7 +17,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from mbodied.types.sample import Sample
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 Role = Literal["user", "assistant", "system"]
 

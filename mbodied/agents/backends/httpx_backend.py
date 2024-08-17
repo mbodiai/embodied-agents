@@ -7,7 +7,7 @@ import httpx
 from mbodied.agents.backends.openai_backend import OpenAIBackendMixin
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
-from mbodied.types.sense import Image
+from mbodied.types.sense.image import Image
 
 
 class HttpxSerializer(Serializer):

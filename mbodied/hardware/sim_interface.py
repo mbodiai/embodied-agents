@@ -14,7 +14,7 @@
 
 from mbodied.hardware.interface import HardwareInterface
 from mbodied.types.motion.control import HandControl
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 class SimInterface(HardwareInterface):

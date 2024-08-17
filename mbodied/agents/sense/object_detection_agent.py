@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from mbodied.agents.sense.sensory_agent import SensoryAgent
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.types.sense.world import World
 
 

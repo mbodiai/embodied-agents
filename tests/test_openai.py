@@ -17,7 +17,7 @@ import pytest
 from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.agents.language import LanguageAgent
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from pathlib import Path
 from importlib_resources import files
 

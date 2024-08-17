@@ -1,6 +1,6 @@
 import pytest
 from mbodied.types.motion.control import HandControl
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.robots.robot_recording import RobotRecorder
 from mbodied.robots import SimRobot
 from mbodied.data.replaying import Replayer

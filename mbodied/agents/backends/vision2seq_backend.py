@@ -16,7 +16,7 @@ from typing import Literal
 
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.utils.import_utils import smart_import
 
 torch = smart_import("torch", mode="lazy")

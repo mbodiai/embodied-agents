@@ -24,7 +24,8 @@ from openai._exceptions import RateLimitError as OpenAIRateLimitError
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.depth import Depth
+from mbodied.types.sense.image import Image
 
 ERRORS = (
     OpenAIRateLimitError,
@@ -51,6 +52,23 @@ class OpenAISerializer(Serializer):
             "type": "image_url",
             "image_url": {
                 "url": image.url,
+            },
+        }
+
+    @classmethod
+    def serialize_depth(cls, depth: Depth) -> dict[str, Any]:
+        """Serializes a depth image to the OpenAI format.
+
+        Args:
+            depth: The depth image to be serialized.
+
+        Returns:
+            A dictionary representing the serialized depth image.
+        """
+        return {
+            "type": "depth_url",
+            "depth_url": {
+                "url": depth.url,
             },
         }
 

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from mbodied.types.motion.control import HandControl, JointControl, Pose6D
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.agents.motion.openvla_agent import OpenVlaAgent
 from mbodied.agents.backends.gradio_backend import GradioBackend
 

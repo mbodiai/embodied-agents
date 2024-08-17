@@ -17,7 +17,7 @@ import pytest
 from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.agents.language.language_agent import LanguageAgent
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 from mbodied.agents.auto.auto_agent import AutoAgent
 
 # Mock responses for the API calls

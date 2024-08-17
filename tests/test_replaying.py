@@ -57,7 +57,6 @@ def test_replayer_iteration(mock_hdf5_file):
 
     count = 0
     for observation, action in replayer:
-        print("loop")
         assert isinstance(observation, dict)
         assert isinstance(action, dict)
         assert "image" in observation

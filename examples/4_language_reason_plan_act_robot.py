@@ -30,7 +30,7 @@ from mbodied.robots import SimRobot
 from mbodied.types.message import Message
 from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
 from mbodied.types.motion.control import FullJointControl, HandControl
-from mbodied.types.sense.vision import Image
+from mbodied.types.sense.image import Image
 
 
 @click.command()
