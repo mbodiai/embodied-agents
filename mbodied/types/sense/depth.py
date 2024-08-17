@@ -73,6 +73,12 @@ class Depth(Sample):
     def base64(self) -> Base64Str:
         return self.rgb.base64
 
+    @computed_field
+    @cached_property
+    def url(self) -> str:
+        """The URL of the image."""
+        return f"data:image/{self.encoding};base64,{self.base64}"
+
     def __init__(  # noqa
         self,
         arg: SupportsImage | DepthArrayLike | None = None,

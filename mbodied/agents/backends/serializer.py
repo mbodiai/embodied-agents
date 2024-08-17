@@ -18,6 +18,7 @@ from pydantic import ConfigDict, model_serializer, model_validator
 
 from mbodied.types.message import Message
 from mbodied.types.sample import Sample
+from mbodied.types.sense.depth import Depth
 from mbodied.types.sense.image import Image
 
 
@@ -104,6 +105,8 @@ class Serializer(Sample):
             sample = Sample(sample)
         if isinstance(sample, Image):
             return self.serialize_image(sample)
+        if isinstance(sample, Depth):
+            return self.serialize_depth(sample)
         if Image.supports(sample):
             return self.serialize_image(Image(sample))
         if hasattr(sample, "datum") and isinstance(sample.datum, str):
@@ -157,6 +160,21 @@ class Serializer(Sample):
         return {
             "type": "image",
             "image_url": f"data:image/{image.encoding};base64," + image.base64,
+        }
+
+    @classmethod
+    def serialize_depth(cls, depth: Depth) -> dict[str, Any]:
+        """Serializes an Depth image instance.
+
+        Args:
+            depth: The Depth image to be serialized.
+
+        Returns:
+            A dictionary representing the serialized depth.
+        """
+        return {
+            "type": "depth",
+            "image_url": f"data:image/{depth.encoding};base64," + depth.base64,
         }
 
     @classmethod
