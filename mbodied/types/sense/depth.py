@@ -66,7 +66,9 @@ class Depth(Sample):
     def rgb(self) -> Image:
         """The rgb image represented as a NumPy array."""
         self.array = self.array if self.array is not None else np.zeros((224, 224), dtype=np.uint16)
-        return Image(cv2.normalize(self.array, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8), mode="RGB")
+        normalized_array = cv2.normalize(self.array, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        rgb_array = cv2.cvtColor(normalized_array, cv2.COLOR_GRAY2RGB)
+        return Image(array=rgb_array)
 
     @computed_field(return_type=Base64Str)
     @cached_property
@@ -148,7 +150,10 @@ class Depth(Sample):
         return kmeans.fit_predict(self.points.T)
 
     def segment_plane(
-        self, min_samples=3, threshold: float = 0.01, max_trials: int = 1000,
+        self,
+        min_samples=3,
+        threshold: float = 0.01,
+        max_trials: int = 1000,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Segment the largest plane using RANSAC."""
         ransac = RANSACRegressor(min_samples=min_samples, residual_threshold=threshold, max_trials=max_trials)
