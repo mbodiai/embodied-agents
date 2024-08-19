@@ -47,7 +47,7 @@ SupportedDTypes = (
 
 class NumpyDataDict(TypedDict):
     data: List
-    data_type: SupportedDTypes
+    data_type: SupportedDTypes | str
     shape: Tuple[int, ...]
 
 
@@ -82,7 +82,10 @@ else:
 
     @singledispatch
     def array_validator(
-        array: np.ndarray, shape: Tuple[int, ...] | None, dtype: SupportedDTypes | None, labels: List[str] | None
+        array: np.ndarray,
+        shape: Tuple[int, ...] | None,
+        dtype: SupportedDTypes | None,
+        labels: List[str] | None,
     ) -> npt.NDArray:
         if shape is not None:
             expected_ndim = len(shape)
@@ -119,7 +122,10 @@ else:
 
     @array_validator.register
     def dict_validator(
-        array: dict, shape: Tuple[int, ...] | None, dtype: SupportedDTypes | None, labels: List[str] | None
+        array: dict,
+        shape: Tuple[int, ...] | None,
+        dtype: SupportedDTypes | None,
+        labels: List[str] | None,
     ) -> npt.NDArray:
         array = np.array(array["data"]).astype(array["data_type"]).reshape(array["shape"])
         return array_validator.dispatch(np.ndarray)(array, shape, dtype, labels)
@@ -296,7 +302,7 @@ class NumpyArray:
             _shape = tuple(s if s not in ("*", Any) else -1 for s in _shape)
 
         _labels = []
-        if isinstance(_dtype, str | int):
+        if isinstance(_dtype, int) or _dtype == "*":
             _shape += (_dtype,)
             _dtype = Any
         _shape = _shape or ()
@@ -390,3 +396,16 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod(verbose=True)
+
+    class MyModel(BaseModel):
+        uint8_array: NumpyArray[np.uint8]
+        must_have_exact_shape: NumpyArray[1, 2, 3]
+        must_be_3d: NumpyArray[Any, Any, Any]
+        must_be_1d: NumpyArray[Any, Any, Any]
+
+    my_failing_model = MyModel(
+        uint8_array=[1, 2, 3, 4],
+        must_have_exact_shape=[[[1]], [[2]]],
+        must_be_3d=[[[1, 2, 3], [4, 5, 6]]],
+        must_be_1d=[[[1, 2, 3]]],
+    )
