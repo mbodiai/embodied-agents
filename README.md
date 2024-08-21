@@ -81,6 +81,8 @@ This repository is broken down into 3 main components: **Agents**, **Data**, and
 - **Motor Agents** always return a `Motion`.
 - **Sensory Agents** always return a `SensorReading`.
 
+Meanwhile, we have an **Auto Agent** that dynamically initializes the right agent from the `task` specified. See [Deep Dive section](#auto-agent) below for more.
+
 A call to `act` or `async_act` can perform local or remote inference synchronously or asynchronously. Remote execution can be performed with [Gradio](https://www.gradio.app/docs/python-client/introduction), [httpx](https://www.python-httpx.org/), or different LLM clients. Validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
@@ -400,6 +402,32 @@ Currently, we have:
 - [3D object pose estimator](mbodied/agents/sense/object_pose_estimator_3d.py)
 
 agents that process robot's sensor information.
+
+### Auto Agent
+
+[Auto Agent](mbodied/agents/auto/auto_agent.py) dynamically selects and initializes the correct agent based on the task and model.
+
+```python
+from mbodied.agents.auto.auto_agent import AutoAgent
+
+# This makes it a LanguageAgent
+agent = AutoAgent(task="language", model_src="openai")
+response = agent.act("What is the capital of France?")
+
+# This makes it a motor agent: OpenVlaAgent
+auto_agent = AutoAgent(task="motion-openvla", model_src="https://api.mbodi.ai/community-models/")
+action = auto_agent.act("move hand forward", Image(size=(224, 224)))
+
+# This makes it a sensory agent: DepthEstimationAgent
+auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
+depth = auto_agent.act(image=Image(size=(224, 224)))
+```
+
+Alternatively, you can use `get_agent` method in [auto_agent](mbodied/agents/auto/auto_agent.py) as well.
+
+```python
+language_agent = get_agent(task="language", model_src="openai")
+```
 
 ### Motions
 
