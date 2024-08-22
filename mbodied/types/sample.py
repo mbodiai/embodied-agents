@@ -470,7 +470,6 @@ class Sample(BaseModel):
         sampled = space.sample()
         if isinstance(sampled, dict | OrderedDict):
             return cls(**sampled)
-        # if isinstance(sampled, np.ndarray | torch.Tensor | list | tuple):
         if hasattr(sampled, "__len__") and not isinstance(sampled, str):
             sampled = np.asarray(sampled)
             if len(sampled.shape) > 0 and isinstance(sampled[0], dict | Sample):
