@@ -33,11 +33,13 @@ def test_auto_openvla_agent_act(auto_openvla_agent):
 
     assert result == expected_action
 
+
 @pytest.fixture
 def auto_openvla_agent_get_method(mock_openvla_gradio_backend):
     agent = get_agent(task="motion-openvla", model_src="http://1.2.3.4:1234/")
     agent.actor = mock_openvla_gradio_backend
     return agent
+
 
 def test_auto_openvla_agent_act(auto_openvla_agent_get_method):
     mock_image = MagicMock(spec=Image)
@@ -50,7 +52,6 @@ def test_auto_openvla_agent_act(auto_openvla_agent_get_method):
     expected_action = HandControl(pose=Pose6D(x=1, y=2, z=3, roll=0, pitch=0, yaw=0), grasp=JointControl(value=0))
 
     assert result == expected_action
-
 
 
 @pytest.fixture
