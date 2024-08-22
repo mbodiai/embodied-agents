@@ -165,6 +165,9 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 ```shell
 pip install mbodied
 
+# With extra dependencies, i.e. torch, opencv-python, etc.
+pip install mbodied[extras]
+
 # For audio support
 pip install mbodied[audio]
 ```

@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 from scipy.optimize import least_squares
 
@@ -27,6 +26,10 @@ def estimate_intrinsic_parameters(
         >>> estimate_intrinsic_parameters(unscaled_depth_map, image)
         {'fx': 1.0, 'fy': 1.0, 'cx': 320.0, 'cy': 240.0}
     """
+    try:
+        import cv2
+    except ImportError:
+        raise ImportError("OpenCV is required for this function. Pleae run `pip install opencv-python`.")
     # Extract feature points from the image
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     orb = cv2.ORB_create()
