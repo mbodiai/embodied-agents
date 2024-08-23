@@ -32,26 +32,6 @@ from mbodied.data.utils import to_features
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 
-
-class TorchModule:
-    """A lazy-loaded module for PyTorch."""
-
-    _torch = None
-
-    def __getattr__(self, name):
-        if self._torch is None:
-            try:
-                import torch
-
-                self._torch = torch
-            except ImportError as e:
-                raise ImportError("Torch is not installed. Please run `pip install torch` to install") from e
-        return getattr(self._torch, name)
-
-
-torch = TorchModule()
-
-
 class Sample(BaseModel):
     """A base model class for serializing, recording, and manipulating arbitray data.
 
@@ -219,6 +199,10 @@ class Sample(BaseModel):
         if output_type == "np":
             return np.array(accumulator)
         if output_type == "pt":
+            try:
+                import torch
+            except ImportError:
+                raise ImportError("Torch is not installed. Please run `pip install torch` to install")
             return torch.tensor(accumulator)
         return accumulator
 
