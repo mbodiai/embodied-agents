@@ -132,6 +132,10 @@ def test_auto_language_agent(mock_openai_init, mock_openai_act):
     agent = AutoAgent(task="language", model_src="openai", context="Hello, how are you?")
     agent.act("What's your name?")
     assert len(agent.context) == 4
+    # Default to LanguageAgent.
+    agent = AutoAgent()
+    agent.act("What's your name?")
+    assert len(agent.context) == 2
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)

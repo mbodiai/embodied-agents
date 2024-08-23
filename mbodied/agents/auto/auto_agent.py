@@ -1,6 +1,5 @@
-from typing import Any
-
-from transformers import pipeline
+from functools import wraps
+from typing import Any, Dict, Literal, Type
 
 from mbodied.agents import Agent
 from mbodied.agents.language import LanguageAgent
@@ -28,7 +27,12 @@ class AutoAgent(Agent):
     depth = auto_agent.act(image=Image("resources/bridge_example.jpeg", size=(224, 224)))
     """
 
-    TASK_TO_AGENT_MAP = {
+    TASK_TO_AGENT_MAP: Dict[
+        Literal[
+            "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation"
+        ],
+        Type[Agent],
+    ] = {
         "language": LanguageAgent,
         "motion-openvla": OpenVlaAgent,
         "sense-object-detection": ObjectDetectionAgent,
@@ -36,48 +40,64 @@ class AutoAgent(Agent):
         "sense-depth-estimation": DepthEstimationAgent,
     }
 
-    def __init__(self, task: str, model_src: str, model_kwargs: dict = None, **kwargs):
-        """Initialize the AutoAgent with the specified task and model.
-
-        Automatically selects the appropriate agent based on the task.
-
-        Args:
-            task (str): The task to perform.
-                - "language": Language understanding and generation.
-                    = initialize as LanguageAgent
-                - "motion-openvla": Motion generation using OpenVLA.
-                    = initialize as OpenVlaAgent
-                - "sense-object-detection": Object detection.
-                    = initialize as ObjectDetectionAgent
-                - "sense-image-segmentation": Image segmentation.
-                    = initialize as SegmentationAgent
-                - "sense-depth-estimation": Depth estimation.
-                    = initialize as DepthEstimationAgent
-
-            model_src (str): The model source to use for the task.
-            model_kwargs (dict): Additional keyword arguments to pass to the model.
-            **kwargs: Additional keyword arguments to pass to the agent.
-        """
-        if task not in self.TASK_TO_AGENT_MAP:
-            raise ValueError(f"Task '{task}' is not supported. Supported tasks: {list(self.TASK_TO_AGENT_MAP.keys())}")
-
+    def __init__(
+        self, task: str | None = None, model_src: str | None = None, model_kwargs: Dict | None = None, **kwargs
+    ):
+        """Initialize the AutoAgent with the specified task and model."""
         if model_kwargs is None:
             model_kwargs = {}
-        self.agent = self.TASK_TO_AGENT_MAP[task](model_src=model_src, model_kwargs=model_kwargs, **kwargs)
+        self.task = task
+        self.model_src = model_src
+        self.model_kwargs = model_kwargs
+        self.kwargs = kwargs
+        self._initialize_agent()
+
+    def _initialize_agent(self):
+        """Initialize the appropriate agent based on the task."""
+        if self.task not in self.TASK_TO_AGENT_MAP:
+            if self.model_src is None:
+                self.model_src = "openai"
+            self.agent = LanguageAgent(model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs)
+        else:
+            self.agent = self.TASK_TO_AGENT_MAP[self.task](
+                model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs
+            )
 
     def __getattr__(self, name: str) -> Any:
         """Delegate attribute access to the agent if not found in AutoAgent."""
         try:
-            return getattr(self.agent, name)
+            attr = getattr(self.agent, name)
+            if callable(attr):
+
+                @wraps(attr)
+                def wrapper(*args, **kwargs):
+                    return attr(*args, **kwargs)
+
+                return wrapper
+            return attr
         except AttributeError as err:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from err
 
     def act(self, *args, **kwargs) -> Any:
-        """Invoke the agent's act method."""
+        """Invoke the agent's act method without reinitializing the agent."""
         return self.agent.act(*args, **kwargs)
 
+    @staticmethod
+    def available_tasks() -> None:
+        """Print available tasks that can be used with AutoAgent."""
+        print("Available tasks:")  # noqa: T201
+        for task in AutoAgent.TASK_TO_AGENT_MAP:
+            print(f"- {task}")  # noqa: T201
 
-def get_agent(task: str, model_src: str, model_kwargs: dict = None, **kwargs) -> Agent:
+
+def get_agent(
+    task: Literal[
+        "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation"
+    ],
+    model_src: str,
+    model_kwargs: Dict | None = None,
+    **kwargs,
+) -> Agent:
     """Initialize the AutoAgent with the specified task and model.
 
     This is an alternative to using the AutoAgent class directly. It returns the corresponding agent instance directly.
@@ -96,7 +116,10 @@ def get_agent(task: str, model_src: str, model_kwargs: dict = None, **kwargs) ->
     depth = depth_agent.act(image=Image("resources/bridge_example.jpeg", size=(224, 224)))
     """
     if task not in AutoAgent.TASK_TO_AGENT_MAP:
-        raise ValueError(f"Task '{task}' is not supported. Supported tasks: {list(AutoAgent.TASK_TO_AGENT_MAP.keys())}")
+        raise ValueError(
+            f"Task '{task}' is not supported. Supported tasks: {list(AutoAgent.TASK_TO_AGENT_MAP.keys())}. "
+            "Use AutoAgent.available_tasks() to view all available tasks."
+        )
 
     if model_kwargs is None:
         model_kwargs = {}
