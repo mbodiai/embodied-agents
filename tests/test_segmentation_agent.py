@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from unittest.mock import patch, MagicMock
-from mbodied.types.sense.scene import BBox2D, PixelCoords
+from mbodied.types.sense.world import BBox2D, PixelCoords
 from mbodied.types.sense.vision import Image
 from mbodied.agents.sense.segmentation_agent import SegmentationAgent
 

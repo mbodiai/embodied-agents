@@ -35,8 +35,8 @@ class PixelCoords(NamedTuple):
     v: int
 
 
-class SceneObject(Sample):
-    """Model for Scene Object. It describes the objects in the scene.
+class WorldObject(Sample):
+    """Model for World Object. It describes the objects in the world.
 
     Attributes:
         name (str): The name of the object.
@@ -54,17 +54,17 @@ class SceneObject(Sample):
     mask: NumpyArray | None = None
 
 
-class Scene(Sample):
-    """Model for Scene Data.
+class World(Sample):
+    """Model for World Data.
 
     Attributes:
-        image (Image | None): The image of the scene.
-        depth (Image | None): The depth image of the scene.
-        annotated (Image | None): The annotated image of the scene.
-        objects (List[SceneObject]): The list of scene objects.
+        image (Image | None): The image of the world.
+        depth (Image | None): The depth image of the world.
+        annotated (Image | None): The annotated image of the world.
+        objects (List[WorldObject]): The list of world objects.
     """
 
     image: Image | None = None
     depth: Image | None = None
     annotated: Image | None = None
-    objects: List[SceneObject] = Field(default_factory=list, description="List of scene objects")
+    objects: List[WorldObject] = Field(default_factory=list, description="List of world objects")
