@@ -18,10 +18,6 @@ try:
     import torch
 except ImportError:
     raise ImportError("PyTorch is required for this class. Pleae run `pip install torch`.")
-try:
-    from transformers import AutoModelForVision2Seq, AutoProcessor
-except ImportError:
-    raise ImportError("Transformers is required for this class. Pleae run `pip install transformers`.")
 
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
@@ -57,6 +53,11 @@ class Vision2SeqBackend(Backend):
         device: torch.device = DEFAULT_DEVICE,
         **kwargs,
     ) -> None:
+        try:
+            from transformers import AutoModelForVision2Seq, AutoProcessor
+        except ImportError:
+            raise ImportError("Transformers is required for this class. Pleae run `pip install transformers`.")
+
         self.model_id = model_id
         self.device = device
         self.torch_dtype = torch_dtype
