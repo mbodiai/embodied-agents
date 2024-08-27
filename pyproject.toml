@@ -59,6 +59,7 @@ Issues = "https://github.com/mbodiai/embodied-agents/issues"
 Source = "https://github.com/mbodiai/embodied-agents"
 
 [project.scripts]
+mbodied = "mbodied.agents.cli:cli"
 
 [tool.hatch.version]
 path = "mbodied/__about__.py"
