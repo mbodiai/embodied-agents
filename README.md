@@ -162,7 +162,6 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] Automatic dataset recording on Robot
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
-- [ ] Central Nervous System (CNS)
 - [ ] ROS integration
 - [ ] More Motor Agents, i.e. RT1
 - [ ] More device support, i.e. OpenCV camera
