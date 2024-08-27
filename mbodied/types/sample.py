@@ -201,7 +201,7 @@ class Sample(BaseModel):
         if output_type == "np":
             return np.array(accumulator)
         if output_type == "pt":
-            torch = smart_import("torch", mode="lazy")
+            torch = smart_import("torch")
             return torch.tensor(accumulator)
         return accumulator
 
