@@ -81,7 +81,7 @@ This repository is broken down into 3 main components: **Agents**, **Data**, and
 - **Motor Agents** always return a `Motion`.
 - **Sensory Agents** always return a `SensorReading`.
 
-Meanwhile, we have an **Auto Agent** that dynamically initializes the right agent from the `task` specified. See [Deep Dive section](#auto-agent) below for more.
+For convenience, we also provide **AutoAgent** which dynamically initializes the right agent for the specified task. See [Deep Dive section](#auto-agent) below for more.
 
 A call to `act` or `async_act` can perform local or remote inference synchronously or asynchronously. Remote execution can be performed with [Gradio](https://www.gradio.app/docs/python-client/introduction), [httpx](https://www.python-httpx.org/), or different LLM clients. Validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
@@ -263,9 +263,7 @@ To learn more about all of the possibilities with embodied agents, check out the
 - You can `pack` a list of `Sample`s or Dicts into a single `Sample` or `Dict` and `unpack` accordingly?
 - You can `unflatten` any python structure into a `Sample` class so long you provide it with a valid json schema?
 
-<details> <summary><h2 style="display: inline-block;">Deep Dive</h2></summary>
-
-## Building Blocks
+## Deep Dive
 
 #### Creating a Sample
 
@@ -488,8 +486,6 @@ replayer = Replayer(path=str("path/to/dataset.h5"))
 for observation, action in replayer:
    ...
 ```
-
-</details>
 
 ## Directory Structure
 
