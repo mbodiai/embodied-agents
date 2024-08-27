@@ -29,8 +29,10 @@ from pydantic_core import from_json
 from typing_extensions import Annotated
 
 from mbodied.data.utils import to_features
+from mbodied.utils.import_utils import smart_import
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
+
 
 class Sample(BaseModel):
     """A base model class for serializing, recording, and manipulating arbitray data.
@@ -199,10 +201,7 @@ class Sample(BaseModel):
         if output_type == "np":
             return np.array(accumulator)
         if output_type == "pt":
-            try:
-                import torch
-            except ImportError:
-                raise ImportError("Torch is not installed. Please run `pip install torch` to install")
+            torch = smart_import("torch", mode="lazy")
             return torch.tensor(accumulator)
         return accumulator
 

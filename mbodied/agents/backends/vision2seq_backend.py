@@ -14,14 +14,12 @@
 
 from typing import Literal
 
-try:
-    import torch
-except ImportError:
-    raise ImportError("PyTorch is required for this class. Pleae run `pip install torch`.")
-
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.sense.vision import Image
+from mbodied.utils.import_utils import smart_import
+
+torch = smart_import("torch", mode="lazy")
 
 
 class Vision2SeqBackend(Serializer):
@@ -53,10 +51,8 @@ class Vision2SeqBackend(Backend):
         device: torch.device = DEFAULT_DEVICE,
         **kwargs,
     ) -> None:
-        try:
-            from transformers import AutoModelForVision2Seq, AutoProcessor
-        except ImportError:
-            raise ImportError("Transformers is required for this class. Pleae run `pip install transformers`.")
+        smart_import("transformers")
+        from transformers import AutoModelForVision2Seq, AutoProcessor
 
         self.model_id = model_id
         self.device = device
