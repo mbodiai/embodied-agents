@@ -17,7 +17,7 @@ from unittest.mock import MagicMock
 import math
 
 from mbodied.types.motion.control import HandControl, Pose6D
-from mbodied.robots import XarmRobot
+from mbodied.robots.xarm_robot import XarmRobot
 
 
 @pytest.fixture

@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
 
 import numpy as np
-import torch
 from datasets import Dataset
 from gymnasium import spaces
 from jsonref import replace_refs
@@ -30,6 +29,7 @@ from pydantic_core import from_json
 from typing_extensions import Annotated
 
 from mbodied.data.utils import to_features
+from mbodied.utils.import_utils import smart_import
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 
@@ -165,7 +165,7 @@ class Sample(BaseModel):
         self,
         output_type: Flattenable = "dict",
         non_numerical: Literal["ignore", "forbid", "allow"] = "allow",
-    ) -> Dict[str, Any] | np.ndarray | torch.Tensor | List:
+    ) -> Dict[str, Any] | np.ndarray | "torch.Tensor" | List:
         accumulator = {} if output_type == "dict" else []
 
         def flatten_recursive(obj, path=""):
@@ -178,7 +178,7 @@ class Sample(BaseModel):
             elif isinstance(obj, list | tuple):
                 for i, item in enumerate(obj):
                     flatten_recursive(item, path + str(i) + "/")
-            elif isinstance(obj, np.ndarray | torch.Tensor):
+            elif hasattr(obj, "__len__") and not isinstance(obj, str):
                 flat_list = obj.flatten().tolist()
                 if output_type == "dict":
                     # Convert to list for dict storage
@@ -201,6 +201,7 @@ class Sample(BaseModel):
         if output_type == "np":
             return np.array(accumulator)
         if output_type == "pt":
+            torch = smart_import("torch")
             return torch.tensor(accumulator)
         return accumulator
 
@@ -452,7 +453,7 @@ class Sample(BaseModel):
         sampled = space.sample()
         if isinstance(sampled, dict | OrderedDict):
             return cls(**sampled)
-        if isinstance(sampled, np.ndarray | torch.Tensor | list | tuple):
+        if hasattr(sampled, "__len__") and not isinstance(sampled, str):
             sampled = np.asarray(sampled)
             if len(sampled.shape) > 0 and isinstance(sampled[0], dict | Sample):
                 return cls.pack_from(sampled)

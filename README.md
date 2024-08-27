@@ -156,14 +156,21 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 
 ### Roadmap
 
-- [ ] More Motor Agents
-- [ ] Yolo, SAM2, DepthAnything Sensory Agents
-- [ ] FineTuning Scripts
+- [x] OpenVLA Motor Agent
+- [x] Automatic dataset recording on Robot
+- [x] Yolo, SAM2, DepthAnything Sensory Agents
+- [ ] ROS integration
+- [ ] More Motor Agents, i.e. RT1
+- [ ] More device support, i.e. OpenCV camera
+- [ ] Fine-tuning Scripts
 
 ## Installation
 
 ```shell
 pip install mbodied
+
+# With extra dependencies, i.e. torch, opencv-python, etc.
+pip install mbodied[extras]
 
 # For audio support
 pip install mbodied[audio]

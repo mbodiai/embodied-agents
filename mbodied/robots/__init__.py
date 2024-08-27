@@ -14,6 +14,5 @@
 
 from .robot import Robot
 from .sim_robot import SimRobot
-from .xarm_robot import XarmRobot
 
-__all__ = ["Robot", "SimRobot", "XarmRobot"]
+__all__ = ["Robot", "SimRobot"]
