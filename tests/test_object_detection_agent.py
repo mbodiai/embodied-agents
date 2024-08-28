@@ -37,14 +37,17 @@ def test_object_detection_agent_act(yolo_agent):
     mock_image = MagicMock(spec=Image)
     mock_image.base64 = "base64encodedimage"
 
-    result = yolo_agent.act(mock_image, "person")
+    result = yolo_agent.act(mock_image, "person", model_type="YOLOWorld")
     assert isinstance(result, World)
 
-    result = yolo_agent.act(mock_image, ["person", "car"])
+    result = yolo_agent.act(mock_image, ["person", "car"], model_type="YOLOWorld")
     assert isinstance(result, World)
+
 
 @pytest.mark.network
 def test_real_object_detection_agent_act():
     agent = ObjectDetectionAgent(model_src="https://api.mbodi.ai/sense/")
-    result = agent.act(image=Image("resources/bridge_example.jpeg", size=(224, 224)), objects=["spoon", "bowl"])
+    result = agent.act(
+        image=Image("resources/bridge_example.jpeg", size=(224, 224)), objects=["spoon", "bowl"], model_type="YOLOWorld"
+    )
     assert isinstance(result, World)

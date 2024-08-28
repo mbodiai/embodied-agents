@@ -33,10 +33,11 @@
 
 **Updates:**
 
-**Aug 6 2024, embodied-agents v1.1**
+**Aug 28 2024, embodied-agents v1.2**
 
 - Added the features to record dataset on [robot](mbodied/robots/robot.py) natively.
-- Add multiple new Sensory Agents, i.e. [depth estimation](mbodied/agents/sense/depth_estimation_agent.py), [object detection](mbodied/agents/sense/object_detection_agent.py), [image segmentation](mbodied/agents/sense/segmentation_agent.py) with public [API endpoints](https://api.mbodi.ai/sense/) hosted.
+- Add multiple new Sensory Agents, i.e. [depth estimation](mbodied/agents/sense/depth_estimation_agent.py), [object detection](mbodied/agents/sense/object_detection_agent.py), [image segmentation](mbodied/agents/sense/segmentation_agent.py) with public [API endpoints](https://api.mbodi.ai/sense/) hosted. And a simple cli `mbodied` for trying them.
+- Added [Auto Agent](mbodied/agents/auto/auto_agent.py) for dynamic agents selection.
 
 **June 30 2024, embodied-agents v1.0**:
 
@@ -69,7 +70,7 @@
     - [Run a robotics transformer model on a robot.](#run-a-robotics-transformer-model-on-a-robot)
     - [Notebooks](#notebooks)
   - [The Sample Class](#the-sample-class)
-  - [Building Blocks](#building-blocks)
+  - [API Reference](#api-reference)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
