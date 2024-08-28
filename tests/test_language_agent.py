@@ -18,6 +18,7 @@ from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.agents.language.language_agent import LanguageAgent
 from mbodied.types.sense.vision import Image
+from mbodied.agents.auto.auto_agent import AutoAgent
 
 # Mock responses for the API calls
 mock_openai_response = "OpenAI response text"
@@ -123,6 +124,18 @@ def test_language_agent_history(mock_openai_init, mock_openai_act):
     assert history[1].content == ["How are you?"]
     assert history[2].content == ["What's your name?"]
     assert history[3].role == "assistant"
+
+
+@mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
+@mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
+def test_auto_language_agent(mock_openai_init, mock_openai_act):
+    agent = AutoAgent(task="language", model_src="openai", context="Hello, how are you?")
+    agent.act("What's your name?")
+    assert len(agent.context) == 4
+    # Default to LanguageAgent.
+    agent = AutoAgent()
+    agent.act("What's your name?")
+    assert len(agent.context) == 2
 
 
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)

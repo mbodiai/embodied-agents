@@ -81,6 +81,8 @@ This repository is broken down into 3 main components: **Agents**, **Data**, and
 - **Motor Agents** always return a `Motion`.
 - **Sensory Agents** always return a `SensorReading`.
 
+For convenience, we also provide **AutoAgent** which dynamically initializes the right agent for the specified task. See [API Reference](#auto-agent) below for more.
+
 A call to `act` or `async_act` can perform local or remote inference synchronously or asynchronously. Remote execution can be performed with [Gradio](https://www.gradio.app/docs/python-client/introduction), [httpx](https://www.python-httpx.org/), or different LLM clients. Validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
@@ -159,6 +161,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] OpenVLA Motor Agent
 - [x] Automatic dataset recording on Robot
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
+- [x] Auto Agent
 - [ ] ROS integration
 - [ ] More Motor Agents, i.e. RT1
 - [ ] More device support, i.e. OpenCV camera
@@ -261,9 +264,7 @@ To learn more about all of the possibilities with embodied agents, check out the
 - You can `pack` a list of `Sample`s or Dicts into a single `Sample` or `Dict` and `unpack` accordingly?
 - You can `unflatten` any python structure into a `Sample` class so long you provide it with a valid json schema?
 
-<details> <summary><h2 style="display: inline-block;">Deep Dive</h2></summary>
-
-## Building Blocks
+## API Reference
 
 #### Creating a Sample
 
@@ -401,6 +402,32 @@ Currently, we have:
 
 agents that process robot's sensor information.
 
+### Auto Agent
+
+[Auto Agent](mbodied/agents/auto/auto_agent.py) dynamically selects and initializes the correct agent based on the task and model.
+
+```python
+from mbodied.agents.auto.auto_agent import AutoAgent
+
+# This makes it a LanguageAgent
+agent = AutoAgent(task="language", model_src="openai")
+response = agent.act("What is the capital of France?")
+
+# This makes it a motor agent: OpenVlaAgent
+auto_agent = AutoAgent(task="motion-openvla", model_src="https://api.mbodi.ai/community-models/")
+action = auto_agent.act("move hand forward", Image(size=(224, 224)))
+
+# This makes it a sensory agent: DepthEstimationAgent
+auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
+depth = auto_agent.act(image=Image(size=(224, 224)))
+```
+
+Alternatively, you can use `get_agent` method in [auto_agent](mbodied/agents/auto/auto_agent.py) as well.
+
+```python
+language_agent = get_agent(task="language", model_src="openai")
+```
+
 ### Motions
 
 The [motion_controls](mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
@@ -460,8 +487,6 @@ replayer = Replayer(path=str("path/to/dataset.h5"))
 for observation, action in replayer:
    ...
 ```
-
-</details>
 
 ## Directory Structure
 

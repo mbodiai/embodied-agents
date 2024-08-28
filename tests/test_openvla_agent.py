@@ -25,6 +25,18 @@ def test_openvla_agent_initialization(openvla_agent):
     assert openvla_agent.actor is not None
 
 
+@pytest.fixture
+def openvla_agent_2(mock_gradio_backend):
+    agent = OpenVlaAgent(model_src="gradio", model_kwargs={"endpoint": "http://1.2.3.4:1234/"})
+    agent.actor = mock_gradio_backend
+    return agent
+
+
+def test_openvla_agent_initialization_2(openvla_agent_2):
+    assert isinstance(openvla_agent_2, OpenVlaAgent)
+    assert openvla_agent_2.actor is not None
+
+
 def test_openvla_agent_act(openvla_agent):
     mock_image = MagicMock(spec=Image)
     mock_image.base64 = "base64encodedimage"
