@@ -15,3 +15,9 @@ Serve server:
 ```
 mkdocs serve
 ```
+
+Build site:
+
+```
+mkdocs build
+```
