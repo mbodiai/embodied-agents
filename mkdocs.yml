@@ -5,7 +5,7 @@ extra_javascript:
 - javascripts/extra.js
 theme:
   name: material
-  logo: assets/images/mbodi.png
+  logo: https://raw.githubusercontent.com/mbodiai/embodied-agents/main/assets/logo_full.png
   features:
   - announce.dismiss
   - content.code.annotate
