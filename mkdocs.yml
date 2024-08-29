@@ -67,12 +67,27 @@ extra:
 
 nav:
   - Home:
-    - Overview: overview.md
+      - Overview: overview.md
   - Getting Started:
-    - Installation: installation.md
-    - Getting Started: getting-started.md
+      - Installation: installation.md
+      - Getting Started: getting-started.md
   - Deep Dive: deep-dev.md
-  - API Reference: api.md
+  - API Reference:
+      - Agents:
+          - Base Agent Class: api/mbodied_agents_agent.md
+          - Language Agent: api/mbodied_agents_language.md
+          - Motor Agent: api/mbodied_agents_motion.md
+          - Sensory Agent: api/mbodied_agents_sense.md
+          - Auto Agent: api/mbodied_agents_auto.md
+          - Backends for agents: api/mbodied_agents_backends.md
+      - Data:
+          - Recorder: api/mbodied_data_recording.md
+          - Replayer: api/mbodied_data_replaying.md
+      - Robots:
+          - Robot: api/mbodied_robots_robot.md
+          - Sim Robot: api/mbodied_robots_sim_robot.md
+          - Robot Recording: api/mbodied_robots_robot_recording.md
+      - Types: api/mbodied_types.md
   - Contributing: contributing.md
 
 markdown_extensions:
@@ -85,7 +100,6 @@ markdown_extensions:
       guess_lang: False
   - admonition
   - codehilite
-  - mkautodoc
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.highlight:
@@ -96,3 +110,10 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
+
+plugins:
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [.]
