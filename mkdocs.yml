@@ -6,7 +6,7 @@ extra_javascript:
 theme:
   name: material
   logo: assets/images/mbodi.png
-  favicon: assets/images/mbodi.png
+  favicon: assets/images/logo.png
   features:
   - announce.dismiss
   - content.code.annotate
