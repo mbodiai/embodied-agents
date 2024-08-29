@@ -1,9 +1,7 @@
 # Build docs
 
 ```
-pip install mkdocs-material
-pip install mkdocstrings
-pip install mkdocstrings-python
+pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python
 ```
 
 Generate API docs automatically:
