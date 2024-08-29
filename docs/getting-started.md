@@ -1,4 +1,4 @@
-## Getting Started
+# Getting Started
 
 ### Customize a Motion to fit a robot's action space.
 

@@ -1,4 +1,4 @@
-## Installation
+# Installation
 
 ```bash
 pip install mbodied
