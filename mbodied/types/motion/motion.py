@@ -14,16 +14,18 @@ To create a new Pydantic model for a motion, inherit from the Motion class and d
 function as you would with any other Pydantic field.
 
 Example:
-    from mbodied_agents.motion import Motion, AbsoluteMotionField, MotionField, MotionType, VelocityMotionField
-    from mbodied_agents.data.sample import Sample
+```python
+from mbodied_agents.motion import Motion, AbsoluteMotionField, MotionField, MotionType, VelocityMotionField
+from mbodied_agents.data.sample import Sample
 
-    class Twist(Motion):
-        x: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
-        y: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
-        z: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
-        roll: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
-        pitch: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
-        yaw: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
+class Twist(Motion):
+    x: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
+    y: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
+    z: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
+    roll: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
+    pitch: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
+    yaw: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
+```
 
 
 This automatically generates a Pydantic model with the specified fields and the additional properties of a motion.

@@ -168,7 +168,7 @@ class RealsenseCamera:
         Returns:
             rs.intrinsics: An rs.intrinsics object with the given intrinsics data.
 
-        Example:
+        Examples:
             >>> matrix = np.array([[525.0, 0.0, 319.5], [0.0, 525.0, 239.5], [0.0, 0.0, 1.0]])
             >>> coeffs = np.array([0.1, 0.01, 0.001, 0.0001, 0.00001])
             >>> intrinsics = RealsenseCamera.matrix_and_distortion_to_intrinsics(480, 640, matrix, coeffs)
@@ -219,7 +219,7 @@ class RealsenseCamera:
         Returns:
             np.ndarray: The 3D coordinates of the point.
 
-        Example:
+        Examples:
             >>> estimator = ArucoMarkerBasedObjectPoseEstimation(color_image, depth_image, intrinsic_matrix)
             >>> estimator.pixel_to_3dpoint_realsense((320, 240), 1.5, realsense_intrinsics)
         """

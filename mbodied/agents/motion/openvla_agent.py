@@ -11,7 +11,7 @@ class OpenVlaAgent(MotorAgent):
 
     `actor` is a gradio server taking: image, instruction, and unnorm_key as input.
 
-    Example:
+    Examples:
         >>> openvla_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
         >>> openvla.act("move hand forward", Image(size=(224, 224)))
         HandControl(pose=Pose6D(x=1,y=2,z=3,roll=0,pitch=0,yaw=0), grasp=JointControl(value=0))

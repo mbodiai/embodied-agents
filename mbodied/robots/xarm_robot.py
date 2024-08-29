@@ -26,8 +26,10 @@ class XarmRobot(Robot):
     """Control the xArm robot arm with SDK.
 
     Usage:
-        xarm = XarmRobot()
-        xarm.do(HandControl(...))
+    ```python
+    xarm = XarmRobot()
+    xarm.do(HandControl(...))
+    ```
 
     Attributes:
         ip: The IP address of the xArm robot.

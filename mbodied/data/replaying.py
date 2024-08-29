@@ -356,7 +356,7 @@ def parse_slice(s: str) -> int | slice:
     Returns:
         Union[int, slice]: Integer or slice.
 
-    Example:
+    Examples:
         >>> lst = [0, 1, 2, 3, 4, 5]
         >>> lst[parse_slice("1")]
         1
