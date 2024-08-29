@@ -62,7 +62,7 @@ nav:
 - Getting Started:
   - Installation: installation.md
   - Getting Started: getting-started.md
-- Deep Dive: deep-dev.md
+- Deep Dive: deep-dive.md
 - Contributing: contributing.md
 - API Reference:
   - Agents:

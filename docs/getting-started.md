@@ -45,11 +45,11 @@ for step in plan.strip('[]').strip().split(','):
 
 Example Scripts:
 
-- [1_simple_robot_agent.py](examples/1_simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output voice and actions.
-- [2_openvla_motor_agent_example.py](examples/2_openvla_motor_agent_example.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
-- [3_reason_plan_act_robot.py](examples/3_reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
-- [4_language_reason_plan_act_robot.py](examples/4_language_reason_plan_act_robot.py): Full example of all languaged based cognitive and motor agent executing task.
-- [5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py): Example of collecting dataset on robot's action at a specific frequency by just yelling at the robot!
+- [1_simple_robot_agent.py](https://github.com/mbodiai/embodied-agents/blob/main/examples/1_simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output voice and actions.
+- [2_openvla_motor_agent_example.py](https://github.com/mbodiai/embodied-agents/blob/main/examples/2_openvla_motor_agent_example.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
+- [3_reason_plan_act_robot.py](https://github.com/mbodiai/embodied-agents/blob/main/examples/3_reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
+- [4_language_reason_plan_act_robot.py](https://github.com/mbodiai/embodied-agents/blob/main/examples/4_language_reason_plan_act_robot.py): Full example of all languaged based cognitive and motor agent executing task.
+- [5_teach_robot_record_dataset.py](https://github.com/mbodiai/embodied-agents/blob/main/examples/5_teach_robot_record_dataset.py): Example of collecting dataset on robot's action at a specific frequency by just yelling at the robot!
 
 ### Notebooks
 

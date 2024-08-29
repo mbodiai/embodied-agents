@@ -1,8 +1,8 @@
 # Deep Dive
 
-### The [Sample](mbodied/base/sample.py) Class
+### The [Sample](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/base/sample.py) Class
 
-The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extendable, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](mbodied/base/sample.py) class, you'll be able to convert to and from the following with ease:
+The Sample class is a base model for serializing, recording, and manipulating arbitrary data. It is designed to be extendable, flexible, and strongly typed. By wrapping your observation or action objects in the [Sample](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/base/sample.py) class, you'll be able to convert to and from the following with ease:
 
 - A Gym space for creating a new Gym environment.
 - A flattened list, array, or tensor for plugging into an ML model.
@@ -78,11 +78,11 @@ print(gym_space)
 # Output: Dict('action': Box(-inf, inf, (3,), float64), 'observation': Box(-inf, inf, (3,), float64))
 ```
 
-See [sample.py](mbodied/base/sample.py) for more details.
+See [sample.py](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/base/sample.py) for more details.
 
 ### Message
 
-The [Message](mbodied/types/message.py) class represents a single completion sample space. It can be text, image, a list of text/images, Sample, or other modality. The Message class is designed to handle various types of content and supports different roles such as user, assistant, or system.
+The [Message](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/types/message.py) class represents a single completion sample space. It can be text, image, a list of text/images, Sample, or other modality. The Message class is designed to handle various types of content and supports different roles such as user, assistant, or system.
 
 You can create a `Message` in versatile ways. They can all be understood by mbodi's backend.
 
@@ -96,15 +96,15 @@ Message(role="user", content=[Sample("Hello")])
 
 ### Backend
 
-The [Backend](mbodied/base/backend.py) class is an abstract base class for Backend implementations. It provides the basic structure and methods required for interacting with different backend services, such as API calls for generating completions based on given messages. See [backend directory](mbodied/agents/backends) on how various backends are implemented.
+The [Backend](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/base/backend.py) class is an abstract base class for Backend implementations. It provides the basic structure and methods required for interacting with different backend services, such as API calls for generating completions based on given messages. See [backend directory](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/backends) on how various backends are implemented.
 
 ### Agent
 
-[Agent](mbodied/base/agent.py) is the base class for various agents listed below. It provides a template for creating agents that can talk to a remote backend/server and optionally record their actions and observations.
+[Agent](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/base/agent.py) is the base class for various agents listed below. It provides a template for creating agents that can talk to a remote backend/server and optionally record their actions and observations.
 
 ### Language Agent
 
-The [Language Agent](mbodied/agents/language/language_agent.py) can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
+The [Language Agent](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/language/language_agent.py) can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
 Natively supports API services: OpenAI, Anthropic, vLLM, Ollama, HTTPX, or any gradio endpoints. More upcoming!
 
@@ -136,8 +136,8 @@ response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct
 
 ### Motor Agent
 
-[Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
-Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, may be challenging to run without quantization. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
+[Motor Agent](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
+Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, may be challenging to run without quantization. See [OpenVLA Agent](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](https://github.com/mbodiai/embodied-agents/blob/main/examples/servers/gradio_example_openvla.py)
 
 ### Sensory Agent
 
@@ -145,16 +145,16 @@ These agents interact with the environment to collect sensor data. They always r
 
 Currently, we have:
 
-- [depth estimation](mbodied/agents/sense/depth_estimation_agent.py)
-- [object detection](mbodied/agents/sense/object_detection_agent.py)
-- [image segmentation](mbodied/agents/sense/segmentation_agent.py)
-- [3D object pose estimator](mbodied/agents/sense/object_pose_estimator_3d.py)
+- [depth estimation](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/sense/depth_estimation_agent.py)
+- [object detection](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/sense/object_detection_agent.py)
+- [image segmentation](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/sense/segmentation_agent.py)
+- [3D object pose estimator](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/sense/object_pose_estimator_3d.py)
 
 agents that process robot's sensor information.
 
 ### Auto Agent
 
-[Auto Agent](mbodied/agents/auto/auto_agent.py) dynamically selects and initializes the correct agent based on the task and model.
+[Auto Agent](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/auto/auto_agent.py) dynamically selects and initializes the correct agent based on the task and model.
 
 ```python
 from mbodied.agents.auto.auto_agent import AutoAgent
@@ -172,7 +172,7 @@ auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbo
 depth = auto_agent.act(image=Image(size=(224, 224)))
 ```
 
-Alternatively, you can use `get_agent` method in [auto_agent](mbodied/agents/auto/auto_agent.py) as well.
+Alternatively, you can use `get_agent` method in [auto_agent](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/agents/auto/auto_agent.py) as well.
 
 ```python
 language_agent = get_agent(task="language", model_src="openai")
@@ -180,15 +180,15 @@ language_agent = get_agent(task="language", model_src="openai")
 
 ### Motions
 
-The [motion_controls](mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
+The [motion_controls](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
 
 ### Robot
 
-You can integrate your custom robot hardware by subclassing [Robot](mbodied/robot/robot.py) quite easily. You only need to implement `do()` function to perform actions (and some additional methods if you want to record dataset on the robot). In our examples, we use a [mock robot](mbodied/robot/sim_robot.py). We also have an [XArm robot](mbodied/robot/xarm_robot.py) as an example.
+You can integrate your custom robot hardware by subclassing [Robot](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/robot/robot.py) quite easily. You only need to implement `do()` function to perform actions (and some additional methods if you want to record dataset on the robot). In our examples, we use a [mock robot](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/robot/sim_robot.py). We also have an [XArm robot](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/robot/xarm_robot.py) as an example.
 
 #### Recording a Dataset
 
-Recording a dataset on a robot is very easy! All you need to do is implement the `get_observation()`, `get_state()`, and `prepare_action()` methods for your robot. After that, you can record a dataset on your robot anytime you want. See [examples/5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py) and this colab: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing) for more details.
+Recording a dataset on a robot is very easy! All you need to do is implement the `get_observation()`, `get_state()`, and `prepare_action()` methods for your robot. After that, you can record a dataset on your robot anytime you want. See [examples/5_teach_robot_record_dataset.py](https://github.com/mbodiai/embodied-agents/blob/main/examples/5_teach_robot_record_dataset.py) and this colab: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing) for more details.
 
 ```python
 from mbodied.robots import SimRobot
@@ -203,7 +203,7 @@ with robot.record("pick up the fork"):
 
 ### Recorder
 
-Dataset [Recorder](mbodied/data/recording.py) is a lower level recorder to record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder. See [gymnasium](https://github.com/Farama-Foundation/Gymnasium) for more details about spaces.
+Dataset [Recorder](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/data/recording.py) is a lower level recorder to record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder. See [gymnasium](https://github.com/Farama-Foundation/Gymnasium) for more details about spaces.
 
 ```python
 from mbodied.data.recording import Recorder
@@ -226,7 +226,7 @@ The dataset is saved to `./saved_datasets`.
 
 ### Replayer
 
-The [Replayer](mbodied/data/replaying.py) class is designed to process and manage data stored in HDF5 files generated by `Recorder`. It provides a variety of functionalities, including reading samples, generating statistics, extracting unique items, and converting datasets for use with HuggingFace. The Replayer also supports saving specific images during processing and offers a command-line interface for various operations.
+The [Replayer](https://github.com/mbodiai/embodied-agents/blob/main/mbodied/data/replaying.py) class is designed to process and manage data stored in HDF5 files generated by `Recorder`. It provides a variety of functionalities, including reading samples, generating statistics, extracting unique items, and converting datasets for use with HuggingFace. The Replayer also supports saving specific images during processing and offers a command-line interface for various operations.
 
 Example for iterating through a dataset from Recorder with Replayer:
 

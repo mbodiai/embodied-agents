@@ -239,7 +239,6 @@ class Sample(BaseModel):
         Optionally resolves references.
 
         Args:
-            schema (dict): A dictionary representing the JSON schema.
             resolve_refs (bool): Whether to resolve references in the schema. Defaults to True.
             include_descriptions (bool): Whether to include descriptions in the schema. Defaults to False.
 
@@ -300,8 +299,8 @@ class Sample(BaseModel):
 
         Args:
             container (Any): The container type to convert to. Supported types are
-            'dict', 'list', 'np', 'pt' (pytorch), 'space' (gym.space),
-            'schema', 'json', 'hf' (datasets.Dataset) and any subtype of Sample.
+                'dict', 'list', 'np', 'pt' (pytorch), 'space' (gym.space),
+                'schema', 'json', 'hf' (datasets.Dataset) and any subtype of Sample.
 
         Returns:
             Any: The converted container.

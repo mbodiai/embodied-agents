@@ -200,10 +200,11 @@ class Recorder:
         """Configure the root spaces.
 
         Args:
-          observation_space (spaces.Dict): Observation space.
-          action_space (spaces.Dict): Action space.
-          state_space (spaces.Dict): State space.
-          supervision_space (spaces.Dict): Supervision space.
+            **spaces: Spaces to configure.
+                observation_space (spaces.Dict): Observation space.
+                action_space (spaces.Dict): Action space.
+                state_space (spaces.Dict): State space.
+                supervision_space (spaces.Dict): Supervision space.
         """
         root_keys = []
         root_spaces = []

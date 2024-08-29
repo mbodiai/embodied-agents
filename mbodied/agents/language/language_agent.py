@@ -232,7 +232,7 @@ class LanguageAgent(Agent):
         context: list | str | Image | Message = None,
         model=None,
         max_retries: int = 1,
-        record=False,
+        record: bool = False,
         **kwargs,
     ) -> Sample:
         """Responds to the given instruction, image, and context and parses the response into a Sample object.
