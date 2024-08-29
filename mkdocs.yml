@@ -1,0 +1,98 @@
+site_name: ""
+
+extra_css:
+  - stylesheets/extra.css
+extra_javascript:
+  - javascripts/extra.js
+
+theme:
+  name: material
+  logo: assets/images/mbodi.png
+  features:
+    - announce.dismiss
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.preview
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+  language: en
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  pygments_style: monokai
+
+repo_name: mbodiai/embodied-agents
+repo_url: https://github.com/mbodiai/embodied-agents
+edit_uri: edit/main/docs/
+extra:
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/thumb-up-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/thumb-down-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback!
+
+nav:
+  - Home:
+    - Overview: overview.md
+  - Getting Started:
+    - Installation: installation.md
+    - Getting Started: getting-started.md
+  - Deep Dive: deep-dev.md
+  - API Reference: api.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - toc:
+      permalink: True
+      toc_depth: 3
+  - markdown.extensions.toc
+  - fenced_code
+  - codehilite:
+      guess_lang: False
+  - admonition
+  - codehilite
+  - mkautodoc
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.extra
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
