@@ -11,12 +11,14 @@ The dynamically created Enums are:
 - MobileSingleArmLangControl: Based on MobileSingleArmControl.
 
 Example usage:
-    execute_command(LangControl.START)  # Output: Starting the system...
-    execute_command(LangControl.MOVE_FORWARD)  # Output: Moving forward...
+```python
+execute_command(LangControl.START)  # Output: Starting the system...
+execute_command(LangControl.MOVE_FORWARD)  # Output: Moving forward...
 
-    command_str = "move forward"
-    command = get_command_from_string(command_str)
-    execute_command(command)  # Execute: Moving forward...
+command_str = "move forward"
+command = get_command_from_string(command_str)
+execute_command(command)  # Execute: Moving forward...
+```
 """
 
 from enum import Enum

@@ -19,7 +19,7 @@ from mbodied.types.sense.vision import Image
 class DepthEstimationAgent(SensoryAgent):
     """A depth estimation agent that uses a remote depth estimation server to estimate depth from an image.
 
-    Usage:
+    Examples:
     >>> agent = DepthEstimationAgent(model_src="https://api.mbodi.ai/sense/")
     >>> result = agent.act(image=Image("resources/xarm.jpeg", size=(224, 224)))
     """

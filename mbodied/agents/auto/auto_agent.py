@@ -14,6 +14,7 @@ class AutoAgent(Agent):
     """AutoAgent that dynamically selects and initializes the correct agent based on the task and model.
 
     Example Usage:
+    ```python
     # AutoAgent as LanguageAgent:
     auto_agent = AutoAgent(task="language", model_src="openai")
     response = auto_agent.act("What is the capital of France?")
@@ -25,6 +26,7 @@ class AutoAgent(Agent):
     # AutoAgent as SenseAgent:
     auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
     depth = auto_agent.act(image=Image("resources/bridge_example.jpeg", size=(224, 224)))
+    ```
     """
 
     TASK_TO_AGENT_MAP: Dict[
@@ -103,6 +105,7 @@ def get_agent(
     This is an alternative to using the AutoAgent class directly. It returns the corresponding agent instance directly.
 
     Usage:
+    ```python
     # Get LanguageAgent instance
     language_agent = get_agent(task="language", model_src="openai")
     response = language_agent.act("What is the capital of France?")
@@ -114,6 +117,7 @@ def get_agent(
     # Get DepthEstimationAgent instance
     depth_agent = get_agent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
     depth = depth_agent.act(image=Image("resources/bridge_example.jpeg", size=(224, 224)))
+    ```
     """
     if task not in AutoAgent.TASK_TO_AGENT_MAP:
         raise ValueError(

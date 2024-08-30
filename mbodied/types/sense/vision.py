@@ -76,7 +76,7 @@ class Image(Sample):
         size (Optional[tuple[int, int]]): The size of the image as a (width, height) tuple.
         encoding (Optional[Literal["png", "jpeg", "jpg", "bmp", "gif"]]): The encoding of the image.
 
-    Example:
+    Examples:
         >>> image = Image("https://example.com/image.jpg")
         >>> image = Image("/path/to/image.jpg")
         >>> image = Image("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4Q3zaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA")

@@ -1,0 +1,148 @@
+site_name: 'Embodied Agents'
+extra_css:
+- stylesheets/extra.css
+extra_javascript:
+- javascripts/extra.js
+theme:
+  name: material
+  logo: assets/images/mbodi.png
+  favicon: assets/images/logo.png
+  features:
+  - announce.dismiss
+  - content.code.annotate
+  - content.code.copy
+  - content.tabs.link
+  - navigation.expand
+  - navigation.footer
+  - navigation.indexes
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.instant.preview
+  - navigation.instant.progress
+  - navigation.path
+  - navigation.sections
+  - navigation.tabs
+  - navigation.top
+  - navigation.tracking
+  - search.highlight
+  - search.share
+  - search.suggest
+  - toc.follow
+  language: en
+  palette:
+  - media: '(prefers-color-scheme: light)'
+    scheme: default
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - media: '(prefers-color-scheme: dark)'
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to light mode
+  pygments_style: monokai
+repo_name: mbodiai/embodied-agents
+repo_url: https://github.com/mbodiai/embodied-agents
+edit_uri: edit/main/docs/
+extra:
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+      - icon: material/thumb-up-outline
+        name: This page was helpful
+        data: 1
+        note: Thanks for your feedback!
+      - icon: material/thumb-down-outline
+        name: This page could be improved
+        data: 0
+        note: Thanks for your feedback!
+nav:
+- Home:
+  - Overview: overview.md
+- Getting Started:
+  - Installation: installation.md
+  - Getting Started: getting-started.md
+- Deep Dive: deep-dive.md
+- Contributing: contributing.md
+- API Reference:
+  - Agents:
+    - Agent: api/agents/agent.md
+    - Auto:
+      - Auto Agent: api/agents/auto/auto_agent.md
+    - Backends:
+      - Anthropic Backend: api/agents/backends/anthropic_backend.md
+      - Backend: api/agents/backends/backend.md
+      - Gradio Backend: api/agents/backends/gradio_backend.md
+      - Httpx Backend: api/agents/backends/httpx_backend.md
+      - Ollama Backend: api/agents/backends/ollama_backend.md
+      - Openai Backend: api/agents/backends/openai_backend.md
+      - Serializer: api/agents/backends/serializer.md
+      - Vision2Seq Backend: api/agents/backends/vision2seq_backend.md
+    - Cli: api/agents/cli.md
+    - Language:
+      - Language Agent: api/agents/language/language_agent.md
+    - Motion:
+      - Motor Agent: api/agents/motion/motor_agent.md
+      - Openvla Agent: api/agents/motion/openvla_agent.md
+    - Sense:
+      - Audio:
+        - Audio Agent: api/agents/sense/audio/audio_agent.md
+      - Depth Estimation Agent: api/agents/sense/depth_estimation_agent.md
+      - Object Detection Agent: api/agents/sense/object_detection_agent.md
+      - Object Pose Estimator 3D: api/agents/sense/object_pose_estimator_3d.md
+      - Segmentation Agent: api/agents/sense/segmentation_agent.md
+      - Sensory Agent: api/agents/sense/sensory_agent.md
+  - Data:
+    - Recording: api/data/recording.md
+    - Replaying: api/data/replaying.md
+    - Utils: api/data/utils.md
+  - Hardware:
+    - Interface: api/hardware/interface.md
+    - Realsense Camera: api/hardware/realsense_camera.md
+    - Sim Interface: api/hardware/sim_interface.md
+  - Robots:
+    - Robot: api/robots/robot.md
+    - Robot Recording: api/robots/robot_recording.md
+    - Sim Robot: api/robots/sim_robot.md
+    - Xarm Robot: api/robots/xarm_robot.md
+  - Types:
+    - Geometry: api/types/geometry.md
+    - Language:
+      - Control: api/types/language/control.md
+    - Message: api/types/message.md
+    - Motion:
+      - Control: api/types/motion/control.md
+      - Motion: api/types/motion/motion.md
+    - Ndarray: api/types/ndarray.md
+    - Sample: api/types/sample.md
+    - Sense:
+      - Sensor Reading: api/types/sense/sensor_reading.md
+      - Vision: api/types/sense/vision.md
+      - World: api/types/sense/world.md
+  - Utils:
+    - Import Utils: api/utils/import_utils.md
+markdown_extensions:
+- toc:
+    permalink: true
+    toc_depth: 3
+- markdown.extensions.toc
+- fenced_code
+- codehilite:
+    guess_lang: false
+- admonition
+- codehilite
+- pymdownx.details
+- pymdownx.superfences
+- pymdownx.highlight:
+    pygments_lang_class: true
+- pymdownx.extra
+- pymdownx.tabbed:
+    alternate_style: true
+plugins:
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        paths:
+        - .

@@ -38,9 +38,11 @@ class AudioAgent(Agent):
     It will then take input from the terminal.
 
     Usage:
-        audio_agent = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
-        audio_agent.speak("How can I help you?")
-        message = audio_agent.listen()
+    ```python
+    audio_agent = AudioAgent(api_key="your-openai-api-key", use_pyaudio=False)
+    audio_agent.speak("How can I help you?")
+    message = audio_agent.listen()
+    ```
     """
 
     mode = Literal["speak", "type", "speak_or_type"]
@@ -59,7 +61,6 @@ class AudioAgent(Agent):
             listen_filename: The filename for storing recorded audio.
             tmp_speak_filename: The filename for storing synthesized speech.
             use_pyaudio: Whether to use PyAudio for playback. Prefer setting to False for Mac.
-            client: An optional OpenAI client instance.
             api_key: The API key for OpenAI.
             run_local: Whether to run the whisper model locally instead of using OpenAI.
         """

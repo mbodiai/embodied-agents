@@ -1,0 +1,133 @@
+[data-md-color-scheme="slate"] {
+  --md-hue: 230;
+  --md-default-bg-color: rgb(22, 22, 22);
+}
+
+[data-md-color-accent="pink"] {
+  --md-accent-fg-color: rgb(235, 76, 95);
+  --md-accent-bg-color: #fff;
+  --md-accent-bg-color--light: #ffffff;
+}
+
+[data-md-color-scheme="slate"][data-md-color-primary="pink"] {
+  --md-typeset-a-color: rgb(235, 76, 95);
+}
+
+.md-typeset body {
+  font-size: 20px; /* Adjust the size as needed */
+}
+
+/* Change the font size for headings */
+.md-typeset h1 {
+  font-size: 2em; /* Adjust the size as needed */
+}
+
+.md-typeset h2 {
+  font-size: 1.75em; /* Adjust the size as needed */
+}
+
+.md-typeset h3 {
+  font-size: 1.5em; /* Adjust the size as needed */
+}
+
+.highlight .k {
+  color: #ff0000;
+} /* Keyword */
+.highlight .nf {
+  color: #007700;
+} /* Function name */
+.highlight .s {
+  color: #ba2121;
+} /* Strings */
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  fill: currentcolor;
+  display: block;
+  height: 3.2rem;
+}
+
+/* extra.css */
+
+.md-typeset a {
+  color: rgb(235, 76, 95);
+  word-break: break-word;
+}
+
+.box-ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.box-li {
+  position: relative;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+.box-li::marker {
+  content: "☐";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: gray;
+}
+
+.box-li .nested-description {
+  font-size: 14px;
+  color: gray;
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+  background-color: transparent !important;
+}
+
+.md-header,
+.md-footer,
+.md-tabs {
+  background: rgb(235, 76, 95);
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  color: rgb(235, 76, 95);
+}
+
+.md-typeset .headerlink:focus,
+.md-typeset .headerlink:hover,
+.md-typeset :target > .headerlink {
+  color: rgb(235, 76, 95);
+}
+
+.md-nav__link[for]:focus,
+.md-nav__link[for]:hover,
+.md-nav__link[href]:focus,
+.md-nav__link[href]:hover {
+  color: rgb(235, 76, 95);
+  cursor: pointer;
+}
+
+/* Collapsible section summary styling */
+
+/* .md-typeset .admonition, .md-typeset details {
+
+  border: .075rem solid rgb(235, 76, 95);
+} */
+
+.md-typeset .admonition-title:before,
+.md-typeset summary:before {
+  background-color: rgb(235, 76, 95);
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+  background-color: var(--md-code-bg-color);
+  border: 0.075rem solid #444444;
+}

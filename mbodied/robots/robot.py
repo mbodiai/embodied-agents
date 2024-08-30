@@ -144,10 +144,12 @@ class Robot(ABC):
         """Start recording with the given task with context manager.
 
         Usage:
-            with robot.record("pick up the remote"):
-                robot.do(motion1)
-                robot.do(motion2)
-                ...
+        ```python
+        with robot.record("pick up the remote"):
+            robot.do(motion1)
+            robot.do(motion2)
+            ...
+        ```
         """
         return self.robot_recorder.record(task)
 

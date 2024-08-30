@@ -149,7 +149,7 @@ class OpenAIBackendMixin(Backend):
         """Streams a completion for the given messages using the OpenAI API standard.
 
         Args:
-            messages: A list of messages to be sent to the completion API.
+            message: Message to be sent to the completion API.
             context: The context of the messages.
             model: The model to be used for the completion.
             **kwargs: Additional keyword arguments.
@@ -171,7 +171,7 @@ class OpenAIBackendMixin(Backend):
         """Streams a completion asynchronously for the given messages using the OpenAI API standard.
 
         Args:
-            messages: A list of messages to be sent to the completion API.
+            message: Message to be sent to the completion API.
             context: The context of the messages.
             model: The model to be used for the completion.
             **kwargs: Additional keyword arguments.

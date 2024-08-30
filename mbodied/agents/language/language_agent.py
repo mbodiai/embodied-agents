@@ -19,12 +19,14 @@ which can be set with a gym.Space object or any python object using the Sample c
 (see examples/using_sample.py for a tutorial), you can have the recorder infer the spaces
 by setting recorder="default" for automatic dataset recording.
 
-For example:
+Examples:
     >>> agent = LanguageAgent(context=SYSTEM_PROMPT, model_src=backend, recorder="default")
     >>> agent.act_and_record("pick up the fork", image)
 
 Alternatively, you can define the recorder separately to record the space you want.
-For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action:
+For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action.
+
+Examples:
     >>> observation_space = spaces.Dict({"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)})
     >>> action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
     >>> recorder = Recorder(
@@ -33,7 +35,9 @@ For example, to record the dataset with the image and instruction observation an
     ...     observation_space=observation_space,
     ...     action_space=action_space
 
-To record:
+To record the dataset, you can use the record method of the recorder object.
+
+Examples:
     >>> recorder.record(
     ...     observation={
     ...         "image": image,
@@ -232,7 +236,7 @@ class LanguageAgent(Agent):
         context: list | str | Image | Message = None,
         model=None,
         max_retries: int = 1,
-        record=False,
+        record: bool = False,
         **kwargs,
     ) -> Sample:
         """Responds to the given instruction, image, and context and parses the response into a Sample object.
@@ -344,7 +348,7 @@ class LanguageAgent(Agent):
         Returns:
             str: The response to the instruction.
 
-        Example:
+        Examples:
             >>> agent.act("Hello, world!", Image("scene.jpeg"))
             "Hello! What can I do for you today?"
             >>> agent.act("Return a plan to pickup the object as a python list.", Image("scene.jpeg"))
