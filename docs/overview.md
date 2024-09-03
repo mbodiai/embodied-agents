@@ -15,7 +15,7 @@ For convenience, we also provide **AutoAgent** which dynamically initializes the
 
 A call to `act` or `async_act` can perform local or remote inference synchronously or asynchronously. Remote execution can be performed with [Gradio](https://www.gradio.app/docs/python-client/introduction), [httpx](https://www.python-httpx.org/), or different LLM clients. Validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
-<img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
+<img src="https://raw.githubusercontent.com/mbodiai/embodied-agents/main/assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
 - Language Agents natively support OpenAI, Anthropic, Ollama, vLLM, Gradio, etc
 - Motor Agents natively support OpenVLA, RT1(upcoming)
