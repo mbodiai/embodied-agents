@@ -139,6 +139,27 @@ def test_image_model_dump_load_with_base64():
     reconstructed_img = Image.model_validate_json(json)
     assert np.array_equal(reconstructed_img.array, array)
 
+    
+def test_lazy_loading():
+    # Create an image with a path
+    image_path = "resources/bridge_example.jpeg"
+    img = Image(image_path)
+
+    # Test that attributes are lazily loaded
+    assert img._array is None
+    assert img._base64 is None
+    assert img._size is None
+
+    # Access size, which should trigger lazy loading
+    assert img.size is not None
+    assert img._size is not None
+
+    # Access array and base64 to ensure they are also lazily loaded
+    assert img.array is not None
+    assert img._array is not None
+    assert img.base64 is not None
+    assert img._base64 is not None
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
