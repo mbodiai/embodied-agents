@@ -44,5 +44,5 @@ jobs:
             ${{ runner.os }}-${{ env.cache-name }}-
       - name: Run tests
         run: |
-          hatch run pip install '.[audio]'
+          hatch run pip install '.[audio, extras]'
           hatch run test

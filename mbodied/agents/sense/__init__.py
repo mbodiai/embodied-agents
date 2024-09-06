@@ -12,3 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .depth_estimation_agent import DepthEstimationAgent
+from .object_detection_agent import ObjectDetectionAgent
+from .segmentation_agent import SegmentationAgent
+from .sensory_agent import SensoryAgent
+
+__all__ = ["SensoryAgent", "DepthEstimationAgent", "ObjectDetectionAgent", "SegmentationAgent"]

@@ -120,12 +120,16 @@ def test_record_and_replay_basic(recorder_and_path):
     }
     # Create actions as dictionaries directly
     dummy_action = ActionOrAnswer.default_sample()
-    recorder.record(dummy_observation, dummy_action)
+    dummy_state = {
+        "dummy_state": "dummy_value",
+    }
+    recorder.record(dummy_observation, dummy_action, dummy_state)
 
     replayer = Replayer(str(recorder_path))
-    for observation, action in replayer:
+    for observation, action, state in replayer:
         assert observation["instruction"] == dummy_observation["instruction"]
         assert ActionOrAnswer(action).dict() == dummy_action.dict()
+        assert state == dummy_state
 
 
 logging.basicConfig(level=logging.DEBUG)

@@ -5,9 +5,9 @@ from mbodied.agents.backends import GradioBackend
 
 def test_init():
     with patch("mbodied.agents.backends.gradio_backend.Client") as mock_client:
-        backend = GradioBackend(remote_server="http://fake-server.com")
+        backend = GradioBackend(endpoint="http://fake-server.com")
         mock_client.assert_called_with(src="http://fake-server.com")
-        assert backend.remote_server == "http://fake-server.com"
+        assert backend.endpoint == "http://fake-server.com"
 
 
 def test_act():
@@ -18,9 +18,9 @@ def test_act():
     with patch("mbodied.agents.backends.gradio_backend.Client") as mock_client:
         mock_instance = mock_client.return_value
         mock_instance.predict.return_value = expected_result
-        backend = GradioBackend(remote_server="http://fake-server.com")
+        backend = GradioBackend(endpoint="http://fake-server.com")
 
-        result = backend.act(*test_args, **test_kwargs)
+        result = backend.predict(*test_args, **test_kwargs)
 
         mock_instance.predict.assert_called_once_with(*test_args, **test_kwargs)
         assert result == expected_result
@@ -36,7 +36,7 @@ def test_submit():
     with patch("mbodied.agents.backends.gradio_backend.Client") as mock_client:
         mock_instance = mock_client.return_value
         mock_instance.submit.return_value = expected_job
-        backend = GradioBackend(remote_server="http://fake-server.com")
+        backend = GradioBackend(endpoint="http://fake-server.com")
 
         job = backend.submit(*test_args, api_name=api_name, result_callbacks=result_callbacks, **test_kwargs)
 

@@ -13,12 +13,15 @@
 # limitations under the License.
 
 
-from typing import Any, List, Optional
+import os
+from typing import Any, List
 
 import backoff
+import httpx
 from anthropic import RateLimitError as AnthropicRateLimitError
 from openai._exceptions import RateLimitError as OpenAIRateLimitError
 
+from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
 from mbodied.types.sense.vision import Image
@@ -26,6 +29,8 @@ from mbodied.types.sense.vision import Image
 ERRORS = (
     OpenAIRateLimitError,
     AnthropicRateLimitError,
+    httpx.HTTPError,
+    ConnectionError,
 )
 
 
@@ -62,7 +67,7 @@ class OpenAISerializer(Serializer):
         return {"type": "text", "text": text}
 
 
-class OpenAIBackendMixin:
+class OpenAIBackendMixin(Backend):
     """Backend for interacting with OpenAI's API.
 
     Attributes:
@@ -77,54 +82,45 @@ class OpenAIBackendMixin:
     ]
     DEFAULT_MODEL = "gpt-4o"
 
-    def __init__(self, api_key: str | None = None, client: Any | None = None, response_format: str = None, **kwargs):
+    def __init__(
+        self,
+        api_key: str | None = None,
+        client: Any | None = None,
+        response_format: str = None,
+        aclient=False,
+        **kwargs,
+    ):
         """Initializes the OpenAIBackend with the given API key and client.
 
         Args:
             api_key: The API key for the OpenAI service.
             client: An optional client for the OpenAI service.
             response_format: The format for the response.
+            aclient: Whether to use the asynchronous client.
             **kwargs: Additional keyword arguments.
         """
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("MBODI_API_KEY")
         self.client = client
         if self.client is None:
-            from openai import OpenAI
-            self.client = OpenAI(api_key=self.api_key, **kwargs)
+            from openai import AsyncOpenAI, OpenAI
+
+            kwargs.pop("model_src", None)
+            self.client = OpenAI(api_key=self.api_key or "any_key", **kwargs)
+            if aclient:
+                self.aclient = AsyncOpenAI(api_key=self.api_key or "any_key", **kwargs)
+
         self.serialized = OpenAISerializer
         self.response_format = response_format
-
-    def _create_completion(self, messages: List[Message], model: str = "gpt-4o", stream: bool = False, **kwargs) -> str:
-        """Creates a completion for the given messages using the OpenAI API standard.
-
-        Args:
-            messages: A list of messages to be sent to the completion API.
-            model: The model to be used for the completion.
-            stream: Whether to stream the response. Defaults to False.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            str: The content of the completion response.
-        """
-        serialized_messages = [self.serialized(msg) for msg in messages]
-
-        completion = self.client.chat.completions.create(
-            model=model,
-            messages=serialized_messages,
-            temperature=0,
-            max_tokens=1000,
-            stream=stream,
-            response_format=self.response_format,
-            **kwargs,
-        )
-        return completion.choices[0].message.content
 
     @backoff.on_exception(
         backoff.expo,
         ERRORS,
         max_tries=3,
+        on_backoff=lambda details: print(f"Backing off {details['wait']:.1f} seconds after {details['tries']} tries."),  # noqa
     )
-    def act(self, message: Message, context: List[Message] | None = None, model: Optional[Any] = None, **kwargs) -> str:
+    def predict(
+        self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs
+    ) -> str:
         """Create a completion based on the given message and context.
 
         Args:
@@ -136,9 +132,61 @@ class OpenAIBackendMixin:
         Returns:
             str: The result of the completion.
         """
-        if context is None:
-            context = []
+        context = context or self.INITIAL_CONTEXT
+        model = model or self.DEFAULT_MODEL
+        serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
 
-        if model is not None:
-            kwargs["model"] = model
-        return self._create_completion(context + [message], **kwargs)
+        completion = self.client.chat.completions.create(
+            model=model,
+            messages=serialized_messages,
+            temperature=0,
+            max_tokens=1000,
+            **kwargs,
+        )
+        return completion.choices[0].message.content
+
+    def stream(self, message: Message, context: List[Message] = None, model: str = "gpt-4o", **kwargs):
+        """Streams a completion for the given messages using the OpenAI API standard.
+
+        Args:
+            message: Message to be sent to the completion API.
+            context: The context of the messages.
+            model: The model to be used for the completion.
+            **kwargs: Additional keyword arguments.
+        """
+        model = model or self.DEFAULT_MODEL
+        context = context or self.INITIAL_CONTEXT
+        serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
+        stream = self.client.chat.completions.create(
+            messages=serialized_messages,
+            model=model,
+            temperature=0,
+            stream=True,
+            **kwargs,
+        )
+        for chunk in stream:
+            yield chunk.choices[0].delta.content or ""
+
+    async def astream(self, message: Message, context: List[Message] = None, model: str = "gpt-4o", **kwargs):
+        """Streams a completion asynchronously for the given messages using the OpenAI API standard.
+
+        Args:
+            message: Message to be sent to the completion API.
+            context: The context of the messages.
+            model: The model to be used for the completion.
+            **kwargs: Additional keyword arguments.
+        """
+        if not hasattr(self, "aclient"):
+            raise AttributeError("AsyncOpenAI client not initialized. Pass in aclient=True to the constructor.")
+        model = model or self.DEFAULT_MODEL
+        context = context or self.INITIAL_CONTEXT
+        serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
+        stream = await self.aclient.chat.completions.create(
+            messages=serialized_messages,
+            model=model,
+            temperature=0,
+            stream=True,
+            **kwargs,
+        )
+        async for chunk in stream:
+            yield chunk.choices[0].delta.content or ""

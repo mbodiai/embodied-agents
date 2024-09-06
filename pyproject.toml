@@ -21,55 +21,45 @@ classifiers = [
 ]
 
 dependencies = [
-  "coverage[toml]",
-  "toml",
-  "pytest",
-  "pytest-mock",
-  "pytest-asyncio",
-  "gymnasium",
-  "pillow",
-  "numpy==1.26.4",
-  "opencv-python",
-  "pydantic_numpy==5.0.2",
   "anthropic",
-  "openai",
-  "anthropic",
+  "art",
   "backoff",
-  "pydantic",
-  "torch",
-  "h5py",
   "click",
   "datasets",
+  "gymnasium",
+  "h5py",
   "jsonref",
-  "art",
-  "transformers",
+  "numpy==1.26.4",
+  "openai",
+  "pillow",
+  "pydantic",
+  "pydantic_numpy==5.0.2",
   "gradio",
   "gradio_client",
-  "xarm-python-sdk",
 ]
-
 [project.optional-dependencies]
-
-audio = [
-  "playsound",
-  "pyaudio",
-]
-
+extras = ["xarm-python-sdk", "opencv-python", "torch", "transformers"]
+audio = ["playsound", "pyaudio", "openai-whisper"]
 all = [
+  "xarm-python-sdk",
+  "opencv-python",
+  "torch",
+  "transformers",
   "playsound",
   "pyaudio",
+  "openai-whisper",
   "open3d",
   "timm",
   "torchvision",
   "wandb",
 ]
-
 [project.urls]
 Documentation = "https://github.com/mbodiai/embodied-agents#readme"
 Issues = "https://github.com/mbodiai/embodied-agents/issues"
 Source = "https://github.com/mbodiai/embodied-agents"
 
 [project.scripts]
+mbodied = "mbodied.agents.cli:cli"
 
 [tool.hatch.version]
 path = "mbodied/__about__.py"
@@ -83,7 +73,7 @@ allow-direct-references = true
 [tool.hatch.envs.default]
 python = "3.11"
 path = ".mbodied/envs/mbodied"
-
+dependencies = ["pytest", "pytest-mock", "pytest-asyncio"]
 
 [tool.hatch.envs.default.env-vars]
 

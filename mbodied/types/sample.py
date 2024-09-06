@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
 
 import numpy as np
-import torch
 from datasets import Dataset
 from gymnasium import spaces
 from jsonref import replace_refs
@@ -30,6 +29,7 @@ from pydantic_core import from_json
 from typing_extensions import Annotated
 
 from mbodied.data.utils import to_features
+from mbodied.utils.import_utils import smart_import
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 
@@ -111,22 +111,22 @@ class Sample(BaseModel):
             Dict[str, Any]: Dictionary representation of the Sample object.
         """
         return self.model_dump(exclude_none=exclude_none, exclude=exclude)
-    
+
     @classmethod
     def unflatten(cls, one_d_array_or_dict, schema=None) -> "Sample":
         """Unflatten a one-dimensional array or dictionary into a Sample instance.
-        
+
         If a dictionary is provided, its keys are ignored.
-        
+
         Args:
             one_d_array_or_dict: A one-dimensional array or dictionary to unflatten.
             schema: A dictionary representing the JSON schema. Defaults to using the class's schema.
-            
+
         Returns:
             Sample: The unflattened Sample instance.
-        
+
         Examples:
-            >>> sample = Sample(x=1, y=2, z={'a': 3, 'b': 4}, extra_field=5)
+            >>> sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
             >>> flat_list = sample.flatten()
             >>> print(flat_list)
             [1, 2, 3, 4, 5]
@@ -135,36 +135,37 @@ class Sample(BaseModel):
         """
         if schema is None:
             schema = cls().schema()
-        
+
         # Convert input to list if it's not already
         if isinstance(one_d_array_or_dict, dict):
             flat_data = list(one_d_array_or_dict.values())
         else:
             flat_data = list(one_d_array_or_dict)
-        
+
         def unflatten_recursive(schema_part, index=0):
-            if schema_part['type'] == 'object':
+            if schema_part["type"] == "object":
                 result = {}
-                for prop, prop_schema in schema_part['properties'].items():
+                for prop, prop_schema in schema_part["properties"].items():
                     value, index = unflatten_recursive(prop_schema, index)
                     result[prop] = value
                 return result, index
-            elif schema_part['type'] == 'array':
+            elif schema_part["type"] == "array":
                 items = []
-                for _ in range(schema_part.get('maxItems', len(flat_data) - index)):
-                    value, index = unflatten_recursive(schema_part['items'], index)
+                for _ in range(schema_part.get("maxItems", len(flat_data) - index)):
+                    value, index = unflatten_recursive(schema_part["items"], index)
                     items.append(value)
                 return items, index
             else:  # Assuming it's a primitive type
                 return flat_data[index], index + 1
-        
+
         unflattened_dict, _ = unflatten_recursive(schema)
         return cls(**unflattened_dict)
+
     def flatten(
         self,
         output_type: Flattenable = "dict",
         non_numerical: Literal["ignore", "forbid", "allow"] = "allow",
-    ) -> Dict[str, Any] | np.ndarray | torch.Tensor | List:
+    ) -> Dict[str, Any] | np.ndarray | "torch.Tensor" | List:
         accumulator = {} if output_type == "dict" else []
 
         def flatten_recursive(obj, path=""):
@@ -177,7 +178,7 @@ class Sample(BaseModel):
             elif isinstance(obj, list | tuple):
                 for i, item in enumerate(obj):
                     flatten_recursive(item, path + str(i) + "/")
-            elif isinstance(obj, np.ndarray | torch.Tensor):
+            elif hasattr(obj, "__len__") and not isinstance(obj, str):
                 flat_list = obj.flatten().tolist()
                 if output_type == "dict":
                     # Convert to list for dict storage
@@ -200,6 +201,7 @@ class Sample(BaseModel):
         if output_type == "np":
             return np.array(accumulator)
         if output_type == "pt":
+            torch = smart_import("torch")
             return torch.tensor(accumulator)
         return accumulator
 
@@ -237,7 +239,6 @@ class Sample(BaseModel):
         Optionally resolves references.
 
         Args:
-            schema (dict): A dictionary representing the JSON schema.
             resolve_refs (bool): Whether to resolve references in the schema. Defaults to True.
             include_descriptions (bool): Whether to include descriptions in the schema. Defaults to False.
 
@@ -250,18 +251,18 @@ class Sample(BaseModel):
 
         if resolve_refs:
             schema = replace_refs(schema)
-            
+
         if not include_descriptions and "description" in schema:
             del schema["description"]
-        
+
         properties = schema.get("properties", {})
         for key, value in self.dict().items():
             if key not in properties:
                 properties[key] = Sample.obj_to_schema(value)
             if isinstance(value, Sample):
-                properties[key] = value.schema( resolve_refs=resolve_refs, include_descriptions=include_descriptions)
+                properties[key] = value.schema(resolve_refs=resolve_refs, include_descriptions=include_descriptions)
             else:
-               properties[key] = Sample.obj_to_schema(value)
+                properties[key] = Sample.obj_to_schema(value)
         return schema
 
     @classmethod
@@ -298,8 +299,8 @@ class Sample(BaseModel):
 
         Args:
             container (Any): The container type to convert to. Supported types are
-            'dict', 'list', 'np', 'pt' (pytorch), 'space' (gym.space),
-            'schema', 'json', 'hf' (datasets.Dataset) and any subtype of Sample.
+                'dict', 'list', 'np', 'pt' (pytorch), 'space' (gym.space),
+                'schema', 'json', 'hf' (datasets.Dataset) and any subtype of Sample.
 
         Returns:
             Any: The converted container.
@@ -451,7 +452,7 @@ class Sample(BaseModel):
         sampled = space.sample()
         if isinstance(sampled, dict | OrderedDict):
             return cls(**sampled)
-        if isinstance(sampled, np.ndarray | torch.Tensor | list | tuple):
+        if hasattr(sampled, "__len__") and not isinstance(sampled, str):
             sampled = np.asarray(sampled)
             if len(sampled.shape) > 0 and isinstance(sampled[0], dict | Sample):
                 return cls.pack_from(sampled)
@@ -555,5 +556,3 @@ class Sample(BaseModel):
 
 if __name__ == "__main__":
     sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
-
-    

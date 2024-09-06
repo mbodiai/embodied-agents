@@ -38,7 +38,7 @@ class Replayer:
     Example:
         replayer = Replayer("data.h5")
         for sample in replayer:
-            observation, action = sample
+            observation, action, state = sample
             ...
     """
 
@@ -74,6 +74,9 @@ class Replayer:
         if "action" in self.file_keys:
             self.file_keys.remove("action")
             self.file_keys = self.file_keys + ["action"]
+        if "state" in self.file_keys:
+            self.file_keys.remove("state")
+            self.file_keys = self.file_keys + ["state"]
         if "supervision" in self.file_keys:
             self.file_keys.remove("supervision")
             self.file_keys = self.file_keys + ["supervision"]
@@ -280,7 +283,7 @@ def clean_folder(folder: str, image_keys_to_save: List[str]) -> None:
     for f in os.listdir(folder):
         r = Replayer(f"{folder}/{f}", image_keys_to_save=image_keys_to_save)
         for _i, sample in enumerate(r):
-            obs, act = sample
+            obs, act, state = sample
         should_delete = input(f"Delete {f}? (y/n): ")
         if should_delete.lower() == "y":
             Path(f"{folder}/{f}").rmdir()
@@ -303,9 +306,10 @@ class FolderReplayer:
                 for _i, sample in enumerate(r):
                     observation = sample[0]
                     action = sample[1]
+                    state = sample[2] if len(sample) > 2 else None
                     image = np.asarray(observation["image"])
                     instruction = observation["instruction"]
-                    yield {"observation": {"image": image, "instruction": instruction}, "action": action}
+                    yield {"observation": {"image": image, "instruction": instruction}, "action": action, "state": state}
 
 
 def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> None:
@@ -319,24 +323,17 @@ def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> Non
     """
     r = FolderReplayer(folder)
     data = list(r.__iter__())
-
-    def list_of_dicts_to_dict(data: List[dict]) -> dict:
-        if not data:
-            return {}
-        columnar_data = {key: [] for key in data[0]}
-        for item in data:
-            for key, value in item.items():
-                columnar_data[key].append(value)
-        return columnar_data
-
     features = Features(
         {
             "observation": {"image": Image(), "instruction": Value("string")},
             "action": infer_features(data[0]["action"]),
+            "state": infer_features(data[0]["state"]),
+            "episode": Value("int32"),
         },
     )
 
-    data = list_of_dicts_to_dict(data)
+    # Convert list of dicts to dict of lists, preserving order
+    data_dict = {key: [item[key] for item in data] for key in data[0]}
     info = DatasetInfo(
         description=description,
         license="Apache-2.0",
@@ -345,10 +342,9 @@ def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> Non
         features=features,
     )
 
-    ds = Dataset.from_dict(data, info=info)
+    ds = Dataset.from_dict(data_dict, info=info)
     ds = ds.with_format("pandas")
-    login(os.getenv("HF_TOKEN"))
-    ds.push_to_hub(name, **kwargs)
+    ds.push_to_hub(name, private=True, **kwargs)
 
 
 def parse_slice(s: str) -> int | slice:
@@ -360,7 +356,7 @@ def parse_slice(s: str) -> int | slice:
     Returns:
         Union[int, slice]: Integer or slice.
 
-    Example:
+    Examples:
         >>> lst = [0, 1, 2, 3, 4, 5]
         >>> lst[parse_slice("1")]
         1

@@ -19,12 +19,14 @@ which can be set with a gym.Space object or any python object using the Sample c
 (see examples/using_sample.py for a tutorial), you can have the recorder infer the spaces
 by setting recorder="default" for automatic dataset recording.
 
-For example:
+Examples:
     >>> agent = LanguageAgent(context=SYSTEM_PROMPT, model_src=backend, recorder="default")
     >>> agent.act_and_record("pick up the fork", image)
 
 Alternatively, you can define the recorder separately to record the space you want.
-For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action:
+For example, to record the dataset with the image and instruction observation and AnswerAndActionsList as action.
+
+Examples:
     >>> observation_space = spaces.Dict({"image": Image(size=(224, 224)).space(), "instruction": spaces.Text(1000)})
     >>> action_space = AnswerAndActionsList(actions=[HandControl()] * 6).space()
     >>> recorder = Recorder(
@@ -33,7 +35,9 @@ For example, to record the dataset with the image and instruction observation an
     ...     observation_space=observation_space,
     ...     action_space=action_space
 
-To record:
+To record the dataset, you can use the record method of the recorder object.
+
+Examples:
     >>> recorder.record(
     ...     observation={
     ...         "image": image,
@@ -47,7 +51,7 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
-from typing import List, Literal, TypeAlias
+from typing import AsyncGenerator, Generator, List, Literal, TypeAlias
 
 from art import text2art
 from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
@@ -67,6 +71,18 @@ class Reminder:
 
     prompt: str | Image | Message
     n: int
+
+    def __iter__(self):
+        yield self.prompt
+        yield self.n
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.prompt
+        elif key == 1:
+            return self.n
+        else:
+            raise IndexError("Invalid index")
 
 
 def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
@@ -101,45 +117,45 @@ class LanguageAgent(Agent):
 
     _art_printed = False
 
-    def __init__(  # noqa
+    def __init__(
         self,
-        model_src: Literal["openai", "anthropic"]
-        | SupportsOpenAI
+        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http"]
         | AnyUrl
         | FilePath
         | DirectoryPath
         | NewPath = "openai",
         context: list | Image | str | Message = None,
         api_key: str | None = os.getenv("OPENAI_API_KEY"),
-        model_kwargs: dict = None,  # noqa
+        model_kwargs: dict = None,
         recorder: Literal["default", "omit"] | str = "omit",
-        recorder_kwargs: dict = None,  # noqa
-        local_only: bool = False,  # noqa
+        recorder_kwargs: dict = None,
     ) -> None:
-        """LanguageAgent with memory, dataset-recording, and remote infererence support. Always returns a string.
+        """Agent with memory,  asynchronous remote acting, and automatic dataset recording.
 
-        Supported datasets: HDF5, Datasets, JSON, CSV, Parquet.
-        Supported inference backends: OpenAI, Anthropic, Gradio.
-
-        Methods:
-            - act(instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs) -> str
-            - forget_last() -> Message
-            - forget(everything=False, last_n: int = -1) -> None
-            - remind_every(prompt: str | Image | Message, n: int) -> None
+         Additionally supports asynchronous remote inference,
+            supporting multiple platforms including OpenAI, Anthropic, vLLM, Gradio, and Ollama.
 
         Args:
-            model: The model or weights path to setup and preload if applicable.
-            context: The starting context to use for the conversation. Can be a list of messages, an image, a string,
-                or a message. If a string is provided, it will be interpreted as a user message.
-            api_key: The API key to use for the remote actor (if applicable).
-            model_src: Any of:
-                1. A path to a model's weights.
-                2. A string or mbodied.agents.backends.openai_backend.OpenAIBackendMixin subclass representing a backend API.
-                3. Any huggingface spaces path (mbodiai/openvla-quantized) or URL hosting a gradio server. See https://www.gradio.app/guides/getting-started-with-the-python-client for more details.
-            model_kwargs: Additional keyword arguments to pass to the model source. See mbodied.agents.backends.
-            recorder: The recorder config or name to use for the agent to record observations and actions.
-            recorder_kwargs: Additional keyword arguments to pass to the recorder such as push_to_cloud.
-            local_only: Whether to use the local model only. If True, the agent will not use a remote actor for inference.
+            model_src: The source of the model to use for inference. It can be one of the following:
+                - "openai": Use the OpenAI backend (or vLLM).
+                - "anthropic": Use the Anthropic backend.
+                - "gradio": Use the Gradio backend.
+                - "ollama": Use the Ollama backend.
+                - "http": Use a custom HTTP API backend.
+                - AnyUrl: A URL pointing to the model source.
+                - FilePath: A local path to the model's weights.
+                - DirectoryPath: A local directory containing the model's weights.
+                - NewPath: A new path object representing the model source.
+            context (Union[list, Image, str, Message], optional): The starting context to use for the conversation.
+                    It can be a list of messages, an image, a string, or a message.
+                    If a string is provided, it will be interpreted as a user message. Defaults to None.
+            api_key (str, optional): The API key to use for the remote actor (if applicable).
+                 Defaults to the value of the OPENAI_API_KEY environment variable.
+            model_kwargs (dict, optional): Additional keyword arguments to pass to the model source.
+                See the documentation of the specific backend for more details. Defaults to None.
+            recorder (Union[str, Literal["default", "omit"]], optional):
+                The recorder configuration or name or action. Defaults to "omit".
+            recorder_kwargs (dict, optional): Additional keyword arguments to pass to the recorder. Defaults to None.
         """
         if not LanguageAgent._art_printed:
             print("Welcome to")  # noqa: T201
@@ -155,7 +171,6 @@ class LanguageAgent(Agent):
             model_src=model_src,
             model_kwargs=model_kwargs,
             api_key=api_key,
-            local_only=local_only,
         )
 
         self.context = make_context_list(context)
@@ -167,20 +182,43 @@ class LanguageAgent(Agent):
         except IndexError:
             logging.warning("No message to forget in the context")
 
-    def forget(self, everything=False, last_n: int = -1) -> None:
-        """Forget the last n messages in the context."""
+    def forget_after(self, first_n: int) -> None:
+        """Forget after the first n messages in the context.
+
+        Args:
+            first_n: The number of messages to keep.
+        """
+        self.context = self.context[:first_n]
+
+    def forget(self, everything=False, last_n: int = -1) -> List[Message]:
+        """Forget the last n messages in the context.
+
+        Args:
+            everything: Whether to forget everything.
+            last_n: The number of messages to forget.
+        """
         if everything:
+            context = self.context
             self.context = []
-            return
+            return context
+        forgotten = []
         for _ in range(last_n):
-            self.forget_last()
+            last = self.forget_last()
+            if last:
+                forgotten.append(last)
+        return forgotten
 
     def history(self) -> List[Message]:
         """Return the conversation history."""
         return self.context
 
     def remind_every(self, prompt: str | Image | Message, n: int) -> None:
-        """Remind the agent of the prompt every n messages."""
+        """Remind the agent of the prompt every n messages.
+
+        Args:
+            prompt: The prompt to remind the agent of.
+            n: The frequency of the reminder.
+        """
         message = Message([prompt]) if not isinstance(prompt, Message) else prompt
         self.reminders.append(Reminder(message, n))
 
@@ -194,26 +232,43 @@ class LanguageAgent(Agent):
         self,
         instruction: str,
         image: Image = None,
-        parse_target: Sample = Sample,
+        parse_target: type[Sample] = Sample,
         context: list | str | Image | Message = None,
         model=None,
+        max_retries: int = 1,
+        record: bool = False,
         **kwargs,
     ) -> Sample:
-        """Responds to the given instruction, image, and context and parses the response into a Sample object."""
-        response = self.act(instruction, image, context, model, **kwargs)
-        response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
-        try:
-            response = parse_target.model_validate_json(response)
-        except Exception as e:
-            error = f"Error parsing response: {e}"
-            logging.error(error)
-            logging.info(f"Recieved response: {response}. Retrying with error message.")
+        """Responds to the given instruction, image, and context and parses the response into a Sample object.
 
-            instruction = instruction + "avoid the following error: " + error
-            response = self.act(instruction, image, context, model, **kwargs)
-            response = response.replace("```json", "").replace("```", "").replace("\n", "").strip()
-            response = parse_target.model_validate_json(response)
-        return response
+        Args:
+            instruction: The instruction to be processed.
+            image: The image to be processed.
+            parse_target: The target type to parse the response into.
+            context: Additonal context to include in the response. If context is a list of messages, it will be interpreted
+                as new memory.
+            model: The model to use for the response.
+            max_retries: The maximum number of retries to parse the response.
+            record: Whether to record the interaction for training.
+            **kwargs: Additional keyword arguments.
+        """
+        original_instruction = instruction
+        for attempt in range(max_retries + 1):
+            if record:
+                response = self.act_and_record(instruction, image, context, model, **kwargs)
+            else:
+                response = self.act(instruction, image, context, model, **kwargs)
+            response = response[response.find("{") : response.rfind("}") + 1]
+            try:
+                return parse_target.model_validate_json(response)
+            except Exception as e:
+                if attempt == max_retries:
+                    raise ValueError(f"Failed to parse response after {max_retries + 1} attempts") from e
+                error = f"Error parsing response: {e}"
+                instruction = original_instruction + f". Avoid the following error: {error}"
+                self.forget(last_n=2)
+                logging.warning(f"\nReceived response: {response}.\n Retrying with error message: {instruction}")
+        raise ValueError(f"Failed to parse response after {max_retries + 1} attempts")
 
     async def async_act_and_parse(
         self,
@@ -222,15 +277,61 @@ class LanguageAgent(Agent):
         parse_target: Sample = Sample,
         context: list | str | Image | Message = None,
         model=None,
+        max_retries: int = 1,
         **kwargs,
     ) -> Sample:
         """Responds to the given instruction, image, and context asynchronously and parses the response into a Sample object."""
         return await asyncio.to_thread(
-            self.act_and_parse, instruction, image, parse_target, context, model=model, **kwargs
+            self.act_and_parse,
+            instruction,
+            image,
+            parse_target,
+            context,
+            model=model,
+            max_retries=max_retries,
+            **kwargs,
         )
 
+    def prepare_inputs(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None
+    ) -> tuple[Message, list[Message]]:
+        """Helper method to prepare the inputs for the agent.
+
+        Args:
+            instruction: The instruction to be processed.
+            image: The image to be processed.
+            context: Additonal context to include in the response. If context is a list of messages, it will be interpreted
+                as new memory.
+        """
+        self._check_for_reminders()
+        memory = self.context
+        if context and all(isinstance(c, Message) for c in context):
+            memory += context
+            context = []
+
+        # Prepare the inputs
+        inputs = [instruction]
+        if image is not None:
+            inputs.append(image)
+        if context:
+            inputs.extend(context if isinstance(context, list) else [context])
+        message = Message(role="user", content=inputs)
+
+        return message, memory
+
+    def postprocess_response(self, response: str, message: Message, memory: list[Message], **kwargs) -> str:
+        """Postprocess the response."""
+        self.context.append(message)
+        self.context.append(Message(role="assistant", content=response))
+        return response
+
     def act(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self,
+        instruction: str,
+        image: Image = None,
+        context: list | str | Image | Message = None,
+        model=None,
+        **kwargs,
     ) -> str:
         """Responds to the given instruction, image, and context.
 
@@ -247,29 +348,62 @@ class LanguageAgent(Agent):
         Returns:
             str: The response to the instruction.
 
-        Example:
+        Examples:
             >>> agent.act("Hello, world!", Image("scene.jpeg"))
             "Hello! What can I do for you today?"
             >>> agent.act("Return a plan to pickup the object as a python list.", Image("scene.jpeg"))
             "['Move left arm to the object', 'Move right arm to the object']"
         """
-        self._check_for_reminders()
-        memory = self.context
-        if context and all(isinstance(c, Message) for c in context):
-            memory += context
-            context = []
+        message, memory = self.prepare_inputs(instruction, image, context)
+        model = model or self.actor.DEFAULT_MODEL
+        response = self.actor.predict(message, memory, model=model, **kwargs)
+        return self.postprocess_response(response, message, memory, **kwargs)
 
-        # Prepare the inputs
-        inputs = [instruction]
-        if image is not None:
-            inputs.append(image)
-        if context:
-            inputs.extend(context if isinstance(context, list) else [context])
-        message = Message(role="user", content=inputs)
+    def act_and_stream(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+    ) -> Generator[str, None, str]:
+        """Responds to the given instruction, image, and context and streams the response."""
+        message, memory = self.prepare_inputs(instruction, image, context)
+        response = ""
+        model = model or self.actor.DEFAULT_MODEL
+        kwargs.update({"model": model})
 
-        model = model or kwargs.pop("model", None)
-        response = self.actor.act(message, memory, model=model, **kwargs)
+        for chunk in self.actor.stream(message, memory, **kwargs):
+            response += chunk
+            yield chunk
+        return self.postprocess_response(response, message, memory, **kwargs)
 
-        self.context.append(message)
-        self.context.append(Message(role="assistant", content=response))
-        return response
+    async def async_act_and_stream(
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+    ) -> AsyncGenerator[str, None]:
+        # TODO(sebastian): fix this. Response is None maybe due to three nested async yields.
+        # raise NotImplementedError("Async streaming is not supported for this agent.")
+        message, memory = self.prepare_inputs(instruction, image, context)
+        model = model or self.actor.DEFAULT_MODEL
+        kwargs.update({"model": model})
+        response = ""
+        async for chunk in self.actor.astream(message, memory, **kwargs):
+            response += chunk
+            yield chunk
+        self.postprocess_response(response, message, memory, **kwargs)
+
+
+def main():
+    agent = LanguageAgent(model_src="openai")
+    resp = ""
+    for chunk in agent.act_and_stream("Hello, world!"):
+        resp += chunk
+        print(resp)
+
+
+async def async_main():
+    agent = LanguageAgent(model_src="openai", model_kwargs={"aclient": True})
+    resp = ""
+    async for chunk in agent.async_act_and_stream("Hello, world!"):
+        resp += chunk
+        print(resp)
+
+
+if __name__ == "__main__":
+    main()
+    asyncio.run(async_main())

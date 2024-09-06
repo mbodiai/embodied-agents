@@ -43,7 +43,7 @@ class ObjectPoseEstimator3D(SensoryAgent):
             depth_image_path (str): The path to save the depth image.
             intrinsic_matrix (np.ndarray): The intrinsic matrix.
 
-        Example:
+        Examples:
             >>> color_image = np.zeros((480, 640, 3), dtype=np.uint8)
             >>> depth_image = np.zeros((480, 640), dtype=np.uint16)
             >>> intrinsic_matrix = np.eye(3)
@@ -81,7 +81,7 @@ class ObjectPoseEstimator3D(SensoryAgent):
         Returns:
             Dict: Result from the Gradio server.
 
-        Example:
+        Examples:
             >>> estimator = ObjectPoseEstimator3D()
             >>> result = estimator.act(
             ...     "resources/color_image.png",

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from abc import ABC, abstractmethod
 
 
@@ -22,6 +23,7 @@ class HardwareInterface(ABC):
     control robots or other hardware devices.
     """
 
+    @abstractmethod
     def __init__(self, **kwargs):
         """Initializes the hardware interface.
 
@@ -31,7 +33,7 @@ class HardwareInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def do(self, *args, **kwargs) -> None: # noqa
+    def do(self, *args, **kwargs) -> None:  # noqa
         """Executes motion.
 
         Args:
@@ -39,7 +41,16 @@ class HardwareInterface(ABC):
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError
-    
+
+    async def async_do(self, *args, **kwargs) -> None:
+        """Asynchronously executes motion.
+
+        Args:
+            args: Arguments to pass to the hardware interface.
+            kwargs: Additional arguments to pass to the hardware interface.
+        """
+        return await asyncio.to_thread(self.do, *args, **kwargs)
+
     def fetch(self, *args, **kwargs) -> None:
         """Fetches data from the hardware.
 
@@ -48,7 +59,7 @@ class HardwareInterface(ABC):
             kwargs: Additional arguments to pass to the hardware interface.
         """
         raise NotImplementedError
-    
+
     def capture(self, *args, **kwargs) -> None:
         """Captures continuous data from the hardware.
 

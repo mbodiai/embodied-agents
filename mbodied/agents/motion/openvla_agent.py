@@ -11,7 +11,7 @@ class OpenVlaAgent(MotorAgent):
 
     `actor` is a gradio server taking: image, instruction, and unnorm_key as input.
 
-    Example:
+    Examples:
         >>> openvla_agent = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
         >>> openvla.act("move hand forward", Image(size=(224, 224)))
         HandControl(pose=Pose6D(x=1,y=2,z=3,roll=0,pitch=0,yaw=0), grasp=JointControl(value=0))
@@ -23,7 +23,6 @@ class OpenVlaAgent(MotorAgent):
         recorder_kwargs=None,
         model_src=None,
         model_kwargs=None,
-        local_only: bool = False,
         **kwargs,
     ):
         super().__init__(
@@ -31,7 +30,6 @@ class OpenVlaAgent(MotorAgent):
             recorder_kwargs=recorder_kwargs,
             model_src=model_src,
             model_kwargs=model_kwargs,
-            local_only=local_only,
             **kwargs,
         )
 
@@ -48,7 +46,7 @@ class OpenVlaAgent(MotorAgent):
         """
         if self.actor is None:
             raise ValueError("Remote actor for OpenVLA not initialized.")
-        response = self.actor.act(image.base64, instruction, unnorm_key)
+        response = self.actor.predict(image.base64, instruction, unnorm_key)
         items = response.strip("[]").split()
         action = [float(item) for item in items]
         return HandControl.unflatten(action)

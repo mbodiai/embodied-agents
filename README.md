@@ -17,13 +17,13 @@
 [![PyPI](https://img.shields.io/pypi/v/mbodied)](https://pypi.org/project/mbodied)
 [![MacOS](https://github.com/mbodiai/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/mbodiai/opensource/actions/workflows/macos.yml)
 [![Ubuntu](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml)
-[![Documentation Status](https://readthedocs.com/projects/mbodi-ai-mbodied/badge/?version=latest)](https://readthedocs.com/projects/mbodi-ai-mbodied-agents/badge/?version=latest)
 
-📖 **Docs**: [readthedocs](https://mbodi-ai-mbodied-agents.readthedocs-hosted.com/en/latest/)
+📖 **Docs**: [docs](https://api.mbodi.ai/docs)
 
-🚀 **Simple Robot Agent Example:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) </br>
-💻 **Simulation Example with [SimplerEnv](https://github.com/simpler-env/SimplerEnv):** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing) </br>
-🤖 **Motor Agent using OpenVLA:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1anbOd4snFw84Zf0AvLrWReVdx61TfAIC?usp=sharing)
+🚀 **Simple Robot Agent Example:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing) </br>
+💻 **Simulation Example with [SimplerEnv](https://github.com/simpler-env/SimplerEnv):** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/18oiuw1yTxO5x-eT7Z8qNyWtjyYd8cECI?usp=sharing) </br>
+🤖 **Motor Agent using OpenVLA:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1flnMrqyepGOO8J9rE6rehzaLdZPsw6lX?usp=sharing)</br>
+⏺️ **Record Dataset on a Robot**[<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing)</br>
 
 🫡 **Support, Discussion, and How-To's** **:** </br>
 [![](https://dcbadge.limes.pink/api/server/BPQ7FEGxNb?theme=discord&?logoColor=pink)](https://discord.gg/BPQ7FEGxNb)
@@ -31,6 +31,13 @@
 </div>
 
 **Updates:**
+
+**Aug 28 2024, embodied-agents v1.2**
+
+- New [Doc site](https://api.mbodi.ai/docs) is up!
+- Added the features to record dataset on [robot](mbodied/robots/robot.py) natively.
+- Add multiple new Sensory Agents, i.e. [depth estimation](mbodied/agents/sense/depth_estimation_agent.py), [object detection](mbodied/agents/sense/object_detection_agent.py), [image segmentation](mbodied/agents/sense/segmentation_agent.py) with public [API endpoints](https://api.mbodi.ai/sense/) hosted. And a simple cli `mbodied` for trying them.
+- Added [Auto Agent](mbodied/agents/auto/auto_agent.py) for dynamic agents selection.
 
 **June 30 2024, embodied-agents v1.0**:
 
@@ -63,38 +70,29 @@
     - [Run a robotics transformer model on a robot.](#run-a-robotics-transformer-model-on-a-robot)
     - [Notebooks](#notebooks)
   - [The Sample Class](#the-sample-class)
-    - [💡 Did you know](#-did-you-know)
-  - [Building Blocks](#building-blocks)
-      - [Creating a Sample](#creating-a-sample)
-      - [Serialization and Deserialization with Pydantic](#serialization-and-deserialization-with-pydantic)
-      - [Converting to Different Containers](#converting-to-different-containers)
-      - [Gym Space Integration](#gym-space-integration)
-    - [Message](#message)
-    - [Backend](#backend)
-    - [Agent](#agent)
-    - [Language Agent](#language-agent)
-    - [Motor Agent](#motor-agent)
-    - [Sensory Agent](#sensory-agent)
-    - [Motions](#motions)
-    - [Hardware Interface](#hardware-interface)
-    - [Recorder](#recorder)
-    - [Replayer](#replayer)
+  - [API Reference](#api-reference)
   - [Directory Structure](#directory-structure)
   - [Contributing](#contributing)
 
 ## Overview
 
-This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of the central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent has an `act` method that can be overriden and satisfies:
+This repository is broken down into 3 main components: **Agents**, **Data**, and **Hardware**. Inspired by the efficiency of the central nervous system, each component is broken down into 3 meta-modalities: **Language**, **Motion**, and **Sense**. Each agent has an `act` method that can be overridden and satisfies:
 
 - **Language Agents** always return a string.
 - **Motor Agents** always return a `Motion`.
 - **Sensory Agents** always return a `SensorReading`.
 
+For convenience, we also provide **AutoAgent** which dynamically initializes the right agent for the specified task. See [API Reference](#auto-agent) below for more.
+
 A call to `act` or `async_act` can perform local or remote inference synchronously or asynchronously. Remote execution can be performed with [Gradio](https://www.gradio.app/docs/python-client/introduction), [httpx](https://www.python-httpx.org/), or different LLM clients. Validation is performed with [Pydantic](https://docs.pydantic.dev/latest/).
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
-Jump to [getting started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing) or [simulation](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing). Be sure to join our [Discord](https://discord.gg/BPQ7FEGxNb) for 🥇-winning discussions :)
+- Language Agents natively support OpenAI, Anthropic, Ollama, vLLM, Gradio, etc
+- Motor Agents natively support OpenVLA, RT1(upcoming)
+- Sensory Agents support Depth Anything, YOLO, Segment Anything 2
+
+Jump to [getting started](#getting-started) to get up and running on [real hardware](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing) or [simulation](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing). Be sure to join our [Discord](https://discord.gg/BPQ7FEGxNb) for 🥇-winning discussions :)
 
 **⭐ Give us a star on GitHub if you like us!**
 
@@ -159,19 +157,33 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - Open Weights: OpenVLA, Idefics2, Llava-1.6-Mistral, Phi-3-vision-128k-instruct
 - All gradio endpoints hosted on HuggingFace spaces.
 
-### To Do
+### Roadmap
 
-- [ ] More Motor Agents
-- [ ] More Data Augmentation
-- [ ] More Evaluation on Latency, Accuracy, and Prompting
+- [x] OpenVLA Motor Agent
+- [x] Automatic dataset recording on Robot
+- [x] Yolo, SAM2, DepthAnything Sensory Agents
+- [x] Auto Agent
+- [ ] ROS integration
+- [ ] More Motor Agents, i.e. RT1
+- [ ] More device support, i.e. OpenCV camera
+- [ ] Fine-tuning Scripts
 
 ## Installation
 
 ```shell
 pip install mbodied
 
+# With extra dependencies, i.e. torch, opencv-python, etc.
+pip install mbodied[extras]
+
 # For audio support
 pip install mbodied[audio]
+```
+
+Or install from source:
+
+```shell
+pip install git+https://github.com/mbodiai/embodied-agents.git
 ```
 
 ## Getting Started
@@ -184,8 +196,6 @@ from mbodied.types.motion import AbsoluteMotionField, RelativeMotionField
 
 class FineGrainedHandControl(HandControl):
     comment: str = Field(None, description="A comment to voice aloud.")
-
-    # Any attempted validation will fail if the bounds and shape are not satisfied.
     index: FullJointControl = AbsoluteMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
     thumb: FullJointControl = RelativeMotionField([0,0,0],bounds=[-3.14, 3.14], shape=(3,))
 ```
@@ -197,44 +207,47 @@ import os
 from mbodied.agents import LanguageAgent
 from mbodied.agents.motion import OpenVlaAgent
 from mbodied.agents.sense.audio import AudioAgent
-from mbodied.hardware.sim_interface import SimInterface
+from mbodied.robots import SimRobot
 
 cognition = LanguageAgent(
   context="You are an embodied planner that responds with a python list of strings and nothing else.",
-  api_key=os.getenv("ANTHROPIC_API_KEY"), # Or use OpenAI
-  model_src="anthropic", model_kwargs={"model": "claude-3-5-sonnet-20240620"},
+  api_key=os.getenv("OPENAI_API_KEY"),
+  model_src="openai",
   recorder="auto",
 )
-speech = AudioAgent(use_pyaudio=False) # pyaudio is buggy on mac
+audio = AudioAgent(use_pyaudio=False, api_key=os.getenv("OPENAI_API_KEY")) # pyaudio is buggy on mac
 motion = OpenVlaAgent(model_src="https://api.mbodi.ai/community-models/")
 
 # Subclass and override do() and capture() methods.
-hardware_interface = SimInterface()
+robot = SimRobot()
 
-instruction = speech.listen()
-plan = cognition.act(instruction, hardware_interface.capture())
+instruction = audio.listen()
+plan = cognition.act(instruction, robot.capture())
 
 for step in plan.strip('[]').strip().split(','):
   print("\nMotor agent is executing step: ", step, "\n")
   for _ in range(10):
-    hand_control = motion.act(step, hardware_interface.capture())
-    hardware_interface.do(hand_control)
+    hand_control = motion.act(step, robot.capture())
+    robot.do(hand_control)
 ```
 
 Example Scripts:
 
-- [examples/simple_robot_agent.py](examples/simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output actions.
-- [examples/full_example.py](examples/full_example.py): Full example of languaged based cognitive and motor agent executing task.
-- [examples/motor_example_openvla.py](examples/motor_example_openvla.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
-- [examples/reason_plan_act_robot.py](examples/reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
+- [1_simple_robot_agent.py](examples/1_simple_robot_agent.py): A very simple language based cognitive agent taking instruction from user and output voice and actions.
+- [2_openvla_motor_agent_example.py](examples/2_openvla_motor_agent_example.py): Run robotic transformers, i.e. OpenVLA, in several lines on the robot.
+- [3_reason_plan_act_robot.py](examples/3_reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
+- [4_language_reason_plan_act_robot.py](examples/4_language_reason_plan_act_robot.py): Full example of all languaged based cognitive and motor agent executing task.
+- [5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py): Example of collecting dataset on robot's action at a specific frequency by just yelling at the robot!
 
 ### Notebooks
 
-Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qFoo2h4tD9LYtUwkWtO4XtVAwcKxALn_?usp=sharing)
+Real Robot Hardware: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing)
 
-Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1gJlfEvsODZWGn3rK8Nx4A0kLnLzJtJG_?usp=sharing)
+Simulation with: [SimplerEnv](https://github.com/simpler-env/SimplerEnv.git) : [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18oiuw1yTxO5x-eT7Z8qNyWtjyYd8cECI?usp=sharing)
 
-MotorAgent with OpenVLA: [examples/motor_example_openvla.py](examples/motor_example_openvla.py)
+Run OpenVLA with embodied-agents in simulation: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1flnMrqyepGOO8J9rE6rehzaLdZPsw6lX?usp=sharing)
+
+Record dataset on a robot: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing)
 
 ## The [Sample](mbodied/base/sample.py) Class
 
@@ -252,15 +265,14 @@ To learn more about all of the possibilities with embodied agents, check out the
 - You can `pack` a list of `Sample`s or Dicts into a single `Sample` or `Dict` and `unpack` accordingly?
 - You can `unflatten` any python structure into a `Sample` class so long you provide it with a valid json schema?
 
-<details> <summary><h2 style="display: inline-block;">Deep Dive</h2></summary>
-
-## Building Blocks
+## API Reference
 
 #### Creating a Sample
 
 Creating a Sample requires just wrapping a python dictionary with the `Sample` class. Additionally, they can be made from kwargs, Gym Spaces, and Tensors to name a few.
 
 ```python
+from mbodied.types.sample import Sample
 # Creating a Sample instance
 sample = Sample(observation=[1,2,3], action=[4,5,6])
 
@@ -307,15 +319,6 @@ print(sample_np) # Output: array([1, 2, 3, 4, 5, 6])
 # Converting to a PyTorch tensor
 sample_pt = sample.to("pt")
 print(sample_pt) # Output: tensor([1, 2, 3, 4, 5, 6])
-
-# Converting to a HuggingFace Dataset
-sample_hf = sample.to("hf")
-print(sample_hf)
-# Output: Dataset({
-#     features: ['observation', 'action'],
-#     num_rows: 3
-# })
-
 ```
 
 #### Gym Space Integration
@@ -335,6 +338,8 @@ The [Message](mbodied/types/message.py) class represents a single completion sam
 You can create a `Message` in versatile ways. They can all be understood by mbodi's backend.
 
 ```python
+from mbodied.types.message import Message
+
 Message(role="user", content="example text")
 Message(role="user", content=["example text", Image("example.jpg"), Image("example2.jpg")])
 Message(role="user", content=[Sample("Hello")])
@@ -350,34 +355,23 @@ The [Backend](mbodied/base/backend.py) class is an abstract base class for Backe
 
 ### Language Agent
 
-The [Language Agent](mbodied/agents/language/language_agent.py) is the main entry point for intelligent robot agents. It can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
+The [Language Agent](mbodied/agents/language/language_agent.py) can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
-Currently supported API services are OpenAI and Anthropic. Upcoming API services includes Gemini, Ollama, and HuggingFace.
+Natively supports API services: OpenAI, Anthropic, vLLM, Ollama, HTTPX, or any gradio endpoints. More upcoming!
 
 To use OpenAI for your robot backend:
 
 ```python
-robot_agent = LanguageAgent(context=context_prompt, model_src="openai")
-```
+from mbodied.agents.language import LanguageAgent
 
-`context` can be either a string or a list, for example:
-
-```python
-context_prompt = "you are a robot"
-# OR
-context_prompt = [
-    Message(role="system", content="you are a robot"),
-    Message(role="user", content=["example text", Image("example.jpg")]),
-    Message(role="assistant", content="Understood."),
-]
+agent = LanguageAgent(context="You are a robot agent.", model_src="openai")
 ```
 
 To execute an instruction:
 
 ```python
-response = robot_agent.act(instruction, image)[0]
-# You can also pass an arbituary number of text and image to the agent:
-response = robot_agent.act([instruction1, image1, instruction2, image2])[0]
+instruction = "pick up the fork"
+response = robot_agent.act(instruction, image)
 ```
 
 Language Agent can connect to vLLM as well. For example, suppose you are running a vLLM server Mistral-7B on 1.2.3.4:1234. All you need to do is:
@@ -394,27 +388,80 @@ response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct
 ### Motor Agent
 
 [Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
-Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, are too large to run on edge devices. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](mbodied/agents/motion/openvla_example_server.py)
+Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, may be challenging to run without quantization. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
 
 ### Sensory Agent
 
-These agents interact with the environment to collect sensory data. They always return a `SensorReading`, which can be various forms of processed sensory input such as images, depth data, or audio signals.
+These agents interact with the environment to collect sensor data. They always return a `SensorReading`, which can be various forms of processed sensory input such as images, depth data, or audio signals.
 
-For example, [object_pose_estimator_3d](mbodied/agents/sense/object_pose_estimator_3d.py) is a sensory agent that senses objects' 3d coordinates as the robot sees.
+Currently, we have:
+
+- [depth estimation](mbodied/agents/sense/depth_estimation_agent.py)
+- [object detection](mbodied/agents/sense/object_detection_agent.py)
+- [image segmentation](mbodied/agents/sense/segmentation_agent.py)
+- [3D object pose estimator](mbodied/agents/sense/object_pose_estimator_3d.py)
+
+agents that process robot's sensor information.
+
+### Auto Agent
+
+[Auto Agent](mbodied/agents/auto/auto_agent.py) dynamically selects and initializes the correct agent based on the task and model.
+
+```python
+from mbodied.agents.auto.auto_agent import AutoAgent
+
+# This makes it a LanguageAgent
+agent = AutoAgent(task="language", model_src="openai")
+response = agent.act("What is the capital of France?")
+
+# This makes it a motor agent: OpenVlaAgent
+auto_agent = AutoAgent(task="motion-openvla", model_src="https://api.mbodi.ai/community-models/")
+action = auto_agent.act("move hand forward", Image(size=(224, 224)))
+
+# This makes it a sensory agent: DepthEstimationAgent
+auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
+depth = auto_agent.act(image=Image(size=(224, 224)))
+```
+
+Alternatively, you can use `get_agent` method in [auto_agent](mbodied/agents/auto/auto_agent.py) as well.
+
+```python
+language_agent = get_agent(task="language", model_src="openai")
+```
 
 ### Motions
 
 The [motion_controls](mbodied/types/motion_controls.py) module defines various motions to control a robot as Pydantic models. They are also subclassed from `Sample`, thus possessing all the capability of `Sample` as mentioned above. These controls cover a range of actions, from simple joint movements to complex poses and full robot control.
 
-### Hardware Interface
+### Robot
 
-Mapping robot actions from a model to an action is very easy. In our example script, we use a mock hardware interface. We also have an [XArm interface](mbodied/hardware/xarm_interface.py) as an example.
+You can integrate your custom robot hardware by subclassing [Robot](mbodied/robot/robot.py) quite easily. You only need to implement `do()` function to perform actions (and some additional methods if you want to record dataset on the robot). In our examples, we use a [mock robot](mbodied/robot/sim_robot.py). We also have an [XArm robot](mbodied/robot/xarm_robot.py) as an example.
+
+#### Recording a Dataset
+
+Recording a dataset on a robot is very easy! All you need to do is implement the `get_observation()`, `get_state()`, and `prepare_action()` methods for your robot. After that, you can record a dataset on your robot anytime you want. See [examples/5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py) and this colab: [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing) for more details.
+
+```python
+from mbodied.robots import SimRobot
+from mbodied.types.motion.control import HandControl, Pose
+
+robot = SimRobot()
+robot.init_recorder(frequency_hz=5)
+with robot.record("pick up the fork"):
+  motion = HandControl(pose=Pose(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3))
+  robot.do(motion)
+```
 
 ### Recorder
 
-Dataset [Recorder](mbodied/data/recording.py) can record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder.
+Dataset [Recorder](mbodied/data/recording.py) is a lower level recorder to record your conversation and the robot's actions to a dataset as you interact with/teach the robot. You can define any observation space and action space for the Recorder. See [gymnasium](https://github.com/Farama-Foundation/Gymnasium) for more details about spaces.
 
 ```python
+from mbodied.data.recording import Recorder
+from mbodied.types.motion.control import HandControl
+from mbodied.types.sense.vision import Image
+from gymnasium import spaces
+
 observation_space = spaces.Dict({
     'image': Image(size=(224, 224)).space(),
     'instruction': spaces.Text(1000)
@@ -435,12 +482,12 @@ The [Replayer](mbodied/data/replaying.py) class is designed to process and manag
 Example for iterating through a dataset from Recorder with Replayer:
 
 ```python
+from mbodied.data.replaying import Replayer
+
 replayer = Replayer(path=str("path/to/dataset.h5"))
 for observation, action in replayer:
    ...
 ```
-
-</details>
 
 ## Directory Structure
 
@@ -456,7 +503,8 @@ for observation, action in replayer:
 │     │  ├─ motion/ .... Motion based agents modules
 │     │  └─ sense/ ..... Sensory, e.g. audio, processing modules
 │     ├─ data/ ......... Data handling and processing
-│     ├─ hardware/ ..... Hardware interface and interaction
+│     ├─ hardware/ ..... Hardware modules, i.e. camera
+│     ├─ robot/ ........ Robot interface and interaction
 │     └─ types/ ........ Common types and definitions
 └─ tests/ .............. Unit tests
 ```
