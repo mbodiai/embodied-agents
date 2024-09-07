@@ -272,9 +272,13 @@ def test_language_agent_act_and_parse_retry_history(mock_act):
 
     history = agent.history()
     assert len(history) == 2, f"Expected 2 messages in history, but got {len(history)}"
-    assert history[0].content == [
-        "Parse this. Avoid the following error: Error parsing response: 1 validation error for TestSample\nkey\n  Field required [type=missing, input_value={'invalid': 'json'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.8/v/missing"
-    ]
+    # Compare the main part of the error message and avoid the version number in the URL
+    expected_message = (
+        "Parse this. Avoid the following error: Error parsing response: 1 validation error for TestSample\n"
+        "key\n  Field required [type=missing, input_value={'invalid': 'json'}, input_type=dict]\n"
+        "    For further information visit https://errors.pydantic.dev"
+    )
+    assert history[0].content[0].startswith(expected_message), f"Unexpected content: {history[0].content[0]}"
     assert history[1].content == ['{"key": "value"}']
 
 
