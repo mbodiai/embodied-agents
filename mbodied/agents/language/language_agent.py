@@ -61,6 +61,7 @@ from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.types.sample import Sample
 from mbodied.types.sense.image import Image
+from mbodied.types.sense.depth import Depth
 
 SupportsOpenAI: TypeAlias = OpenAIBackend
 
@@ -293,7 +294,11 @@ class LanguageAgent(Agent):
         )
 
     def prepare_inputs(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None
+        self,
+        instruction: str,
+        image: Image = None,
+        depth: Depth | None = None,
+        context: list | str | Image | Message = None,
     ) -> tuple[Message, list[Message]]:
         """Helper method to prepare the inputs for the agent.
 
@@ -313,6 +318,8 @@ class LanguageAgent(Agent):
         inputs = [instruction]
         if image is not None:
             inputs.append(image)
+        if depth is not None:
+            inputs.append(depth)
         if context:
             inputs.extend(context if isinstance(context, list) else [context])
         message = Message(role="user", content=inputs)
@@ -331,6 +338,7 @@ class LanguageAgent(Agent):
         image: Image = None,
         context: list | str | Image | Message = None,
         model=None,
+        depth: Depth | None = None,
         **kwargs,
     ) -> str:
         """Responds to the given instruction, image, and context.
@@ -354,7 +362,7 @@ class LanguageAgent(Agent):
             >>> agent.act("Return a plan to pickup the object as a python list.", Image("scene.jpeg"))
             "['Move left arm to the object', 'Move right arm to the object']"
         """
-        message, memory = self.prepare_inputs(instruction, image, context)
+        message, memory = self.prepare_inputs(instruction, image, depth, context)
         model = model or self.actor.DEFAULT_MODEL
         response = self.actor.predict(message, memory, model=model, **kwargs)
         return self.postprocess_response(response, message, memory, **kwargs)

@@ -137,7 +137,11 @@ class OpenAIBackendMixin(Backend):
         on_backoff=lambda details: print(f"Backing off {details['wait']:.1f} seconds after {details['tries']} tries."),  # noqa
     )
     def predict(
-        self, message: Message, context: List[Message] | None = None, model: Any | None = None, **kwargs
+        self,
+        message: Message,
+        context: List[Message] | None = None,
+        model: Any | None = None,
+        **kwargs,
     ) -> str:
         """Create a completion based on the given message and context.
 
