@@ -173,28 +173,27 @@ class Image(Sample):
         self._base64 = kwargs.get("base64", None)
         self._pil = kwargs.get("pil", None)
         self._url = kwargs.get("url", None)
+        self._size = kwargs.get("size", None)
+
+        if self._size is not None and self.pil is not None:
+            self._pil = self._pil.resize(self._size)
+            self._array = np.array(self._pil)
 
     @property
     def array(self) -> np.ndarray | None:
         """Lazily computes and returns the NumPy array."""
-        if self._array is None:
-            if self._pil is not None:
-                # Convert the PIL image to a NumPy array
-                self._array = np.array(self._pil)
-            else:
-                self._array = np.array(self.pil)
+        if self._array is None and self.pil is not None:
+            # Convert the PIL image to a NumPy array
+            self._array = np.array(self._pil)
         return self._array
 
     @property
     def base64(self) -> Base64Str | None:
         """Lazily computes and returns the base64-encoded string."""
-        if self._base64 is None:
+        if self._base64 is None and self.pil is not None:
             buffer = io.BytesIO()
             # Save the PIL image to a buffer in the specified encoding
-            if self._pil is not None:
-                self._pil.convert("RGB").save(buffer, format=self.encoding.upper())
-            else:
-                self.pil.convert("RGB").save(buffer, format=self.encoding.upper())
+            self._pil.convert("RGB").save(buffer, format=self.encoding.upper())
             self._base64 = base64lib.b64encode(buffer.getvalue()).decode("utf-8")
         return self._base64
 
@@ -216,13 +215,12 @@ class Image(Sample):
     @property
     def url(self) -> AnyUrl | str | None:
         """Lazily computes and returns the data URL."""
-        if self._url is None:
+        if self._url is None and self._base64 is not None:
+            self._url = f"data:image/{self.encoding};base64,{self._base64}"
+        elif self._url is None and self.pil is not None:
             # First convert the PIL image to a base64 string
             buffer = io.BytesIO()
-            if self._pil is not None:
-                self._pil.convert("RGB").save(buffer, format=self.encoding.upper())
-            else:
-                self.pil.convert("RGB").save(buffer, format=self.encoding.upper())
+            self._pil.convert("RGB").save(buffer, format=self.encoding.upper())
             self._base64 = base64lib.b64encode(buffer.getvalue()).decode("utf-8")
             # Construct the data URL
             self._url = f"data:image/{self.encoding};base64,{self._base64}"
@@ -231,11 +229,8 @@ class Image(Sample):
     @property
     def size(self) -> tuple[int, int] | None:
         "Lazily computes and returns the image size"
-        if self._size is None:
-            if self._pil is not None:
-                self._size = self._pil.size
-            else:
-                self._size = self.pil.size
+        if self._size is None and self.pil is not None:
+            self._size = self._pil.size
         return self._size
 
     def __repr__(self):

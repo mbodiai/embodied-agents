@@ -149,6 +149,7 @@ def test_lazy_loading():
     assert img._array is None
     assert img._base64 is None
     assert img._size is None
+    assert img._url is None
 
     # Access size, which should trigger lazy loading
     assert img.size is not None
@@ -159,6 +160,8 @@ def test_lazy_loading():
     assert img._array is not None
     assert img.base64 is not None
     assert img._base64 is not None
+    assert img.url is not None
+    assert img._url is not None
 
 
 if __name__ == "__main__":
