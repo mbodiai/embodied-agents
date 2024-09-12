@@ -78,68 +78,84 @@ class HttpxBackend(OpenAIBackendMixin):
     @overload
     def predict(self, messages: List[Message], model: str | None = None, **kwargs) -> str: ...
 
-    def predict(self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs) -> str:
-        if isinstance(message, list):
-            messages = message
-        elif isinstance(message, Message):
-            messages = context + [message]
+    @overload
+    def predict(
+        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+    ) -> str: ...
+
+    def predict(
+        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs
+    ) -> str:
+        # Determine if the input is a list of messages or a single message
+        if isinstance(message_or_messages, list):
+            messages = message_or_messages
         else:
-            messages = context
-        if isinstance(context, str):
-            model = context
+            # If a single message is provided, append it to the context
+            messages = (context or []) + [message_or_messages]
+
         model = model or self.DEFAULT_MODEL
-        messages = [message] + messages
+
         data = {
             "messages": [self.serialized(msg).serialize() for msg in messages],
             "model": model,
             "stream": False,
             **kwargs,
         }
-        data.update(kwargs)
+
         with httpx.Client(trust_env=True) as client:
             response = client.post(
                 self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60), follow_redirects=True
             )
+
+            # Process response
             if response.status_code == 200:
                 response_data = response.json()
                 return self.serialized.extract_response(response_data)
+
             response.raise_for_status()
             return response.text
 
     @overload
-    def stream(self, messages: List[Message], model: str | None = None, **kwargs) -> str: ...
+    def stream(self, messages: List[Message], model: str | None = None, **kwargs) -> Generator[str, None, None]: ...
 
+    @overload
     def stream(
         self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+    ) -> Generator[str, None, None]: ...
+
+    def stream(
+        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs
     ) -> Generator[str, None, None]:
-        if isinstance(message, list):
-            messages = message
-        elif isinstance(message, Message):
-            messages = context + [message]
+        if isinstance(message_or_messages, list):
+            messages = message_or_messages
         else:
-            messages = context
-        if isinstance(context, str):
-            model = context
-        else:
-            messages = context
+            # If a single message is provided, append it to the context
+            messages = (context or []) + [message_or_messages]
+
+        model = model or self.DEFAULT_MODEL
+
         yield from self._stream_completion(messages, model, **kwargs)
 
     @overload
-    async def astream(self, messages: List[Message], model: str | None = None, **kwargs) -> str: ...
+    async def astream(
+        self, messages: List[Message], model: str | None = None, **kwargs
+    ) -> AsyncGenerator[str, None]: ...
+
+    @overload
+    async def astream(
+        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+    ) -> AsyncGenerator[str, None]: ...
 
     async def astream(
-        self, message: Message, context: List[Message] | None = None,  model: str | None = None, **kwargs
+        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs
     ) -> AsyncGenerator[str, None]:
-        if isinstance(message, list):
-            messages = message
-        elif isinstance(message, Message):
-            messages = context + [message]
+        if isinstance(message_or_messages, list):
+            messages = message_or_messages
         else:
-            messages = context
-        if isinstance(messages, str):
-            model = messages
-        else:
-            messages = context
+            # If a single message is provided, append it to the context
+            messages = (context or []) + [message_or_messages]
+
+        model = model or self.DEFAULT_MODEL
 
         async for chunk in self._astream_completion(messages, model, **kwargs):
             yield chunk
