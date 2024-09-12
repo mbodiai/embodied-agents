@@ -15,6 +15,7 @@
 [![license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mbodied)](https://pypi.org/project/mbodied/)
 [![PyPI](https://img.shields.io/pypi/v/mbodied)](https://pypi.org/project/mbodied)
+[![Downloads](https://static.pepy.tech/badge/mbodied)](https://pepy.tech/project/mbodied)</br>
 [![MacOS](https://github.com/mbodiai/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/mbodiai/opensource/actions/workflows/macos.yml)
 [![Ubuntu](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml)
 
