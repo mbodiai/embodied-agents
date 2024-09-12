@@ -179,7 +179,7 @@ def test_serializer_with_image():
         "content": [{"type": "text", "text": "Describe this image"}, {"type": "image_url", "image_url": image.url}],
     }
 
-@pytest.mark.slow
+@mock.patch("httpx.Client", FakeHttpxClient)
 def test_ollama_agent():                                                                                                                
     from mbodied.agents.language import LanguageAgent                                                                 
     agent = LanguageAgent(context="You are a robot agent.", model_src="ollama")                                       
