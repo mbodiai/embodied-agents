@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Generator, List, AsyncGenerator, Any
+from typing import AsyncGenerator, Generator, List, overload
 
 import httpx
 
@@ -73,9 +73,22 @@ class HttpxBackend(OpenAIBackendMixin):
         self.headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
         self.serialized = serializer or self.SERIALIZER
         self.kwargs = kwargs
+        self.DEFAULT_MODEL = kwargs.get("model", self.DEFAULT_MODEL)
 
-    def predict(self, messages: List[Message], model: str | None = None, **kwargs) -> str:
+    @overload
+    def predict(self, messages: List[Message], model: str | None = None, **kwargs) -> str: ...
+
+    def predict(self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs) -> str:
+        if isinstance(message, list):
+            messages = message
+        elif isinstance(message, Message):
+            messages = context + [message]
+        else:
+            messages = context
+        if isinstance(context, str):
+            model = context
         model = model or self.DEFAULT_MODEL
+        messages = [message] + messages
         data = {
             "messages": [self.serialized(msg).serialize() for msg in messages],
             "model": model,
@@ -83,18 +96,51 @@ class HttpxBackend(OpenAIBackendMixin):
             **kwargs,
         }
         data.update(kwargs)
-        with httpx.Client() as client:
-            response = client.post(self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60))
+        with httpx.Client(trust_env=True) as client:
+            response = client.post(
+                self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60), follow_redirects=True
+            )
             if response.status_code == 200:
                 response_data = response.json()
                 return self.serialized.extract_response(response_data)
             response.raise_for_status()
             return response.text
 
-    def stream(self, messages: List[Message], model: str | None = None, **kwargs) -> Generator[str, None, None]:
+    @overload
+    def stream(self, messages: List[Message], model: str | None = None, **kwargs) -> str: ...
+
+    def stream(
+        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+    ) -> Generator[str, None, None]:
+        if isinstance(message, list):
+            messages = message
+        elif isinstance(message, Message):
+            messages = context + [message]
+        else:
+            messages = context
+        if isinstance(context, str):
+            model = context
+        else:
+            messages = context
         yield from self._stream_completion(messages, model, **kwargs)
 
-    async def astream(self, messages: List[Message], model: str | None = None, **kwargs) -> AsyncGenerator[str, None]:
+    @overload
+    async def astream(self, messages: List[Message], model: str | None = None, **kwargs) -> str: ...
+
+    async def astream(
+        self, message: Message, context: List[Message] | None = None,  model: str | None = None, **kwargs
+    ) -> AsyncGenerator[str, None]:
+        if isinstance(message, list):
+            messages = message
+        elif isinstance(message, Message):
+            messages = context + [message]
+        else:
+            messages = context
+        if isinstance(messages, str):
+            model = messages
+        else:
+            messages = context
+
         async for chunk in self._astream_completion(messages, model, **kwargs):
             yield chunk
 

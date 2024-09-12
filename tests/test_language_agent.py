@@ -69,6 +69,7 @@ def test_language_agent_initialization(mock_openai_init, mock_openai_act):
     assert agent.context == []
 
 
+
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
 @mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_forget_last(mock_openai_init, mock_openai_act):
@@ -282,5 +283,18 @@ def test_language_agent_act_and_parse_retry_history(mock_act):
     assert history[1].content == ['{"key": "value"}']
 
 
+@pytest.mark.asyncio
+@pytest.mark.network
+async def test_async_act_and_stream():
+    agent = LanguageAgent(model_src="ollama")
+    chunks = []
+    async for chunk in agent.async_act_and_stream("Hello, how are you?"):
+        chunks.append(chunk)
+        print(f"Chunk: {chunk}")
+    assert len(chunks) > 1
+
+
 if __name__ == "__main__":
-    pytest.main(["-vv", __file__])
+    pytest.main(["-vv", __file__, "-m", "not asyncio"])
+    asyncio.run(pytest.main(["-vv", __file__, "-m", "asyncio"]))
+

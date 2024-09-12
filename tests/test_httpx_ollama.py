@@ -179,6 +179,11 @@ def test_serializer_with_image():
         "content": [{"type": "text", "text": "Describe this image"}, {"type": "image_url", "image_url": image.url}],
     }
 
-
+@pytest.mark.slow
+def test_ollama_agent():                                                                                                                
+    from mbodied.agents.language import LanguageAgent                                                                 
+    agent = LanguageAgent(context="You are a robot agent.", model_src="ollama")                                       
+    response = agent.act("Hello, how are you?")                                                                       
+                                                    
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])

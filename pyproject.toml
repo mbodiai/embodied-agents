@@ -76,8 +76,6 @@ path = ".mbodied/envs/mbodied"
 dependencies = ["pytest", "pytest-mock", "pytest-asyncio"]
 
 [tool.hatch.envs.default.env-vars]
-
-
 [tool.hatch.envs.conda]
 type = "conda"
 python = "310"                       # Python version 3.10
