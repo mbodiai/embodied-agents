@@ -122,6 +122,14 @@ def test_completion():
 
 
 @mock.patch("httpx.Client", FakeHttpxClient)
+def test_completion_single_message_and_context():
+    wrapper = OllamaBackend()
+    text = "What is the capital of France?"
+    response = wrapper.predict(Message(role="user", content=text), ["context"], model="llama2")
+    assert response == mock_response
+
+
+@mock.patch("httpx.Client", FakeHttpxClient)
 def test_stream_completion():
     wrapper = OllamaBackend()
     chunks = list(wrapper._stream_completion([Message(role="user", content="Hello")], "llama2"))
@@ -179,11 +187,14 @@ def test_serializer_with_image():
         "content": [{"type": "text", "text": "Describe this image"}, {"type": "image_url", "image_url": image.url}],
     }
 
+
 @mock.patch("httpx.Client", FakeHttpxClient)
-def test_ollama_agent():                                                                                                                
-    from mbodied.agents.language import LanguageAgent                                                                 
-    agent = LanguageAgent(context="You are a robot agent.", model_src="ollama")                                       
-    response = agent.act("Hello, how are you?")                                                                       
-                                                    
+def test_ollama_agent():
+    from mbodied.agents.language import LanguageAgent
+
+    agent = LanguageAgent(context="You are a robot agent.", model_src="ollama")
+    response = agent.act("Hello, how are you?")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
