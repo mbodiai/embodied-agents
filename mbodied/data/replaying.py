@@ -309,7 +309,11 @@ class FolderReplayer:
                     state = sample[2] if len(sample) > 2 else None
                     image = np.asarray(observation["image"])
                     instruction = observation["instruction"]
-                    yield {"observation": {"image": image, "instruction": instruction}, "action": action, "state": state}
+                    yield {
+                        "observation": {"image": image, "instruction": instruction},
+                        "action": action,
+                        "state": state,
+                    }
 
 
 def to_dataset(folder: str, name: str, description: str = None, **kwargs) -> None:

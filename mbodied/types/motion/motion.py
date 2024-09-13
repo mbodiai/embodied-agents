@@ -18,13 +18,14 @@ Example:
 from mbodied_agents.motion import Motion, AbsoluteMotionField, MotionField, MotionType, VelocityMotionField
 from mbodied_agents.data.sample import Sample
 
+
 class Twist(Motion):
     x: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
     y: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
     z: float = VelocityMotionField(default=0.0, bounds=[-1.0, 1.0])
-    roll: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
-    pitch: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
-    yaw: float = VelocityMotionField(default=0.0, bounds=['-pi', 'pi'])
+    roll: float = VelocityMotionField(default=0.0, bounds=["-pi", "pi"])
+    pitch: float = VelocityMotionField(default=0.0, bounds=["-pi", "pi"])
+    yaw: float = VelocityMotionField(default=0.0, bounds=["-pi", "pi"])
 ```
 
 

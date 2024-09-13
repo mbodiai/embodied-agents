@@ -14,21 +14,28 @@
 
 import base64
 import io
-import os
+import logging
+import tempfile
+
 import numpy as np
 import pytest
-import cv2
-from PIL import Image as PILImage
 from mbodied.types.sense.vision import Image
-import tempfile
+from PIL import Image as PILImage
+
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+    logging.warning("OpenCV is not installed. Some tests will be skipped.")
+
+pytest.mark.skipif(cv2 is None, reason="OpenCV is not installed", allow_module_level=True)
 
 
 @pytest.fixture
-def temp_file():
+def temp_file() -> str:
     """Create a temporary file and provide its path to tests, remove it after the test."""
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile() as tmp_file:
         yield tmp_file.name
-    os.remove(tmp_file.name)
 
 
 def test_create_image_with_array():
@@ -91,6 +98,7 @@ def test_space():
     assert img.space().sample().shape == (640, 480, 3)
 
 
+@pytest.mark.skipif(cv2 is None, reason="OpenCV is not installed")
 def test_encode_decode_array():
     array = np.random.randint(0, 256, (480, 640, 3), dtype=np.uint8)
     img = Image(array, encoding="png")

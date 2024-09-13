@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-from gymnasium import spaces
-import numpy as np
-import h5py
 import os
 import tempfile
-
+import sys
+import h5py
+import numpy as np
+import pytest
+from gymnasium import spaces
 from mbodied.data.recording import Recorder
 from mbodied.types.sample import Sample
 
@@ -222,6 +222,7 @@ def test_unflatten_numpy_array():
     assert unflattened_sample.extra_field == 5
 
 
+@pytest.mark.skipif("torch" not in sys.modules, reason="PyTorch is not installed")
 def test_unflatten_torch_tensor():
     sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)
     flat_tensor = sample.flatten(output_type="pt")
