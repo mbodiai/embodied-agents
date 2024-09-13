@@ -113,6 +113,30 @@ class LanguageAgent(Agent):
 
         Automatically act and record to dataset:
             >>> cognitive_agent.act_and_record("your instruction", image)
+
+        Stream the response:
+            >>> for chunk in cognitive_agent.act_and_stream("your instruction", image):
+            ...     print(chunk)
+
+    To use vLLM:
+    ```python
+    agent = LanguageAgent(
+        context=context,
+        model_src="openai",
+        model_kwargs={"api_key": "EMPTY", "base_url": "http://1.2.3.4:1234/v1"},
+    )
+    response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct-v0.3")
+    ```
+
+    To use ollama:
+    ```python
+    agent = LanguageAgent(
+        context="You are a robot agent.",
+        model_src="ollama",
+        model_kwargs={"endpoint": "http://localhost:11434/api/chat"},
+    )
+    response = agent.act("Hello, how are you?", model="llama3.1")
+    ```
     """
 
     _art_printed = False
@@ -126,9 +150,9 @@ class LanguageAgent(Agent):
         | NewPath = "openai",
         context: list | Image | str | Message = None,
         api_key: str | None = os.getenv("OPENAI_API_KEY"),
+        model_kwargs: dict = None,
         recorder: Literal["default", "omit"] | str = "omit",
         recorder_kwargs: dict = None,
-        **model_kwargs,
     ) -> None:
         """Agent with memory,  asynchronous remote acting, and automatic dataset recording.
 
@@ -151,11 +175,11 @@ class LanguageAgent(Agent):
                     If a string is provided, it will be interpreted as a user message. Defaults to None.
             api_key (str, optional): The API key to use for the remote actor (if applicable).
                  Defaults to the value of the OPENAI_API_KEY environment variable.
+            model_kwargs (dict, optional): Additional keyword arguments to pass to the model source. Can be overidden at act time.
+                See the documentation of the specific backend for more details. Defaults to None.
             recorder (Union[str, Literal["default", "omit"]], optional):
                 The recorder configuration or name or action. Defaults to "omit".
             recorder_kwargs (dict, optional): Additional keyword arguments to pass to the recorder. Defaults to None.
-            model_kwargs (dict, optional): Additional keyword arguments to pass to the model source. Can be overidden at act time.
-                See the documentation of the specific backend for more details. Defaults to None.
         """
         if not LanguageAgent._art_printed:
             print("Welcome to")  # noqa: T201
@@ -174,7 +198,6 @@ class LanguageAgent(Agent):
         )
 
         self.context = make_context_list(context)
-        self.model_kwargs = model_kwargs
 
     def forget_last(self) -> Message:
         """Forget the last message in the context."""
@@ -254,7 +277,7 @@ class LanguageAgent(Agent):
             **kwargs: Additional keyword arguments.
         """
         original_instruction = instruction
-        kwargs = {**self.model_kwargs, **kwargs, "model": model}
+        kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         for attempt in range(max_retries + 1):
             if record:
@@ -358,7 +381,7 @@ class LanguageAgent(Agent):
             "['Move left arm to the object', 'Move right arm to the object']"
         """
         message, memory = self.prepare_inputs(instruction, image, context)
-        kwargs = {**self.model_kwargs, **kwargs, "model": model}
+        kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = self.actor.predict(message, context=memory, model=model, **kwargs)
         return self.postprocess_response(response, message, memory, **kwargs)
@@ -368,7 +391,7 @@ class LanguageAgent(Agent):
     ) -> Generator[str, None, str]:
         """Responds to the given instruction, image, and context and streams the response."""
         message, memory = self.prepare_inputs(instruction, image, context)
-        kwargs = {**self.model_kwargs, **kwargs, "model": model}
+        kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = ""
         for chunk in self.actor.stream(message, memory, model=model, **kwargs):
@@ -380,14 +403,13 @@ class LanguageAgent(Agent):
         self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
     ) -> AsyncGenerator[str, None]:
         message, memory = self.prepare_inputs(instruction, image, context)
-        kwargs = {**self.model_kwargs, **kwargs, "model": model}
+        kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = ""
-        async for chunk in self.actor.astream(message=message, context=memory, model=model, **kwargs):
+        async for chunk in self.actor.astream(message, context=memory, model=model, **kwargs):
             response += chunk
             yield chunk
         return
-        self.postprocess_response(response, message, memory, **kwargs)
 
 
 def main():

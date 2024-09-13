@@ -386,6 +386,16 @@ agent = LanguageAgent(
 response = agent.act("Hello, how are you?", model="mistralai/Mistral-7B-Instruct-v0.3")
 ```
 
+Example using Ollama:
+
+```python
+agent = LanguageAgent(
+    context="You are a robot agent.", model_src="ollama",
+    model_kwargs={"endpoint": "http://localhost:11434/api/chat"}
+)
+response = agent.act("Hello, how are you?", model="llama3.1")
+```
+
 ### Motor Agent
 
 [Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
