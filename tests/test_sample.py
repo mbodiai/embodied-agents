@@ -221,6 +221,7 @@ def test_unflatten_numpy_array():
     assert unflattened_sample.z == {"a": 3, "b": 4}
     assert unflattened_sample.extra_field == 5
 
+
 @pytest.mark.skipif("torch" not in sys.modules, reason="PyTorch is not installed")
 def test_unflatten_torch_tensor():
     sample = Sample(x=1, y=2, z={"a": 3, "b": 4}, extra_field=5)

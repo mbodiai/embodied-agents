@@ -93,38 +93,34 @@ class Recorder:
     Example:
       ```
       # Define the observation and action spaces
-      observation_space = spaces.Dict({
-          'image': spaces.Box(low=0, high=255, shape=(224, 224, 3), dtype=np.uint8),
-          'instruction': spaces.Discrete(10)
-      })
-      action_space = spaces.Dict({
-          'gripper_position': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
-          'gripper_action': spaces.Discrete(2)
-      })
+      observation_space = spaces.Dict(
+          {"image": spaces.Box(low=0, high=255, shape=(224, 224, 3), dtype=np.uint8), "instruction": spaces.Discrete(10)}
+      )
+      action_space = spaces.Dict(
+          {
+              "gripper_position": spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
+              "gripper_action": spaces.Discrete(2),
+          }
+      )
 
-      state_space = spaces.Dict({
-          'position': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
-          'velocity': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32)
-      })
+      state_space = spaces.Dict(
+          {
+              "position": spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
+              "velocity": spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32),
+          }
+      )
 
       # Create a recorder instance
-      recorder = Recorder(name='test_recorder', observation_space=observation_space, action_space=action_space, state_space=state_space)
+      recorder = Recorder(
+          name="test_recorder", observation_space=observation_space, action_space=action_space, state_space=state_space
+      )
 
       # Generate some sample data
       num_steps = 10
       for i in range(num_steps):
-          observation = {
-              'image': np.ones((224, 224, 3), dtype=np.uint8),
-              'instruction': i
-          }
-          action = {
-              'gripper_position': np.zeros((3,), dtype=np.float32),
-              'gripper_action': 1
-          }
-          state = {
-              'position': np.random.rand(3).astype(np.float32),
-              'velocity': np.random.rand(3).astype(np.float32)
-          }
+          observation = {"image": np.ones((224, 224, 3), dtype=np.uint8), "instruction": i}
+          action = {"gripper_position": np.zeros((3,), dtype=np.float32), "gripper_action": 1}
+          state = {"position": np.random.rand(3).astype(np.float32), "velocity": np.random.rand(3).astype(np.float32)}
           recorder.record(observation, action, state=state)
 
       # Save the statistics
@@ -134,8 +130,8 @@ class Recorder:
       recorder.close()
 
       # Assert that the HDF5 file and directories are created
-      assert os.path.exists('test_recorder.h5')
-      assert os.path.exists('test_recorder_frames')
+      assert os.path.exists("test_recorder.h5")
+      assert os.path.exists("test_recorder_frames")
       ```
     """
 
@@ -266,7 +262,13 @@ class Recorder:
                 dataset.resize((2 * index, *dataset.shape[1:]))
             dataset[index] = value
 
-    def record(self, observation: Any | None = None, action: Any | None = None, state: Any | None = None, supervision: Any | None = None) -> None:
+    def record(
+        self,
+        observation: Any | None = None,
+        action: Any | None = None,
+        state: Any | None = None,
+        supervision: Any | None = None,
+    ) -> None:
         """Record a timestep.
 
         Args:

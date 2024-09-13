@@ -69,7 +69,6 @@ def test_language_agent_initialization(mock_openai_init, mock_openai_act):
     assert agent.context == []
 
 
-
 @mock.patch("mbodied.agents.backends.OpenAIBackend.__init__", return_value=None)
 @mock.patch("mbodied.agents.backends.OpenAIBackend.predict", return_value=mock_openai_response)
 def test_language_agent_forget_last(mock_openai_init, mock_openai_act):
@@ -297,4 +296,3 @@ async def test_async_act_and_stream():
 if __name__ == "__main__":
     pytest.main(["-vv", __file__, "-m", "not asyncio"])
     asyncio.run(pytest.main(["-vv", __file__, "-m", "asyncio"]))
-

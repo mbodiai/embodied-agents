@@ -359,7 +359,7 @@ class LanguageAgent(Agent):
         """
         message, memory = self.prepare_inputs(instruction, image, context)
         kwargs = {**self.model_kwargs, **kwargs, "model": model}
-        model =  kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
+        model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = self.actor.predict(message, context=memory, model=model, **kwargs)
         return self.postprocess_response(response, message, memory, **kwargs)
 

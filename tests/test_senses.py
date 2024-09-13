@@ -29,12 +29,13 @@ except ImportError:
     logging.warning("OpenCV is not installed. Some tests will be skipped.")
 
 pytest.mark.skipif(cv2 is None, reason="OpenCV is not installed", allow_module_level=True)
+
+
 @pytest.fixture
 def temp_file() -> str:
     """Create a temporary file and provide its path to tests, remove it after the test."""
     with tempfile.NamedTemporaryFile() as tmp_file:
         yield tmp_file.name
-
 
 
 def test_create_image_with_array():
@@ -95,6 +96,7 @@ def test_space():
     array = np.random.randint(0, 256, (480, 640, 3), dtype=np.uint8)
     img = Image(array=array)
     assert img.space().sample().shape == (640, 480, 3)
+
 
 @pytest.mark.skipif(cv2 is None, reason="OpenCV is not installed")
 def test_encode_decode_array():

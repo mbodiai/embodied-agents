@@ -22,6 +22,7 @@ try:
 except ImportError:
     playsound = None
 
+
 @pytest.fixture
 def audio_agent(mocker):
     mocker.patch("mbodied.agents.sense.audio.audio_agent.OpenAI")
