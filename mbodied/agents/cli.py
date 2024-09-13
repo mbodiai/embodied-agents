@@ -16,7 +16,9 @@ def cli():
 @cli.command()
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
 @click.option("--image-path", prompt="Image path", help="Path to the image file.")
-@click.option("--objects", prompt="Objects to detect", help="Comma-separated list of objects to detect.")
+@click.option(
+    "--objects", prompt="Objects to detect (comma-separated)", help="Comma-separated list of objects to detect."
+)
 @click.option(
     "--model-type",
     type=click.Choice(["YOLOWorld", "Grounding DINO"], case_sensitive=False),
@@ -49,25 +51,27 @@ def estimate_depth(model_src, image_path, api_name):
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
 @click.option("--image-path", prompt="Image path", help="Path to the image file.")
 @click.option(
-    "--input-type",
+    "--segment-type",
     type=click.Choice(["bbox", "coords"], case_sensitive=False),
-    prompt="Input type",
-    help="Type of input data (bbox or coords).",
+    prompt="Input type - bounding box or pixel coordinates",
+    help="Type of input data `bbox` (bounding box) or `coords` (pixel coordinates).",
 )
 @click.option(
-    "--input-data", prompt="Input data", help="Bounding box coordinates as x1,y1,x2,y2 or pixel coordinates as u,v."
+    "--segment-input",
+    prompt="Segment input data - x1,y1,x2,y2 (for bbox) or u,v (for coords)",
+    help="Bounding box coordinates as x1,y1,x2,y2 or pixel coordinates as u,v.",
 )
 @click.option("--api-name", default="/segment", help="The API endpoint to use.")
-def segment(model_src, image_path, input_type, input_data, api_name):
+def segment(model_src, image_path, segment_type, segment_input, api_name):
     """Run the SegmentationAgent to segment objects in an image."""
     image = Image(image_path, size=(224, 224))
     agent = SegmentationAgent(model_src=model_src)
 
-    if input_type == "bbox":
-        bbox_coords = list(map(int, input_data.split(",")))
+    if segment_type == "bbox":
+        bbox_coords = list(map(int, segment_input.split(",")))
         input_data = BBox2D(x1=bbox_coords[0], y1=bbox_coords[1], x2=bbox_coords[2], y2=bbox_coords[3])
-    elif input_type == "coords":
-        u, v = map(int, input_data.split(","))
+    elif segment_type == "coords":
+        u, v = map(int, segment_input.split(","))
         input_data = PixelCoords(u=u, v=v)
 
     mask_image, masks = agent.act(image=image, input_data=input_data, api_name=api_name)
