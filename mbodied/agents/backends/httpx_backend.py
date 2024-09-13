@@ -70,7 +70,11 @@ class HttpxBackend(OpenAIBackendMixin):
         """
         self.base_url = endpoint or self.DEFAULT_SRC
         self.api_key = api_key or os.getenv("MBODI_API_KEY")
-        self.headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
+        self.headers = None
+        if not self.api_key:
+            self.headers = {"Content-Type": "application/json"}
+        else:
+            self.headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
         self.serialized = serializer or self.SERIALIZER
         self.kwargs = kwargs
         self.DEFAULT_MODEL = kwargs.get("model", self.DEFAULT_MODEL)
