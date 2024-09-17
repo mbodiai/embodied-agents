@@ -61,6 +61,7 @@ from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
+from mbodied.types.tool import Tool, ToolCall
 
 SupportsOpenAI: TypeAlias = OpenAIBackend
 
@@ -85,14 +86,19 @@ class Reminder:
             raise IndexError("Invalid index")
 
 
-def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
+def make_context_list(
+    context: list[str | Image | Message] | Image | str | Message | None, model_src: str
+) -> List[Message]:
     """Convert the context to a list of messages."""
     if isinstance(context, list):
         return [Message(content=c) if not isinstance(c, Message) else c for c in context]
     if isinstance(context, Message):
         return [context]
     if isinstance(context, str | Image):
-        return [Message(role="user", content=[context]), Message(role="assistant", content="Understood.")]
+        if model_src == "openai":
+            return [Message(role="system", content=[context])]
+        else:
+            return [Message(role="user", content=[context]), Message(role="assistant", content="Understood.")]
     return []
 
 
@@ -149,7 +155,7 @@ class LanguageAgent(Agent):
         | DirectoryPath
         | NewPath = "openai",
         context: list | Image | str | Message = None,
-        api_key: str | None = os.getenv("OPENAI_API_KEY"),
+        api_key: str | None = None,
         model_kwargs: dict = None,
         recorder: Literal["default", "omit"] | str = "omit",
         recorder_kwargs: dict = None,
@@ -198,7 +204,7 @@ class LanguageAgent(Agent):
             api_key=api_key,
         )
 
-        self.context = make_context_list(context)
+        self.context = make_context_list(context, model_src)
 
     def forget_last(self) -> Message:
         """Forget the last message in the context."""
@@ -346,10 +352,17 @@ class LanguageAgent(Agent):
 
         return message, memory
 
-    def postprocess_response(self, response: str, message: Message, memory: list[Message], **kwargs) -> str:
+    def postprocess_response(
+        self, response: str, message: Message, memory: list[Message], tool_calls: list[ToolCall] = None, **kwargs
+    ) -> str:
         """Postprocess the response."""
         self.context.append(message)
-        self.context.append(Message(role="assistant", content=response))
+        resp_content = ""
+        if response:
+            resp_content = response
+        if tool_calls:
+            resp_content += "\nTool Calls: " + str(tool_calls)
+        self.context.append(Message(role="assistant", content=resp_content))
         return response
 
     def act(
@@ -358,8 +371,9 @@ class LanguageAgent(Agent):
         image: Image = None,
         context: list | str | Image | Message = None,
         model=None,
+        tools: List[Tool] = None,
         **kwargs,
-    ) -> str:
+    ) -> str | tuple[str, List[ToolCall]]:
         """Responds to the given instruction, image, and context.
 
         Uses the given instruction and image to perform an action.
@@ -370,66 +384,236 @@ class LanguageAgent(Agent):
             context: Additonal context to include in the response. If context is a list of messages, it will be interpreted
                 as new memory.
             model: The model to use for the response.
+            tools: The tools (function calls) to use. Only OpenAI is supported for now.
             **kwargs: Additional keyword arguments.
 
         Returns:
-            str: The response to the instruction.
+            str | tuple[str, List[ToolCall]]:
+                - When tools are not provided: Just the text response as a string
+                - When tools are provided: A tuple of (text_response, tool_calls)
 
         Examples:
             >>> agent.act("Hello, world!", Image("scene.jpeg"))
             "Hello! What can I do for you today?"
-            >>> agent.act("Return a plan to pickup the object as a python list.", Image("scene.jpeg"))
-            "['Move left arm to the object', 'Move right arm to the object']"
+
+            >>> response, tool_calls = agent.act(
+            ...     "Find the apple in this image", Image("scene.jpeg"), tools=[get_object_location_tool]
+            ... )
         """
         message, memory = self.prepare_inputs(instruction, image, context)
         kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
-        response = self.actor.predict(message, context=memory, model=model, **kwargs)
-        return self.postprocess_response(response, message, memory, **kwargs)
+        if tools:
+            response, tool_calls = self.actor.predict(message, context=memory, model=model, tools=tools, **kwargs)
+            self.postprocess_response(response, message, memory, tool_calls, **kwargs)
+            return response, tool_calls
+        else:
+            response = self.actor.predict(message, context=memory, model=model, **kwargs)
+            return self.postprocess_response(response, message, memory, **kwargs)
+
+    def _process_tool_call_chunks(self, tool_call_chunks, final_tool_calls, previously_completed_indices):
+        """Process tool call chunks and identify newly completed tools.
+
+        Args:
+            tool_call_chunks: The tool call chunks from the stream
+            final_tool_calls: Dictionary of accumulated tool calls by index
+            previously_completed_indices: Set of indices for tools that have already been completed
+
+        Returns:
+            tuple: (newly_completed_tools, updated_final_tool_calls, updated_previously_completed_indices)
+        """
+        newly_completed_tools = []
+
+        if tool_call_chunks:
+            for tool_call in tool_call_chunks:
+                index = tool_call.index
+
+                # Initialize new tool call
+                if index not in final_tool_calls:
+                    final_tool_calls[index] = tool_call
+                else:
+                    # Accumulate arguments
+                    if tool_call.function and tool_call.function.arguments:
+                        final_tool_calls[index].function.arguments += tool_call.function.arguments
+
+                # Check if this tool call just completed
+                # A tool is considered complete when its arguments end with '}'
+                if (
+                    index not in previously_completed_indices
+                    and final_tool_calls[index].function
+                    and final_tool_calls[index].function.arguments
+                    and final_tool_calls[index].function.arguments.strip().endswith("}")
+                ):
+                    previously_completed_indices.add(index)
+                    newly_completed_tools.append(final_tool_calls[index])
+
+        return newly_completed_tools, final_tool_calls, previously_completed_indices
 
     def act_and_stream(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
-    ) -> Generator[str, None, str]:
-        """Responds to the given instruction, image, and context and streams the response."""
+        self,
+        instruction: str,
+        image: Image = None,
+        context: list | str | Image | Message = None,
+        model=None,
+        tools: List[Tool] = None,
+        **kwargs,
+    ) -> Generator[str | tuple[str, List[ToolCall]], None, str | tuple[str, List[ToolCall]]]:
+        """Responds to the given instruction, image, and context and streams the response.
+
+        When tools are provided, this method streams:
+        - Text content as it's generated
+        - Complete tool calls as they become fully formed (not partial tool chunks)
+
+        Returns:
+            Generator yielding either:
+            - str: Content chunks (when no tools are used)
+            - tuple[str, List[ToolCall]]: Tuple of (content_chunk, complete_tool_calls)
+              where complete_tool_calls is a list of fully formed tool calls that were
+              completed in this chunk
+        """
         message, memory = self.prepare_inputs(instruction, image, context)
         kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = ""
-        for chunk in self.actor.stream(message, memory, model=model, **kwargs):
-            response += chunk
-            yield chunk
-        return self.postprocess_response(response, message, memory, **kwargs)
+        final_tool_calls = {}
+        previously_completed_indices = set()
+
+        if tools:
+            for content_chunk, tool_call_chunks in self.actor.stream(
+                message, memory, model=model, tools=tools, **kwargs
+            ):
+                response += content_chunk or ""
+
+                # Process tool call chunks
+                newly_completed_tools, final_tool_calls, previously_completed_indices = self._process_tool_call_chunks(
+                    tool_call_chunks, final_tool_calls, previously_completed_indices
+                )
+
+                # Yield the content chunk and any newly completed tools
+                yield content_chunk, newly_completed_tools
+
+            # Convert final_tool_calls dictionary to list for the return value
+            tool_calls_list = list(final_tool_calls.values())
+            self.postprocess_response(response, message, memory, tool_calls_list, **kwargs)
+            return response, tool_calls_list
+        else:
+            for chunk in self.actor.stream(message, memory, model=model, **kwargs):
+                response += chunk
+                yield chunk
+
+            return self.postprocess_response(response, message, memory, **kwargs)
 
     async def async_act_and_stream(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
-    ) -> AsyncGenerator[str, None]:
+        self,
+        instruction: str,
+        image: Image = None,
+        context: list | str | Image | Message = None,
+        model=None,
+        tools: List[Tool] = None,
+        **kwargs,
+    ) -> AsyncGenerator[str | tuple[str, List[ToolCall]], None]:
+        """Responds to the given instruction, image, and context asynchronously and streams the response.
+
+        When tools are provided, this method streams:
+        - Text content as it's generated
+        - Complete tool calls as they become fully formed (not partial tool chunks)
+
+        Returns:
+            AsyncGenerator yielding either:
+            - str: Content chunks (when no tools are used)
+            - tuple[str, List[ToolCall]]: Tuple of (content_chunk, complete_tool_calls)
+              where complete_tool_calls is a list of fully formed tool calls that were
+              completed in this chunk
+        """
         message, memory = self.prepare_inputs(instruction, image, context)
         kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = ""
-        async for chunk in self.actor.astream(message, context=memory, model=model, **kwargs):
-            response += chunk
-            yield chunk
-        self.postprocess_response(response, message, memory, **kwargs)
-        return
+        final_tool_calls = {}
+        previously_completed_indices = set()
+
+        if tools:
+            async for content_chunk, tool_call_chunks in self.actor.astream(
+                message, context=memory, model=model, tools=tools, **kwargs
+            ):
+                response += content_chunk or ""
+
+                # Process tool call chunks
+                newly_completed_tools, final_tool_calls, previously_completed_indices = self._process_tool_call_chunks(
+                    tool_call_chunks, final_tool_calls, previously_completed_indices
+                )
+
+                # Yield the content chunk and any newly completed tools
+                yield content_chunk, newly_completed_tools
+
+            # Convert final_tool_calls dictionary to list for the postprocessing
+            tool_calls_list = list(final_tool_calls.values())
+            self.postprocess_response(response, message, memory, tool_calls_list, **kwargs)
+            return
+        else:
+            async for chunk in self.actor.astream(message, context=memory, model=model, **kwargs):
+                response += chunk
+                yield chunk
+
+            self.postprocess_response(response, message, memory, **kwargs)
+            return
 
 
 def main():
+    # Example 1: Streaming response
     agent = LanguageAgent(model_src="openai")
     resp = ""
     for chunk in agent.act_and_stream("Hello, world!"):
         resp += chunk
         print(resp)
 
+    # Example 2: Streaming with tools
+    tools = [
+        Tool.model_validate(
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_object_location",
+                    "description": "Get the pose of the object with respect to the reference object.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "object_name": {
+                                "type": "string",
+                                "description": "The name of the object whose location is being queried.",
+                            },
+                            "reference": {
+                                "type": "string",
+                                "description": "The reference object for the pose.",
+                                "default": "end_effector",
+                            },
+                        },
+                        "required": ["object_name"],
+                    },
+                },
+            }
+        )
+    ]
 
-async def async_main():
-    agent = LanguageAgent(model_src="openai", model_kwargs={"aclient": True})
-    resp = ""
-    async for chunk in agent.async_act_and_stream("Hello, world!"):
-        resp += chunk
-        print(resp)
+    agent = LanguageAgent(context="You are a helpful robot assistant that can call tools.")
+    response = ""
+    completed_tool_calls = []
+    print("Starting to stream")
+
+    for content_chunk, completed_tools in agent.act_and_stream(
+        "Find the position of the apple, orange, and banana relative to the camera.", tools=tools
+    ):
+        # Process content chunks
+        if content_chunk:
+            response += content_chunk
+            print(f"Content: {content_chunk}")
+
+        # Process completed tools
+        if completed_tools:
+            for tool in completed_tools:
+                completed_tool_calls.append(tool)
+                print(f"\nTool Call: {tool.function.name} with args: {tool.function.arguments}")
 
 
 if __name__ == "__main__":
     main()
-    asyncio.run(async_main())
