@@ -149,8 +149,8 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 ### Endpoints
 
 - [OpenVLA](https://api.mbodi.ai/community-models/)
+- [Sensory Tools](https://api.mbodi.ai/sense/)
 - [Embodied AI Playground](https://api.mbodi.ai/benchmark/)
-- [3D Object Pose Detection](https://api.mbodi.ai/3d-object-pose-detection/)
 
 ### Support Matrix
 
