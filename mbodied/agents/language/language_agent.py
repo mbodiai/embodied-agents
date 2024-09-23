@@ -409,6 +409,7 @@ class LanguageAgent(Agent):
         async for chunk in self.actor.astream(message, context=memory, model=model, **kwargs):
             response += chunk
             yield chunk
+        self.postprocess_response(response, message, memory, **kwargs)
         return
 
 
