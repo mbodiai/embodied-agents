@@ -381,7 +381,7 @@ class Sample(BaseModel):
                 dtype,
             )
             try:
-                value = np.asfarray(value)
+                value = np.asarray(value, dtype=dtype)
                 shape = shape or value.shape
                 dtype = dtype or value.dtype
                 le = le or -np.inf
@@ -389,13 +389,18 @@ class Sample(BaseModel):
                 return spaces.Box(low=le, high=ge, shape=shape, dtype=dtype)
             except Exception as e:
                 logging.info(f"Could not convert value {value} to numpy array: {e}")
-                if len(value) > 0 and isinstance(value[0], dict | Sample):
+                if hasattr(value, "__len__") and len(value) > 0 and isinstance(value[0], dict | Sample):
                     return spaces.Tuple(
                         [spaces.Dict(cls.space_for(v, max_text_length, info)) for v in value],
                     )
+                if hasattr(value, "__len__") and len(value) > 0:
+                    return spaces.Tuple(
+                        [cls.space_for(value[0], max_text_length, info) for value in value[:1]],
+                    )
                 return spaces.Tuple(
-                    [cls.space_for(value[0], max_text_length, info) for value in value[:1]],
+                    [cls.space_for(v, max_text_length, info) for v in value],
                 )
+              
         raise ValueError(f"Unsupported object {value} of type: {type(value)} for space generation")
 
     @classmethod

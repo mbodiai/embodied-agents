@@ -46,7 +46,7 @@ def xarm(mock_xarm_api):
     # Explicitly initialize XarmRobot to trigger the mocked calls
     return XarmRobot(ip="192.168.1.228")
 
-
+@pytest.mark.network
 def test_initialization(mock_xarm_api, xarm):
     # Test initialization calls
     mock_xarm_api.motion_enable.assert_called_with(True)
@@ -59,7 +59,7 @@ def test_initialization(mock_xarm_api, xarm):
     mock_xarm_api.set_position.assert_called_with(300, 0, 325, math.radians(180), 0, 0, wait=True, speed=200)
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
-
+@pytest.mark.network
 def test_do(mock_xarm_api, xarm):
     mock_motion = HandControl(
         pose=Pose6D(x=0.1, y=0.2, z=0.3, roll=0.1, pitch=0.2, yaw=0.3), grasp=MagicMock(value=0.6)
@@ -80,7 +80,7 @@ def test_do(mock_xarm_api, xarm):
     mock_xarm_api.set_position.assert_called_with(*expected_position, wait=True, speed=200)
     mock_xarm_api.set_gripper_position.assert_called_with(800, wait=True)
 
-
+@pytest.mark.network
 def test_get_state(mock_xarm_api, xarm):
     mock_xarm_api.get_position.return_value = (0, [300, 0, 325, 3.14, 0, 0])
 

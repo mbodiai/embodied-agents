@@ -12,11 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+import json
 import logging
 import os
+from pathlib import Path
 import platform
 import threading
+from time import sleep, time
+from typing import Optional
 import wave
+
+import httpx
 
 try:
     import playsound
@@ -24,6 +31,7 @@ try:
 except ImportError:
     logging.warning("playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install.")
 
+from fastapi import websockets
 from openai import OpenAI
 from typing_extensions import Literal
 
@@ -49,6 +57,7 @@ class AudioAgent(Agent):
 
     def __init__(
         self,
+        client: OpenAI | None = None,
         listen_filename: str = "tmp_listen.wav",
         tmp_speak_filename: str = "tmp_speak.mp3",
         use_pyaudio: bool = True,
@@ -69,6 +78,7 @@ class AudioAgent(Agent):
         self.listen_filename = listen_filename
         self.speak_filename = tmp_speak_filename
         self.use_pyaudio = use_pyaudio
+
         if os.getenv("NO_AUDIO"):
             return
         self.run_local = False
@@ -80,9 +90,9 @@ class AudioAgent(Agent):
             self.run_local = True
             self.model = whisper.load_model("base")
         else:
-            self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
+            self.client = client or OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
 
-    def act(self, *args, **kwargs):
+    def act(self, *args, **kwargs) -> str:
         return self.listen(*args, **kwargs)
 
     def listen(self, keep_audio: bool = False, mode: str = "speak") -> str:
@@ -128,9 +138,9 @@ class AudioAgent(Agent):
             logging.error(f"Failed to read or transcribe audio file: {e}")
             return ""
         finally:
-            if not keep_audio and os.path.exists(self.listen_filename):
-                os.remove(self.listen_filename)
-            return typed_input + transcription if transcription else ""
+            if not keep_audio and Path(self.listen_filename).exists():
+                Path(self.listen_filename).unlink()
+        return typed_input + transcription if transcription else ""
 
     def record_audio(self) -> None:
         """Records audio from the microphone and saves it to a file."""
@@ -174,8 +184,8 @@ class AudioAgent(Agent):
             client = self.client or OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
             with (
                 client.with_streaming_response.audio.speech.create(
-                    model="tts-1",
-                    voice=voice,
+                    model="xtts",
+                    voice="Gracie Wise",
                     input=message,
                 ) as response,
                 open(self.speak_filename, "wb") as out_file,
@@ -206,3 +216,87 @@ class AudioAgent(Agent):
         finally:
             if os.path.exists(filename):
                 os.remove(filename)
+
+
+    async def ws_listen(self, timeout: int = 30) -> str:
+        """Listens for audio input and transcribes it using a WebSocket endpoint.
+
+        Args:
+            timeout: The maximum time (in seconds) to wait for a transcription.
+
+        Returns:
+            The transcribed text from the audio input.
+        """
+        uri = "http://3.22.171.235:5018/transcriptions"
+        auth_token = f"Bearer {self.client.api_key}" if not self.run_local else ""
+        import websockets
+        async with websockets.connect(uri, extra_headers={"Authorization": auth_token}) as websocket:
+            await websocket.send({"model": "whisper-1", "response_format": "text"})
+            transcription = await asyncio.wait_for(websocket.recv(), timeout=timeout)
+            return transcription
+
+
+def listen_httpx(
+    file_path: str,
+    state: dict,
+    endpoint: str,
+    temperature: float,
+    model: str,
+    client: httpx.Client,
+) -> tuple[dict, str, str]:
+    tic = time()
+    with Path(file_path).open("rb") as file:
+        response = client.post(
+            endpoint,
+            files={"file": file},
+            data={
+                "model": model,
+                "response_format": "text",
+                "temperature": temperature,
+            },
+        )
+    result = response.text
+    response.raise_for_status()
+    elapsed_time = time() - tic
+    total_tokens = len(result.split())
+    tokens_per_sec = total_tokens / elapsed_time if elapsed_time > 0 else 0
+    print(state, result, f"STT tok/sec: {tokens_per_sec:.4f}")
+
+def run_sync(func, *args, **kwargs):
+    """Runs a function synchronously in a separate thread."""
+    asyncio.run(func(*args, **kwargs))
+
+from typer import Typer
+from typer.core import TyperArgument, TyperCommand
+app = Typer()
+
+def listen_hz(hz=0.5):
+    while True:
+        try:
+                listen_httpx(  "/Users/sebastianperalta/simply/corp/projects/abb/fractal/demo/whisper/audio.wav",
+                {},
+                "http://3.22.171.235:5018/transcriptions",
+                0,
+                None,
+                httpx.Client())
+                sleep(1/hz)
+        except KeyboardInterrupt:
+            break
+
+@app.command()
+def main(filename: Optional[str] = None) -> None:
+    # audio_agent = AudioAgent(client=OpenAI(api_key="mbodi-demo-1", base_url="http://3.22.171.235:5018/"))
+    # audio_agent.speak("How can I help you?")
+    thread = threading.Thread(
+        target=listen_hz,
+        args=(
+        ),
+        daemon=True,
+    )
+    thread.start()
+    thread.join()
+    # print(f"Message: {message}")
+    # audio_agent.speak("Thank you for your input.")
+
+if __name__ == "__main__":
+   app()(main)

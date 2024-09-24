@@ -1,14 +1,12 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
+requires = ["setuptools>=68", "setuptools_scm[toml]>=8"]
+build-backend = "setuptools.build_meta"
 [project]
 name = "mbodied"
-dynamic = ["version"]
+dynamic = ["version", "optional-dependencies"]
 description = 'Embodied AI'
 readme = "README.md"
 requires-python = ">=3.10"
-license = "apache-2.0"
 keywords = []
 authors = [{ name = "Mbodi Team", email = "info@mbodi.ai" }]
 classifiers = [
@@ -21,38 +19,35 @@ classifiers = [
 ]
 
 dependencies = [
-  "anthropic",
-  "art",
-  "backoff",
-  "click",
-  "datasets",
-  "gymnasium",
-  "h5py",
-  "jsonref",
-  "numpy==1.26.4",
-  "openai",
-  "pillow",
-  "pydantic",
-  "pydantic_numpy==5.0.2",
-  "gradio",
-  "gradio_client",
+    'anthropic==0.34.2',
+    'art==6.3',
+    'backoff==2.2.1',
+    'click==8.1.7',
+    "grep-ast>=0.3.3",
+    "litellm>=1.47.1",
+    "mbpy>=1.11.2",
+    "numpy==2.1.1",
+    'openai==1.47.0',
+    'pillow==10.4.0',
+    'pydantic==2.9.2',
 ]
-[project.optional-dependencies]
-extras = ["xarm-python-sdk", "opencv-python", "torch", "transformers"]
-audio = ["playsound", "pyaudio", "openai-whisper"]
-all = [
-  "xarm-python-sdk",
-  "opencv-python",
-  "torch",
-  "transformers",
-  "playsound",
-  "pyaudio",
-  "openai-whisper",
-  "open3d",
-  "timm",
-  "torchvision",
-  "wandb",
-]
+[tool.setuptools]
+packages = ["mbodied"]
+# extras = ["xarm-python-sdk", "opencv-python", "torch", "transformers"]
+# audio = ["playsound", "pyaudio", "openai-whisper"]
+# all = [
+#   "xarm-python-sdk",
+#   "opencv-python",
+#   "torch",
+#   "transformers",
+#   "playsound",
+#   "pyaudio",
+#   "openai-whisper",
+#   "open3d",
+#   "timm",
+#   "torchvision",
+#   "wandb",
+# ]
 [project.urls]
 Documentation = "https://github.com/mbodiai/embodied-agents#readme"
 Issues = "https://github.com/mbodiai/embodied-agents/issues"
@@ -221,3 +216,5 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "**/{tests,docs}/*" = ["ALL"]
 "**__init__.py" = ["F401"]
+[tool.uv.sources]
+mbodied = { path = "mbodied" }
