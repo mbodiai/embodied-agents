@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# 1. Measure time to first action
+# 2. We should be able to set horizon, prompts per agent, 
 import time
 from pathlib import Path
 

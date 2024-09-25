@@ -33,8 +33,7 @@ from pydantic import (
     validate_call,
 )
 from pydantic.json_schema import JsonSchemaValue, core_schema
-from pydantic.types import DirectoryPath
-from pydantic_core import PydanticCustomError, core_schema
+from pydantic_core import PydanticCustomError
 from ruamel import yaml
 from typing_extensions import (
     Annotated,
