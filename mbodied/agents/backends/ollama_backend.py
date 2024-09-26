@@ -80,7 +80,6 @@ class OllamaBackend(HttpxBackend):
 
 if __name__ == "__main__":
     # Usage
-    import asyncio
 
     client = OllamaBackend()
     image_url = "https://v0.docs.reka.ai/_images/000000245576.jpg"

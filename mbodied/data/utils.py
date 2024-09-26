@@ -12,12 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from datasets import Features, Image, Value
+
+if TYPE_CHECKING:
+    try:
+        from datasets import Features, Image, Value
+    except ImportError:
+        Features = Any
+        Image = Any
+        Value = Any
 
 
-def to_features(indict, image_keys=None, exclude_keys=None, prefix="") -> Features:
+
+def to_features(indict, image_keys=None, exclude_keys=None, prefix="") -> "Features":
     """Convert a dictionary to a Datasets Features object.
 
     Args:
@@ -61,6 +70,6 @@ def to_features(indict, image_keys=None, exclude_keys=None, prefix="") -> Featur
     raise ValueError(f"Cannot infer schema from {indict}")
 
 
-def infer_features(example) -> Features:
+def infer_features(example) -> "Features":
     """Infer Hugging Face Datasets Features from an example."""
     return Features(to_features(example))

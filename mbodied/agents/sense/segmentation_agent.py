@@ -60,7 +60,7 @@ class SegmentationAgent(SensoryAgent):
             raise ValueError("Unsupported input type. Must be BBox2D, List[BBox2D], or PixelCoords.")
 
         segmented_image, masks = self.actor.predict(
-            image.base64, input_type, input_data_str, *args, api_name=api_name, **kwargs
+            image.base64, input_type, input_data_str, *args, api_name=api_name, **kwargs,
         )
         # Convert gradio Dataframe numpy to numpy array.
         masks = np.array(masks["data"])
@@ -72,10 +72,8 @@ if __name__ == "__main__":
     agent = SegmentationAgent(model_src="https://api.mbodi.ai/sense/")
     bboxes = [BBox2D(x1=225, y1=196, x2=408, y2=355), BBox2D(x1=378, y1=179, x2=494, y2=236)]
     mask_image, masks = agent.act(image=Image("resources/bridge_example.jpeg"), input_data=bboxes)
-    print("Masks shape", masks.shape)
     mask_image.pil.show()
 
     pixel_coords = PixelCoords(u=800, v=100)
     mask_image, masks = agent.act(image=Image("resources/bridge_example.jpeg"), input_data=pixel_coords)
-    print("Masks shape", masks.shape)
     mask_image.pil.show()

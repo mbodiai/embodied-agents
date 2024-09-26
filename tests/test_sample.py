@@ -18,11 +18,19 @@ import sys
 import h5py
 import numpy as np
 import pytest
-from gymnasium import spaces
+
 from mbodied.data.recording import Recorder
 from mbodied.types.sample import Sample
+from mbodied.utils.import_utils import smart_import
 
-
+try:
+    spaces = smart_import("gymnasium.spaces")
+    gym = smart_import("gymnasium")
+except ImportError:
+    torch = None
+    spaces = None
+    gym = None
+    pytest.skip("Skipping tests that require torch and gymnasium", allow_module_level=True)
 def test_from_dict():
     d = {"key1": 1, "key2": [2, 3, 4], "key3": {"nested_key": 5}}
     sample = Sample(**d)
@@ -33,6 +41,7 @@ def test_from_dict():
 
 
 def test_from_space():
+    from gymnasium import spaces
     space = spaces.Dict(
         {
             "key1": spaces.Discrete(3),

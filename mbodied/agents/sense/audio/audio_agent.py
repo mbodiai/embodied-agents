@@ -13,25 +13,25 @@
 # limitations under the License.
 
 import asyncio
-import json
 import logging
 import os
-from pathlib import Path
 import platform
 import threading
-from time import sleep, time
-from typing import Optional
 import wave
+from pathlib import Path
+from time import sleep, time
 
 import httpx
 
 try:
     import playsound
     import pyaudio
+    from fastapi import websockets
 except ImportError:
     logging.warning("playsound or pyaudio is not installed. Please run `pip install pyaudio playsound` to install.")
+    
 
-from fastapi import websockets
+
 from openai import OpenAI
 from typing_extensions import Literal
 
@@ -232,8 +232,7 @@ class AudioAgent(Agent):
         import websockets
         async with websockets.connect(uri, extra_headers={"Authorization": auth_token}) as websocket:
             await websocket.send({"model": "whisper-1", "response_format": "text"})
-            transcription = await asyncio.wait_for(websocket.recv(), timeout=timeout)
-            return transcription
+            return await asyncio.wait_for(websocket.recv(), timeout=timeout)
 
 
 def listen_httpx(
@@ -259,18 +258,17 @@ def listen_httpx(
     response.raise_for_status()
     elapsed_time = time() - tic
     total_tokens = len(result.split())
-    tokens_per_sec = total_tokens / elapsed_time if elapsed_time > 0 else 0
-    print(state, result, f"STT tok/sec: {tokens_per_sec:.4f}")
+    total_tokens / elapsed_time if elapsed_time > 0 else 0
 
-def run_sync(func, *args, **kwargs):
+def run_sync(func, *args, **kwargs) -> None:
     """Runs a function synchronously in a separate thread."""
     asyncio.run(func(*args, **kwargs))
 
 from typer import Typer
-from typer.core import TyperArgument, TyperCommand
+
 app = Typer()
 
-def listen_hz(hz=0.5):
+def listen_hz(hz=0.5) -> None:
     while True:
         try:
                 listen_httpx(  "/Users/sebastianperalta/simply/corp/projects/abb/fractal/demo/whisper/audio.wav",
@@ -284,7 +282,7 @@ def listen_hz(hz=0.5):
             break
 
 @app.command()
-def main(filename: Optional[str] = None) -> None:
+def main(filename: str | None = None) -> None:
     # audio_agent = AudioAgent(client=OpenAI(api_key="mbodi-demo-1", base_url="http://3.22.171.235:5018/"))
     # audio_agent.speak("How can I help you?")
     thread = threading.Thread(

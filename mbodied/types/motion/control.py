@@ -12,14 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Sequence
+import logging
+from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
-from gymnasium import spaces
 from pydantic import Field
 
 from mbodied.types.geometry import LocationAngle, Pose, Pose6D
 from mbodied.types.motion import Motion, MotionField
+from mbodied.utils.import_utils import smart_import
+
+if TYPE_CHECKING:
+    try:
+        import gymnasium as gym
+        from gym import spaces
+    except ImportError:
+        gym = Any
+        spaces = Any
+else:
+    try:
+        gym = smart_import("gymnasium")
+        spaces = smart_import("gymnasium.spaces")
+    except ImportError:
+        logging.info("This module requires gymnasium. Install with `pip install gymnasium`.")
+        gym = Any
+        spaces = Any
+
 
 """Motions to control a robot.
 

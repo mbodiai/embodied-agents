@@ -59,7 +59,7 @@ class HttpxBackend(OpenAIBackendMixin):
     DEFAULT_MODEL = "reka-core-20240501"
 
     def __init__(
-        self, api_key=None, endpoint: str | None = None, serializer: Serializer | None = None, **kwargs
+        self, api_key=None, endpoint: str | None = None, serializer: Serializer | None = None, **kwargs,
     ) -> None:
         """Initializes the CompleteBackend. Defaults to using the API key from the environment and.
 
@@ -84,11 +84,11 @@ class HttpxBackend(OpenAIBackendMixin):
 
     @overload
     def predict(
-        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs,
     ) -> str: ...
 
     def predict(
-        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs
+        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs,
     ) -> str:
         # Determine if the input is a list of messages or a single message
         if isinstance(message_or_messages, list):
@@ -108,7 +108,7 @@ class HttpxBackend(OpenAIBackendMixin):
 
         with httpx.Client(trust_env=True) as client:
             response = client.post(
-                self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60), follow_redirects=True
+                self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60), follow_redirects=True,
             )
 
             # Process response
@@ -124,11 +124,11 @@ class HttpxBackend(OpenAIBackendMixin):
 
     @overload
     def stream(
-        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs,
     ) -> Generator[str, None, None]: ...
 
     def stream(
-        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs
+        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs,
     ) -> Generator[str, None, None]:
         if isinstance(message_or_messages, list):
             messages = message_or_messages
@@ -142,16 +142,16 @@ class HttpxBackend(OpenAIBackendMixin):
 
     @overload
     async def astream(
-        self, messages: List[Message], model: str | None = None, **kwargs
+        self, messages: List[Message], model: str | None = None, **kwargs,
     ) -> AsyncGenerator[str, None]: ...
 
     @overload
     async def astream(
-        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
+        self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs,
     ) -> AsyncGenerator[str, None]: ...
 
     async def astream(
-        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs
+        self, message_or_messages, context: List[Message] | None = None, model: str | None = None, **kwargs,
     ) -> AsyncGenerator[str, None]:
         if isinstance(message_or_messages, list):
             messages = message_or_messages
@@ -181,7 +181,7 @@ class HttpxBackend(OpenAIBackendMixin):
         with (
             httpx.Client(follow_redirects=True) as client,
             client.stream(
-                "post", self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60)
+                "post", self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60),
             ) as stream,
         ):
             for chunk in stream.iter_text():
@@ -199,7 +199,7 @@ class HttpxBackend(OpenAIBackendMixin):
 
         async with httpx.AsyncClient(timeout=-1) as client:
             response = await client.post(
-                self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60)
+                self.base_url, headers=self.headers, json=data, timeout=kwargs.get("timeout", 60),
             )
             if response.status_code == 200:
                 response_data = response.json()
@@ -207,7 +207,7 @@ class HttpxBackend(OpenAIBackendMixin):
             return response.text
 
     async def _astream_completion(
-        self, messages: List[Message], model: str | None = None, **kwargs
+        self, messages: List[Message], model: str | None = None, **kwargs,
     ) -> AsyncGenerator[str, None]:
         model = model or self.DEFAULT_MODEL
         data = {
@@ -226,16 +226,13 @@ class HttpxBackend(OpenAIBackendMixin):
 
 if __name__ == "__main__":
     # Usage
-    import asyncio
 
     client = HttpxBackend()
     image_url = "https://v0.docs.reka.ai/_images/000000245576.jpg"
     text = "What animal is this? Answer briefly."
     run = client.predict([Message(role="user", content=[text, Image(url=image_url)])])
-    print(run)
 
-    async def runner():
-        async for response in run:
-            print(response)
+    async def runner() -> None:
+        async for _response in run:
+            pass
 
-    print(asyncio.run(run))

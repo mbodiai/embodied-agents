@@ -8,7 +8,7 @@ from mbodied.types.sense.world import BBox2D, PixelCoords
 
 
 @click.group()
-def cli():
+def cli() -> None:
     """CLI for various AI agents."""
     pass
 
@@ -24,7 +24,7 @@ def cli():
     help="The model type to use for detection.",
 )
 @click.option("--api-name", default="/detect", help="The API endpoint to use.")
-def detect(model_src, image_path, objects, model_type, api_name):
+def detect(model_src, image_path, objects, model_type, api_name) -> None:
     """Run the ObjectDetectionAgent to detect objects in an image."""
     image = Image(image_path, size=(224, 224))
     objects_list = objects.split(",")
@@ -37,7 +37,7 @@ def detect(model_src, image_path, objects, model_type, api_name):
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
 @click.option("--image-path", prompt="Image path", help="Path to the image file.")
 @click.option("--api-name", default="/depth", help="The API endpoint to use.")
-def estimate_depth(model_src, image_path, api_name):
+def estimate_depth(model_src, image_path, api_name) -> None:
     """Run the DepthEstimationAgent to estimate depth from an image."""
     image = Image(image_path, size=(224, 224))
     agent = DepthEstimationAgent(model_src=model_src)
@@ -55,10 +55,10 @@ def estimate_depth(model_src, image_path, api_name):
     help="Type of input data (bbox or coords).",
 )
 @click.option(
-    "--input-data", prompt="Input data", help="Bounding box coordinates as x1,y1,x2,y2 or pixel coordinates as u,v."
+    "--input-data", prompt="Input data", help="Bounding box coordinates as x1,y1,x2,y2 or pixel coordinates as u,v.",
 )
 @click.option("--api-name", default="/segment", help="The API endpoint to use.")
-def segment(model_src, image_path, input_type, input_data, api_name):
+def segment(model_src, image_path, input_type, input_data, api_name) -> None:
     """Run the SegmentationAgent to segment objects in an image."""
     image = Image(image_path, size=(224, 224))
     agent = SegmentationAgent(model_src=model_src)
@@ -71,7 +71,6 @@ def segment(model_src, image_path, input_type, input_data, api_name):
         input_data = PixelCoords(u=u, v=v)
 
     mask_image, masks = agent.act(image=image, input_data=input_data, api_name=api_name)
-    print("Masks shape:", masks.shape)
     mask_image.pil.show()
 
 

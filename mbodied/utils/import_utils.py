@@ -59,5 +59,5 @@ def smart_import(name: str, mode: Literal["lazy"] | None = None) -> ModuleType:
     try:
         return importlib.import_module(name)
     except ImportError as e:
-        msg = f"Module {name} not found"
+        msg = f"Module {name} not found. Please install with `pip install {name}`"
         raise NameError(msg) from e

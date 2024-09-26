@@ -96,7 +96,7 @@ class RealsenseCamera:
             elif isinstance(value, bytes | bytearray):
                 intrinsics_dict[key] = value.decode()
             elif isinstance(value, object) and not isinstance(
-                value, int | float | str | list | dict | bool | type(None)
+                value, int | float | str | list | dict | bool | type(None),
             ):
                 intrinsics_dict[key] = str(value)
 

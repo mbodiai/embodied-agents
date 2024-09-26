@@ -31,16 +31,14 @@ TODO: Implement Lazy attribute loading for the image data.
 """
 
 import base64 as base64lib
+import contextlib
 import io
 import logging
 from pathlib import Path
-from typing import Any, Tuple, Union
+from typing import TYPE_CHECKING, Any, Tuple, Union
 from urllib.parse import urlparse
 
 import numpy as np
-from datasets.features import Features
-from datasets.features import Image as HFImage
-from gymnasium import spaces
 from PIL import Image as PILModule
 from PIL.Image import Image as PILImage
 from pydantic import (
@@ -57,8 +55,24 @@ from typing_extensions import Literal
 
 from mbodied.types.ndarray import NumpyArray
 from mbodied.types.sample import Sample
+from mbodied.utils.import_utils import smart_import
 
 SupportsImage = Union[np.ndarray, PILImage, Base64Str, AnyUrl, FilePath]  # noqa: UP007
+
+if TYPE_CHECKING:
+    with contextlib.suppress(ImportError):
+        from dataesets.features import Image as HFImage
+        from datasets.features import Features
+        from gym import spaces
+
+else:
+    try:
+        HFImage = smart_import("datasets.features").Image
+        Features = smart_import("datasets.features").Features
+        gym = smart_import("gymnasium")
+        spaces = gym.spaces
+    except Exception:
+        logging.info("To use ths module please install gymnasium and datasets. This can be done with `pip install 'mbodied[extras]'`")
 
 
 class Image(Sample):
@@ -433,8 +447,9 @@ class Image(Sample):
 
         plt.imshow(self.array)
 
-    def space(self) -> spaces.Box:
+    def space(self) -> "spaces.Box":
         """Returns the space of the image."""
+        spaces = smart_import("gymnasium.spaces")
         if self.size is None:
             raise ValueError("Image size is not defined.")
         return spaces.Box(low=0, high=255, shape=(*self.size, 3), dtype=np.uint8)
@@ -446,7 +461,7 @@ class Image(Sample):
             return {"size": self.size, "url": self.url, "encoding": self.encoding}
         return {"base64": self.base64, "size": self.size, "url": self.url, "encoding": self.encoding}
 
-    def dump(self, *args, as_field: str | None = None, **kwargs) -> dict | Any:
+    def dump(self, *_, as_field: str | None = None, **__) -> dict | Any:
         """Return a dict or a field of the image."""
         if as_field is not None:
             return getattr(self, as_field)
@@ -458,6 +473,7 @@ class Image(Sample):
             "encoding": self.encoding,
         }
 
-    def infer_features_dict(self) -> Features:
+    def infer_features_dict(self) -> "Features":
         """Infer features of the image."""
-        return HFImage()
+        features = smart_import("datasets.features")
+        return features.Image()

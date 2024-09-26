@@ -18,15 +18,28 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Union
 
 import h5py
 import numpy as np
-from gymnasium import spaces
 from h5py import string_dtype
 
 from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image
+from mbodied.utils.import_utils import smart_import
+
+if TYPE_CHECKING:
+    try:
+        import gymnasium as gym
+        from gym import spaces
+    except ImportError:
+        gym = Any
+        spaces = Any
+else:
+    try:
+        spaces = smart_import("gymnasium.spaces")
+    except Exception:
+        logging.info("This module requies gymnasium. Install with `pip install gymnasium`.")
 
 
 def add_space_metadata(space, group) -> None:
@@ -61,7 +74,8 @@ def add_space_metadata(space, group) -> None:
     group.attrs["json_schema"] = schema
 
 
-def create_dataset_for_space_dict(space_dict: spaces.Dict, group: h5py.Group) -> None:
+def create_dataset_for_space_dict(space_dict: "spaces.Dict", group: h5py.Group) -> None:
+    spaces = smart_import("gymnasium.spaces")
     if not isinstance(space_dict, spaces.Dict):
         raise ValueError("space_dict must be a Dict at the root level")
     add_space_metadata(space_dict, group)
@@ -138,10 +152,10 @@ class Recorder:
     def __init__(
         self,
         name: str = "dataset.h5",
-        observation_space: spaces.Dict | str | None = None,
-        action_space: spaces.Dict | str | None = None,
-        state_space: spaces.Dict | str | None = None,
-        supervision_space: spaces.Dict | str | None = None,
+        observation_space: Union["spaces.Dict", str, None] = None,
+        action_space: Union["spaces.Dict", str, None] = None,
+        state_space:  Union["spaces.Dict", str, None] = None,
+        supervision_space: Union["spaces.Dict", str, None] = None,
         out_dir: str = "saved_datasets",
         image_keys_to_save: list = None,
     ):
@@ -192,7 +206,7 @@ class Recorder:
         copy_and_delete_old(self.filename)
         self.file = h5py.File(self.filename, "a")
 
-    def configure_root_spaces(self, **spaces: spaces.Dict):
+    def configure_root_spaces(self, **spaces: "spaces.Dict"):
         """Configure the root spaces.
 
         Args:

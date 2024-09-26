@@ -12,8 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gradio_client import Client
-from gradio_client.client import Job
+import logging
+from typing import TYPE_CHECKING, Any
+
+from mbodied.utils.import_utils import smart_import
+
+if TYPE_CHECKING:
+    try:
+        from gradio.job import Job
+        from gradio_client import Client
+    except ImportError:
+        Client = Any
+        Job = Any
+        gradio = Any
+else:
+    try:
+        from gradio_client import Client
+    except Exception:
+        
+        logging.info("To use this backend, install gradio-client with `pip install gradio-client`")
+        
 
 from mbodied.agents.backends.backend import Backend
 
@@ -32,8 +50,10 @@ class GradioBackend(Backend):
             endpoint: The url of the gradio server.
             **kwargs: The keywrod arguments to pass to the gradio client.
         """
+        smart_import("gradio_client")
         self.endpoint = endpoint
         self.client = Client(src=endpoint, **kwargs)
+
 
     def predict(self, *args, **kwargs) -> str:
         """Forward queries to the gradio api endpoint `predict`.
@@ -44,7 +64,7 @@ class GradioBackend(Backend):
         """
         return self.client.predict(*args, **kwargs)
 
-    def submit(self, *args, api_name="/predict", result_callbacks=None, **kwargs) -> Job:
+    def submit(self, *args, api_name="/predict", result_callbacks=None, **kwargs) -> "Job":
         """Submit queries asynchronously without need of asyncio.
 
         Args:

@@ -62,7 +62,6 @@ def main(task: str, api_key: str) -> None:
     robot.start_recording(task=task)
     # Recording starts here
     instruction = "move arm left by 0.5 meter please!"
-    print("Instruction:", instruction)
     action = cognitive_agent.act_and_parse(instruction, robot.capture(), HandControl)
     robot.do(action)
     robot.stop_recording()

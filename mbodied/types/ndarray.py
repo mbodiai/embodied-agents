@@ -12,7 +12,6 @@ from typing import (
     ClassVar,
     Generic,
     Iterable,
-    Optional,
     TypeVarTuple,
     get_type_hints,
 )
@@ -213,7 +212,7 @@ class NumpyModel(BaseModel):
         output_directory: DirectoryPath,
         object_id: str,
         *,
-        pre_load_modifier: Optional[Callable[[dict[str, Any]], dict[str, Any]]] = None,
+        pre_load_modifier: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
     ):
         """Load NumpyModel instance.
 
@@ -325,7 +324,7 @@ def model_agnostic_load(
     models: Iterable[type[NumpyModel]],
     not_found_error: bool = False,
     **load_kwargs,
-) -> Optional[NumpyModel]:
+) -> NumpyModel | None:
     """Provided an Iterable containing possible models, and the directory where they have been dumped.
 
      Load the first

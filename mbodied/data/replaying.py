@@ -15,20 +15,28 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any, Callable, List, Tuple
+from typing import TYPE_CHECKING, Any, Callable, List, Tuple
 
 import click
 import h5py
 import numpy as np
-from datasets import Dataset, DatasetInfo, Features, Image, Value
 from h5py import string_dtype
-from huggingface_hub import login
 from PIL import Image as PILImage
 
 from mbodied.data.utils import infer_features
 from mbodied.types.sample import Sample
 from mbodied.types.sense.vision import Image as MbImage
 
+if TYPE_CHECKING:
+    try:
+        from datasets import Dataset, DatasetInfo, Features, Image, Value
+    except ImportError:
+        Dataset = Any
+        DatasetInfo = Any
+        Features = Any
+        Image = Any
+        Value = Any
+        logging.info("To use this module, please install the 'datasets' package: pip install datasets")
 
 class Replayer:
     """Replays datasets recorded by Recorder.

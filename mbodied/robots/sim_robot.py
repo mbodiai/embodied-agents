@@ -63,7 +63,7 @@ class SimRobot(Robot):
             sleep_duration = self.execution_time / steps
             step_motion = [value / steps for value in m.flatten()]
             for _ in range(steps):
-                self.current_pos = [round(x + y, 5) for x, y in zip(self.current_pos, step_motion)]
+                self.current_pos = [round(x + y, 5) for x, y in zip(self.current_pos, step_motion, strict=False)]
                 time.sleep(sleep_duration)
 
             print("New position:", self.current_pos)  # noqa: T201

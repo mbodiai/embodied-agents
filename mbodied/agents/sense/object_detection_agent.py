@@ -60,7 +60,7 @@ class ObjectDetectionAgent(SensoryAgent):
         if isinstance(objects, list):
             objects = ",".join(objects)
         annotated_img, json_dict = self.actor.predict(
-            image.base64, objects, model_type=model_type, *args, api_name=api_name, **kwargs
+            image.base64, objects, model_type=model_type, *args, api_name=api_name, **kwargs,
         )
         return World.model_validate(json_dict)
 

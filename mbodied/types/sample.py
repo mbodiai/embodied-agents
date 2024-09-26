@@ -17,12 +17,9 @@ import logging
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Sequence, Union, get_origin
 
 import numpy as np
-from datasets import Dataset
-from gymnasium import spaces
-from jsonref import replace_refs
 from pydantic import BaseModel, ConfigDict, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import from_json
@@ -33,6 +30,21 @@ from mbodied.utils.import_utils import smart_import
 
 Flattenable = Annotated[Literal["dict", "np", "pt", "list"], "Numpy, PyTorch, list, or dict"]
 
+if TYPE_CHECKING:
+    try:
+        import spaces.Dict
+        import spaces.Space
+        import torch
+        from datasets import Dataset
+        from gymnasium import spaces
+        from gymnasium.spaces import Space
+        from jsonref import replace_refs
+    except ImportError:
+        spaces = Any
+        replace_refs = Any
+        Dataset = Any
+        torch = Any
+        Space = Any
 
 class Sample(BaseModel):
     """A base model class for serializing, recording, and manipulating arbitray data.
@@ -149,14 +161,14 @@ class Sample(BaseModel):
                     value, index = unflatten_recursive(prop_schema, index)
                     result[prop] = value
                 return result, index
-            elif schema_part["type"] == "array":
+            if schema_part["type"] == "array":
                 items = []
                 for _ in range(schema_part.get("maxItems", len(flat_data) - index)):
                     value, index = unflatten_recursive(schema_part["items"], index)
                     items.append(value)
                 return items, index
-            else:  # Assuming it's a primitive type
-                return flat_data[index], index + 1
+            # Assuming it's a primitive type
+            return flat_data[index], index + 1
 
         unflattened_dict, _ = unflatten_recursive(schema)
         return cls(**unflattened_dict)
@@ -250,6 +262,8 @@ class Sample(BaseModel):
             del schema["additionalProperties"]
 
         if resolve_refs:
+            jsonref = smart_import("jsonref")
+            replace_refs = jsonref.replace_refs
             schema = replace_refs(schema)
 
         if not include_descriptions and "description" in schema:
@@ -345,11 +359,12 @@ class Sample(BaseModel):
         value: Any,
         max_text_length: int = 1000,
         info: Annotated = None,
-    ) -> spaces.Space:
+    ) -> "Space":
         """Default Gym space generation for a given value.
 
         Only used for subclasses that do not override the space method.
         """
+        spaces = smart_import("gymnasium.spaces")
         if isinstance(value, Enum) or get_origin(value) == Literal:
             return spaces.Discrete(len(value.__args__))
         if isinstance(value, bool):
@@ -452,8 +467,9 @@ class Sample(BaseModel):
         return reconstructed
 
     @classmethod
-    def from_space(cls, space: spaces.Space) -> "Sample":
+    def from_space(cls, space: "Space") -> "Sample":
         """Generate a Sample instance from a Gym space."""
+        smart_import("gymnasium.spaces")
         sampled = space.sample()
         if isinstance(sampled, dict | OrderedDict):
             return cls(**sampled)
@@ -513,7 +529,7 @@ class Sample(BaseModel):
         return [self.__class__(**{key: getattr(self, key)[i] for key in attributes}) for i in range(list_size)]
 
     @classmethod
-    def default_space(cls) -> spaces.Dict:
+    def default_space(cls) -> "spaces.Dict":
         """Return the Gym space for the Sample class based on its class attributes."""
         return cls().space()
 
@@ -538,11 +554,12 @@ class Sample(BaseModel):
             return info.annotation
         return None
 
-    def space(self) -> spaces.Dict:
+    def space(self) -> "spaces.Dict":
         """Return the corresponding Gym space for the Sample instance based on its instance attributes. Omits None values.
 
         Override this method in subclasses to customize the space generation.
         """
+        spaces = smart_import("gymnasium.spaces")
         space_dict = {}
         for key, value in self.dict().items():
             logging.debug("Generating space for key: '%s', value: %s", key, value)

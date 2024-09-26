@@ -1,9 +1,10 @@
-from typing import Optional
 import asyncio
 import json
 import logging
-from typer import Typer
+
 import websockets
+from typer import Typer
+
 
 async def ws_listen(self, timeout: int = 30) -> str:
     """Listens for audio input and transcribes it using a WebSocket endpoint.
@@ -50,8 +51,7 @@ async def ws_listen(self, timeout: int = 30) -> str:
                     transcription = data.get("data", {}).get("text", "")
                     logging.info(f"Received transcription: {transcription}")
                     return transcription
-                else:
-                    logging.warning(f"Unexpected message type received: {data.get('type')}")
+                logging.warning(f"Unexpected message type received: {data.get('type')}")
             except asyncio.TimeoutError:
                 logging.error("Transcription timed out.")
     except websockets.exceptions.InvalidURI:

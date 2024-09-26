@@ -13,11 +13,10 @@
 # limitations under the License.
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 import h5py
 import numpy as np
 import os
-from gymnasium import spaces
-from gymnasium import spaces
 from mbodied.data.recording import Recorder, create_dataset_for_space_dict
 from mbodied.types.sample import Sample
 from tempfile import TemporaryDirectory
@@ -28,6 +27,12 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
+
+try:
+    from gymnasium import spaces
+except ImportError:
+    logging.info("To run tests, please install gymnasium: pip install gymnasium")
+    pytest.skip("Skipping tests that require gymnasium", allow_module_level=True)
 
 @pytest.fixture
 def tempdir():

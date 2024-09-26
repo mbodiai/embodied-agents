@@ -18,7 +18,6 @@ One language agent act as planner and the other as motor agent.
 """
 
 import os
-from pathlib import Path
 
 import click
 from gymnasium import spaces

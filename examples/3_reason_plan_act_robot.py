@@ -20,7 +20,6 @@ More complex applications can be built using the modules on top of this example.
 
 import json
 import os
-from pathlib import Path
 
 import click
 

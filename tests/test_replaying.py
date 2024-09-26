@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from typing import TYPE_CHECKING
 import pytest
 import numpy as np
 import h5py
@@ -20,10 +21,16 @@ from pathlib import Path
 from mbodied.data.replaying import Replayer, parse_slice
 from mbodied.data.recording import Recorder
 from mbodied.types.motion.control import LocobotActionOrAnswer as ActionOrAnswer
-from gymnasium import spaces
+
 import sys
 import logging
 
+
+try:
+    from gymnasium import spaces
+except ImportError:
+    logging.info("To run tests, please install gymnasium: pip install gymnasium")
+    pytest.skip(f"Skipping gym tests", allow_module_level=True)
 
 @pytest.fixture
 def mock_hdf5_file(tmpdir):

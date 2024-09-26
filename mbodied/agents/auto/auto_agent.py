@@ -31,7 +31,7 @@ class AutoAgent(Agent):
 
     TASK_TO_AGENT_MAP: Dict[
         Literal[
-            "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation"
+            "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation",
         ],
         Type[Agent],
     ] = {
@@ -43,7 +43,7 @@ class AutoAgent(Agent):
     }
 
     def __init__(
-        self, task: str | None = None, model_src: str | None = None, model_kwargs: Dict | None = None, **kwargs
+        self, task: str | None = None, model_src: str | None = None, model_kwargs: Dict | None = None, **kwargs,
     ):
         """Initialize the AutoAgent with the specified task and model."""
         if model_kwargs is None:
@@ -62,7 +62,7 @@ class AutoAgent(Agent):
             self.agent = LanguageAgent(model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs)
         else:
             self.agent = self.TASK_TO_AGENT_MAP[self.task](
-                model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs
+                model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs,
             )
 
     def __getattr__(self, name: str) -> Any:
@@ -94,7 +94,7 @@ class AutoAgent(Agent):
 
 def get_agent(
     task: Literal[
-        "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation"
+        "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation",
     ],
     model_src: str,
     model_kwargs: Dict | None = None,
@@ -122,7 +122,7 @@ def get_agent(
     if task not in AutoAgent.TASK_TO_AGENT_MAP:
         raise ValueError(
             f"Task '{task}' is not supported. Supported tasks: {list(AutoAgent.TASK_TO_AGENT_MAP.keys())}. "
-            "Use AutoAgent.available_tasks() to view all available tasks."
+            "Use AutoAgent.available_tasks() to view all available tasks.",
         )
 
     if model_kwargs is None:
@@ -134,21 +134,18 @@ def get_agent(
 if __name__ == "__main__":
     auto_agent = AutoAgent(task="language", model_src="openai")
     response = auto_agent.act("What is the capital of France?")
-    print(response)
 
     stream = auto_agent.act_and_stream("What is the capital of France?")
-    for chunk in stream:
-        print(chunk)
+    for _chunk in stream:
+        pass
 
     auto_agent = AutoAgent(task="motion-openvla", model_src="https://api.mbodi.ai/community-models/")
     action = auto_agent.act("move hand forward", Image(size=(224, 224)))
-    print(action)
 
     auto_agent = AutoAgent(
-        task="motion-openvla", model_src="gradio", model_kwargs={"endpoint": "https://api.mbodi.ai/community-models/"}
+        task="motion-openvla", model_src="gradio", model_kwargs={"endpoint": "https://api.mbodi.ai/community-models/"},
     )
     action = auto_agent.act("move hand forward", Image(size=(224, 224)), "bridge_orig")
-    print(action)
 
     auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
     image = Image("resources/bridge_example.jpeg", size=(224, 224))
@@ -157,4 +154,3 @@ if __name__ == "__main__":
 
     auto_agent = get_agent(task="language", model_src="openai")
     response = auto_agent.act("What is the capital of France?")
-    print(response)

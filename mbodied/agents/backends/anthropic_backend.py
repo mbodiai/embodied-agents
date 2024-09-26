@@ -118,7 +118,7 @@ class AnthropicBackend(OpenAIBackendMixin):
         return completion.content[0].text
 
     async def async_predict(
-        self, message: Message, context: List[Message] | None = None, model: Any | None = None
+        self, message: Message, context: List[Message] | None = None, model: Any | None = None,
     ) -> str:
         """Asynchronously predict the next message in the conversation."""
         # For now, we'll use the synchronous method since Anthropic doesn't provide an async API

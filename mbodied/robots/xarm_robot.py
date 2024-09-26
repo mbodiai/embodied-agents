@@ -12,18 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from gymnasium import spaces
-
-try:
-    from xarm.wrapper import XArmAPI
-except ImportError:
-    logging.warning("XarmAPI not found. Please install the xArm-Python-SDK package.")
-    xarm = Any
-
+if TYPE_CHECKING:
+    try:
+        import gymnasium as gym
+        from xarm.wrapper import XArmAPI
+    except ImportError:
+        XArmAPI = Any
+        gym = Any
 
 from mbodied.robots import Robot
 from mbodied.types.motion.control import HandControl

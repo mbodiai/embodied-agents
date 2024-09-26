@@ -79,10 +79,9 @@ class Reminder:
     def __getitem__(self, key):
         if key == 0:
             return self.prompt
-        elif key == 1:
+        if key == 1:
             return self.n
-        else:
-            raise IndexError("Invalid index")
+        raise IndexError("Invalid index")
 
 
 def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
@@ -319,7 +318,7 @@ class LanguageAgent(Agent):
         )
 
     def prepare_inputs(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None,
     ) -> tuple[Message, list[Message]]:
         """Helper method to prepare the inputs for the agent.
 
@@ -387,7 +386,7 @@ class LanguageAgent(Agent):
         return self.postprocess_response(response, message, memory, **kwargs)
 
     def act_and_stream(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs,
     ) -> Generator[str, None, str]:
         """Responds to the given instruction, image, and context and streams the response."""
         message, memory = self.prepare_inputs(instruction, image, context)
@@ -400,7 +399,7 @@ class LanguageAgent(Agent):
         return self.postprocess_response(response, message, memory, **kwargs)
 
     async def async_act_and_stream(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs,
     ) -> AsyncGenerator[str, None]:
         message, memory = self.prepare_inputs(instruction, image, context)
         kwargs = {**kwargs, "model": model}
@@ -413,20 +412,18 @@ class LanguageAgent(Agent):
         return
 
 
-def main():
+def main() -> None:
     agent = LanguageAgent(model_src="openai")
     resp = ""
     for chunk in agent.act_and_stream("Hello, world!"):
         resp += chunk
-        print(resp)
 
 
-async def async_main():
+async def async_main() -> None:
     agent = LanguageAgent(model_src="openai", model_kwargs={"aclient": True})
     resp = ""
     async for chunk in agent.async_act_and_stream("Hello, world!"):
         resp += chunk
-        print(resp)
 
 
 if __name__ == "__main__":

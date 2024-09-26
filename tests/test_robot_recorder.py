@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING, Any
 import pytest
 from mbodied.types.motion.control import HandControl
 from mbodied.types.sense.vision import Image
@@ -5,9 +6,28 @@ from mbodied.robots.robot_recording import RobotRecorder
 from mbodied.robots import SimRobot
 from mbodied.data.replaying import Replayer
 from tempfile import TemporaryDirectory
-from gymnasium import spaces
+from mbodied.utils.import_utils import smart_import
 from pathlib import Path
 
+if TYPE_CHECKING:
+    try:
+        from xarm.wrapper import XArmAPI
+        import gymnasium as gym
+        from gymnasium import spaces
+    except ImportError:
+        XArmAPI = Any
+        gym = Any
+else:
+    try:
+        xarm = smart_import("xarm.wrapper")
+        XArmAPI = xarm.XArmAPI
+        gym = smart_import("gymnasium")
+        spaces = smart_import("gymnasium.spaces")
+    except ImportError:
+        XArmAPI = Any
+        gym = Any
+        spaces = Any
+        
 
 @pytest.fixture
 def tempdir():

@@ -62,8 +62,7 @@ class Agent:
             if model_src == "gradio":
                 # Gradio doesn't take api_key.
                 return Agent.ACTOR_MAP[model_src](**model_kwargs)
-            else:
-                return Agent.ACTOR_MAP[model_src](**model_kwargs, api_key=api_key)
+            return Agent.ACTOR_MAP[model_src](**model_kwargs, api_key=api_key)
         return Agent.handle_default(model_src, model_kwargs)
 
     @staticmethod

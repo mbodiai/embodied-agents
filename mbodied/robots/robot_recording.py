@@ -1,7 +1,7 @@
 import threading
 import time
 from queue import Queue
-from typing import Any, Callable, Literal
+from typing import Callable, Literal
 
 from mbodied.data.recording import Recorder
 
