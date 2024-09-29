@@ -56,14 +56,41 @@ def test_anthropic_backend_create_completion(anthropic_backend):
 
 def test_anthropic_backend_with_context(anthropic_backend):
     context = [Message("Hello"), Message("How are you?")]
-    response = anthropic_backend.predict(Message("What's the weather like?"), context=context)
+    response = anthropic_backend.predict(
+        Message("What's the weather like?"), context=context)
     assert response == mock_anthropic_response
 
 
 def test_anthropic_backend_with_image(anthropic_backend):
     image = Image(size=(224, 224))
-    response = anthropic_backend.predict(Message(["Describe this image", image]), context=[])
+    response = anthropic_backend.predict(
+        Message(["Describe this image", image]), context=[])
     assert response == mock_anthropic_response
+
+
+def test_anthropic_backend_stream(anthropic_backend):
+    class MockStream:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            pass
+
+        @property
+        def text_stream(self):
+            return iter(["Streaming response part 1", "Streaming response part 2", ""])
+
+    def mock_stream(*args, **kwargs):
+        return MockStream()
+
+    anthropic_backend.client.messages.stream = mock_stream
+    stream_generator = anthropic_backend.stream(
+        Message("Stream this message"), context=[])
+    results = list(stream_generator)
+    expected_results = ["Streaming response part 1",
+                        "Streaming response part 2", ""]
+
+    assert results == expected_results
 
 
 @pytest.mark.asyncio
