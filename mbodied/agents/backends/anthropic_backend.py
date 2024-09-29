@@ -68,7 +68,8 @@ class AnthropicBackend(OpenAIBackendMixin):
 
     DEFAULT_MODEL = "claude-3-5-sonnet-20240620"
     INITIAL_CONTEXT = [
-        Message(role="user", content="Imagine you are a robot with advanced spatial reasoning."),
+        Message(
+            role="user", content="Imagine you are a robot with advanced spatial reasoning."),
         Message(role="assistant", content="Got it!"),
     ]
 
@@ -108,11 +109,12 @@ class AnthropicBackend(OpenAIBackendMixin):
         """
         if model is None:
             model = self.DEFAULT_MODEL
-        serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
+        serialized_messages = [self.serialized(
+            msg).serialize() for msg in context + [message]]
         completion = self.client.messages.create(
             model=model,
-            max_tokens=1024,
             messages=serialized_messages,
+            max_tokens=1024,
             **kwargs,
         )
         return completion.content[0].text
@@ -123,3 +125,24 @@ class AnthropicBackend(OpenAIBackendMixin):
         """Asynchronously predict the next message in the conversation."""
         # For now, we'll use the synchronous method since Anthropic doesn't provide an async API
         return self.predict(message, context, model)
+
+    def stream(self, message: Message, context: List[Message] = None, model: str = "claude-3-5-sonnet-20240620", **kwargs):
+        """Streams a completion for the given messages using the Anthropic API standard.
+
+        Args:
+            message: Message to be sent to the completion API.
+            context: The context of the messages.
+            model: The model to be used for the completion.
+            **kwargs: Additional keyword arguments.
+        """
+        model = model or self.DEFAULT_MODEL
+        serialized_messages = [self.serialized(
+            msg).serialize() for msg in context + [message]]
+        with self.client.messages.stream(
+            max_tokens=1024,
+            messages=serialized_messages,
+            model=model,
+            **kwargs,
+        ) as stream:
+            for text in stream.text_stream:
+                yield text or ""
