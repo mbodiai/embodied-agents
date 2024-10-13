@@ -16,7 +16,7 @@
 
 import os
 
-import click
+import rich_click as click
 from pydantic import Field
 
 from mbodied.agents.language import LanguageAgent

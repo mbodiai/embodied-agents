@@ -34,9 +34,13 @@ dependencies = [
   "pydantic",
   "gradio",
   "gradio_client",
+<<<<<<< HEAD
   "rich-click>=1.8.3",
   "compress-pickle>=2.1.0",
   "ruamel-yaml>=0.18.6",
+=======
+  "rich-click==1.8.3",
+>>>>>>> 7d88a5b (Use rich click and cleanup)
 ]
 [project.optional-dependencies]
 extras = ["xarm-python-sdk", "opencv-python", "torch", "transformers"]
