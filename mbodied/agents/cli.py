@@ -99,26 +99,42 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
         if instruction.lower() == "exit-loop":
             break
 
-@cli.group()
-def sense():
+@cli.group(invoke_without_command=True)
+@click.option("--list", "-l", is_flag=True, help="List available sensory models.")
+@click.pass_context
+def sense(ctx, list):
     """Commands related to sensing tasks (detection, segmentation, depth estimation)."""
-    pass
+    if list:
+        click.echo("Available Sensory Models:")
+        click.echo("- Object Detection Models:")
+        click.echo("  - Grounding DINO")
+        click.echo("  - YOLOWorld")
+        click.echo("- Depth Estimation Models:")
+        click.echo("  - Depth Anything")
+        click.echo("  - Zoe Depth")
+        click.echo("- Segmentation Models:")
+        click.echo("  - Segment Anything(SAM2)")
+        ctx.exit()
+
+    if ctx.invoked_subcommand is None:
+            click.echo("No subcommand provided. Try 'mbodied sense --help' for help")
 
 @sense.command("detect")
-@click.argument("image_filename")
+@click.argument("image_filename", required=False)
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
 @click.option(
-    "--objects", prompt="Objects to detect (comma-separated)", help="Comma-separated list of objects to detect."
+    "--objects", prompt=False, help="Comma-separated list of objects to detect."
 )
 @click.option(
     "--model-type",
     type=click.Choice(["YOLOWorld", "Grounding DINO"], case_sensitive=False),
-    prompt="Model type",
+    prompt=False,
     help="The model type to use for detection.",
 )
 @click.option("--api-name", default="/detect", help="The API endpoint to use.")
+@click.option("--list", "-l", is_flag=True, help="List available models for object detection.")
 @click.pass_context
-def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name) -> None:
+def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name, list) -> None:
     """
     Run the ObjectDetectionAgent to detect objects in an image.
 
@@ -141,6 +157,27 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
     verbose = ctx.obj['VERBOSE']
     dry_run = ctx.obj['DRY_RUN']
 
+    if list:
+        click.echo("Available Object Detection Models:")
+        click.echo("- Grounding DINO")
+        click.echo("- YOLOWorld")
+        return
+    
+    if image_filename is None:
+        click.echo("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
+        return
+    
+    if objects is None:
+        objects = click.prompt(
+            "Objects to detect (comma-separated)"
+        )
+    
+    if model_type is None:
+        model_type = click.prompt(
+            "Model Type", 
+            type=click.Choice(["YOLOWorld", "Grounding DINO"], case_sensitive=False)
+        )
+
     if verbose:
         click.echo(f"Running object detection on {image_filename} using {model_type}")
 
@@ -157,11 +194,12 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
     result.annotated.pil.show()
 
 @sense.command("depth")
-@click.argument("image_filename")
+@click.argument("image_filename", required=False)
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
 @click.option("--api-name", default="/depth", help="The API endpoint to use.")
+@click.option("--list", "-l", is_flag=True, help="List available models for depth estimation.")
 @click.pass_context
-def estimate_depth(ctx, image_filename, model_src, api_name) -> None:
+def estimate_depth(ctx, image_filename, model_src, api_name, list) -> None:
     """Run the DepthEstimationAgent to estimate depth from an image.
 
     Example command:
@@ -182,6 +220,16 @@ def estimate_depth(ctx, image_filename, model_src, api_name) -> None:
     verbose = ctx.obj['VERBOSE']
     dry_run = ctx.obj['DRY_RUN']
 
+    if list:
+        click.echo("Available Depth Estimation Models:")
+        click.echo("- Depth Anything")
+        click.echo("- Zoe Depth")
+        ctx.exit()
+
+    if image_filename is None:
+        click.echo("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
+        return
+    
     if verbose:
         click.echo(f"Running depth estimation on {image_filename}")
 
@@ -195,22 +243,23 @@ def estimate_depth(ctx, image_filename, model_src, api_name) -> None:
     result.pil.show()
 
 @sense.command("segment")
-@click.argument("image_filename")
+@click.argument("image_filename", required=False)
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
 @click.option(
     "--segment-type",
     type=click.Choice(["bbox", "coords"], case_sensitive=False),
-    prompt="Input type - bounding box or pixel coordinates",
+    prompt=False,
     help="Type of input data `bbox` (bounding box) or `coords` (pixel coordinates).",
 )
 @click.option(
     "--segment-input",
-    prompt="Segment input data - x1,y1,x2,y2 (for bbox) or u,v (for coords)",
+    prompt=False,
     help="Bounding box coordinates as x1,y1,x2,y2 or pixel coordinates as u,v.",
 )
 @click.option("--api-name", default="/segment", help="The API endpoint to use.")
+@click.option("--list", "-l", is_flag=True, help="List available models for segmentation.")
 @click.pass_context
-def segment(ctx, image_filename, model_src, segment_type, segment_input, api_name) -> None:
+def segment(ctx, image_filename, model_src, segment_type, segment_input, api_name, list) -> None:
     """Run the SegmentationAgent to segment objects in an image.
 
     Example command:
@@ -234,6 +283,26 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
     verbose = ctx.obj['VERBOSE']
     dry_run = ctx.obj['DRY_RUN']
 
+    if list:
+        click.echo("Available Segmentation Models:")
+        click.echo("- Segment Anything(SAM2)")
+        ctx.exit()
+
+    if image_filename is None:
+        click.echo("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
+        return
+    
+    if segment_type is None:
+        segment_type = click.prompt(
+            "Input type - bounding box or pixel coordinates", 
+            type=click.Choice(["bbox", "coords"], case_sensitive=False)
+        )
+
+    if segment_input is None:
+        segment_input = click.prompt(
+            "Segment input data - x1,y1,x2,y2 (for bbox) or u,v (for coords)"
+        )
+
     if verbose:
         click.echo(f"Running segmentation agent on {image_filename} to segment {segment_input}")
 
@@ -255,10 +324,18 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
     print("Masks shape:", masks.shape)
     mask_image.pil.show()
 
-@cli.group()
-def motion():
+@cli.group(invoke_without_command=True)
+@click.option("--list", "-l", is_flag=True, help="List available models for motion.")
+@click.pass_context
+def motion(ctx, list):
     """Commands related to robot motion tasks."""
-    pass
+    if list:
+        click.echo("Available Motion Models:")
+        click.echo("- OPENVLA MODEL")
+        ctx.exit()
+    
+    if ctx.invoked_subcommand is None:
+            click.echo("No subcommand provided. Try 'mbodied motion --help' for help")
 
 @motion.command("openvla")
 @click.argument("image_filename")
