@@ -19,7 +19,7 @@ from mbodied.types.message import Message
 from mbodied.agents.language import LanguageAgent
 from mbodied.types.sense.vision import Image
 from pathlib import Path
-from importlib_resources import files
+from importlib.resources import files
 
 # Mock responses for the API callss
 mock_openai_response = "OpenAI response text"
