@@ -36,7 +36,6 @@ dependencies = [
   "pydantic_numpy==5.0.2",
   "gradio",
   "gradio_client",
-  "importlib_resources"
 ]
 [project.optional-dependencies]
 extras = ["xarm-python-sdk", "opencv-python", "torch", "transformers"]
