@@ -23,6 +23,10 @@ try:
 except ImportError:
     logging.warning("XarmAPI not found. Please install the xArm-Python-SDK package.")
     xarm = Any
+    class XArmAPI:
+        def __init__(self, *args, **kwargs):
+            pass
+    xarm.wrapper = XArmAPI
 
 
 from mbodied.robots import Robot
