@@ -410,7 +410,6 @@ Currently, we have:
 - [depth estimation](mbodied/agents/sense/depth_estimation_agent.py)
 - [object detection](mbodied/agents/sense/object_detection_agent.py)
 - [image segmentation](mbodied/agents/sense/segmentation_agent.py)
-- [3D object pose estimator](mbodied/agents/sense/object_pose_estimator_3d.py)
 
 agents that process robot's sensor information.
 

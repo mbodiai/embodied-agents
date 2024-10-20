@@ -20,7 +20,7 @@ One language agent act as planner and the other as motor agent.
 import os
 from pathlib import Path
 
-import click
+import rich_click as click
 from gymnasium import spaces
 from pydantic import Field
 

@@ -22,7 +22,7 @@ import json
 import os
 from pathlib import Path
 
-import click
+import rich_click as click
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.agents.motion.openvla_agent import OpenVlaAgent
