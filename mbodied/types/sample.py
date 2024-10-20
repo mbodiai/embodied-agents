@@ -381,7 +381,7 @@ class Sample(BaseModel):
                 dtype,
             )
             try:
-                value = np.asfarray(value)
+                value = np.asarray(value,dtype=dtype or float)
                 shape = shape or value.shape
                 dtype = dtype or value.dtype
                 le = le or -np.inf

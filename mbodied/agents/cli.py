@@ -1,47 +1,63 @@
 import json
+from typing import TYPE_CHECKING
+
 import rich_click as click
-from rich import print
-from mbodied.agents.language import LanguageAgent
-from mbodied.agents.sense.depth_estimation_agent import DepthEstimationAgent
-from mbodied.agents.sense.object_detection_agent import ObjectDetectionAgent
-from mbodied.agents.sense.segmentation_agent import SegmentationAgent
-from mbodied.agents.auto.auto_agent import AutoAgent
-from mbodied.agents.motion.openvla_agent import OpenVlaAgent
-from mbodied.types.sense.vision import Image
-from mbodied.types.sense.world import BBox2D, PixelCoords
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.markdown import Markdown
 from mbodied import __version__
+from mbodied.utils.import_utils import smart_import
 
+console = Console(style="light_goldenrod2")
+print = console.print # type: ignore # noqa
+if TYPE_CHECKING:
+    from mbodied.agents.language import LanguageAgent
+    from mbodied.agents.sense import DepthEstimationAgent, ObjectDetectionAgent
 
-@click.group()
+def list_agents(verbose) -> None:
+    """List available agents."""
+    import inspect
+    import sys
+
+    from rich.table import Table
+
+    for mode in ["language", "sense", "motion"]:
+        table = Table(title=f"{mode.capitalize()} Agents")
+        table.add_column("Agent Name", style="bold cyan")
+        table.add_column("Description", style="blue")
+
+        smart_import(f"mbodied.agents.{mode}")
+        seen = set()
+        for agent in inspect.getmembers(sys.modules[f"mbodied.agents.{mode}"], inspect.isclass):
+            if agent[0].endswith("Agent") and agent[0] not in seen:
+                description = inspect.getdoc(agent[1])[:100] if inspect.getdoc(agent[1]) else "No description available."
+                if verbose:
+                    description = Markdown("""```python\n""" + inspect.getdoc(agent[1]))
+                table.add_row(agent[0], description)
+                seen.add(agent[0])
+
+        console.print(table, overflow="ellipsis")
+    console.print("\n")
+    if not verbose:
+        console.print("Hint: Rerun with `--verbose` to see full descriptions.")
+    console.print(Markdown("For more information, run `mbodied [language | sense | motion] --help`."))
+    console.print("\n")
+@click.group(invoke_without_command=True)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output.")
 @click.option("--dry-run", is_flag=True, help="Simulate the action without executing.")
+@click.option("--list", "-l", is_flag=True, help="List available agents.")
+@click.option("--help", "-h", is_flag=True, help="Show this message and exit.")
 @click.pass_context
-def cli(ctx, verbose, dry_run) -> None:
+def cli(ctx: click.Context, verbose, dry_run, list, help) -> None:
     """CLI for various AI agents."""
-    ctx.ensure_object(dict)
-    ctx.obj['VERBOSE'] = verbose
-    ctx.obj['DRY_RUN'] = dry_run
-
     if verbose:
-        click.echo("Verbose mode enabled.")
+        print("Verbose mode enabled.")
     if dry_run:
-        click.echo("Dry run mode enabled.")
-
-@cli.command("list")
-def list_agents() -> None:
-    """List all available agent types."""
-    agent_types = [
-        "OpenVLA Agent - Generate robot motion based on image and instructions.",
-        "Auto Agent - Dynamically select and run the appropriate agent based on the task.",
-        "Object Detection Agent - Detect objects in an image.",
-        "Image Segmentation Agent - Segment objects in an image.",
-        "Depth Estimation Agent - Estimate depth from an image.",
-        "Language Agent - Interact with languge model using natural language."
-    ]
-    
-    click.echo("Available Agent Types:")
-    for agent in agent_types:
-        click.echo(f"- {agent}")
+        print("Dry run mode enabled.")
+    if list:
+        list_agents(verbose)
+    if not ctx.invoked_subcommand or help:
+        ctx.get_help()
 
 @cli.command("language")
 @click.option(
@@ -56,8 +72,7 @@ def list_agents() -> None:
 @click.option("--loop", is_flag=True, help="Keep the agent running for multiple instructions.")
 @click.pass_context
 def language_chat(ctx, model_src, api_key, context, instruction, image_path, loop) -> None:
-    """
-    Run the LanguageAgent to interact with users using natural language.
+    """Run the LanguageAgent to interact with users using natural language.
 
     Example command:
         mbodied language --instruction "What type of robot is this?" --image-path resources/color_image.png
@@ -78,25 +93,27 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
     """
     verbose = ctx.obj['VERBOSE']
     dry_run = ctx.obj['DRY_RUN']
-
+    LanguageAgent: "LanguageAgent" = smart_import("mbodied.agents.language.LanguageAgent") # type: ignore # noqa
+    Image = smart_import("mbodied.types.sense.Image") # type: ignore # noqa
     if verbose:
-        click.echo(f"Running language agent from {model_src}")
+        print(f"Running language agent from {model_src}")
 
     if dry_run:
-        click.echo(f"Dry run: Would run LanguageAgent with model: {model_src}, instruction: {instruction}")
+        print(f"Dry run: Would run LanguageAgent with model: {model_src}, instruction: {instruction}")
         return
 
-    agent = LanguageAgent(model_src=model_src, api_key=api_key, context=context)
+    agent: "LanguageAgent" = LanguageAgent(model_src=model_src, api_key=api_key, context=context)
     image = Image(image_path) if image_path else None
     while True:
-        response = agent.act(instruction=instruction, image=image, context=context)
-        print("Response:", response)
-        
-        if not loop:
-            break
-        
-        instruction = input("Enter new instruction (or 'exit-loop' to stop): ")
-        if instruction.lower() == "exit-loop":
+        try:
+            instruction = Prompt.ask("Enter instruction (or 'exit' to stop): ")
+            response = agent.act(instruction=instruction, image=image, context=context)
+            print("Response:", response)
+            
+            if instruction.lower() == "exit" or not loop:
+                break
+        except KeyboardInterrupt:
+            print("Interrupted.")
             break
 
 @cli.group(invoke_without_command=True)
@@ -105,19 +122,19 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
 def sense(ctx, list):
     """Commands related to sensing tasks (detection, segmentation, depth estimation)."""
     if list:
-        click.echo("Available Sensory Models:")
-        click.echo("- Object Detection Models:")
-        click.echo("  - Grounding DINO")
-        click.echo("  - YOLOWorld")
-        click.echo("- Depth Estimation Models:")
-        click.echo("  - Depth Anything")
-        click.echo("  - Zoe Depth")
-        click.echo("- Segmentation Models:")
-        click.echo("  - Segment Anything(SAM2)")
+        print("Available Sensory Models:")
+        print("- Object Detection Models:")
+        print("  - Grounding DINO")
+        print("  - YOLOWorld")
+        print("- Depth Estimation Models:")
+        print("  - Depth Anything")
+        print("  - Zoe Depth")
+        print("- Segmentation Models:")
+        print("  - Segment Anything(SAM2)")
         ctx.exit()
 
     if ctx.invoked_subcommand is None:
-            click.echo("No subcommand provided. Try 'mbodied sense --help' for help")
+            print("No subcommand provided. Try 'mbodied sense --help' for help")
 
 @sense.command("detect")
 @click.argument("image_filename", required=False)
@@ -135,8 +152,7 @@ def sense(ctx, list):
 @click.option("--list", "-l", is_flag=True, help="List available models for object detection.")
 @click.pass_context
 def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name, list) -> None:
-    """
-    Run the ObjectDetectionAgent to detect objects in an image.
+    """Run the ObjectDetectionAgent to detect objects in an image.
 
     Example command:
         mbodied sense detect resources/color_image.png --objects "remote, spoon" --model-type "YOLOWorld"
@@ -158,13 +174,13 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
     dry_run = ctx.obj['DRY_RUN']
 
     if list:
-        click.echo("Available Object Detection Models:")
-        click.echo("- Grounding DINO")
-        click.echo("- YOLOWorld")
+        print("Available Object Detection Models:")
+        print("- Grounding DINO")
+        print("- YOLOWorld")
         return
     
     if image_filename is None:
-        click.echo("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
+        print("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
         return
     
     if objects is None:
@@ -179,19 +195,21 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
         )
 
     if verbose:
-        click.echo(f"Running object detection on {image_filename} using {model_type}")
+        print(f"Running object detection on {image_filename} using {model_type}")
 
     if dry_run:
-        click.echo(f"Dry run: Would detect objects in {image_filename} with model: {model_type}, objects: {objects}")
+        print(f"Dry run: Would detect objects in {image_filename} with model: {model_type}, objects: {objects}")
         return
-
+    Image = smart_import("mbodied.types.sense.Image")
+    ObjectDetectionAgent = smart_import("mbodied.agents.sense.ObjectDetectionAgent")
     image = Image(image_filename, size=(224, 224))
     objects_list = objects.split(",")
-    agent = ObjectDetectionAgent(model_src=model_src)
+    agent: "ObjectDetectionAgent" = ObjectDetectionAgent(model_src=model_src)
     result = agent.act(image=image, objects=objects_list, model_type=model_type, api_name=api_name)
     if verbose:
-        click.echo("Displaying annotated image.")
+        print("Displaying annotated image.")
     result.annotated.pil.show()
+
 
 @sense.command("depth")
 @click.argument("image_filename", required=False)
@@ -221,24 +239,25 @@ def estimate_depth(ctx, image_filename, model_src, api_name, list) -> None:
     dry_run = ctx.obj['DRY_RUN']
 
     if list:
-        click.echo("Available Depth Estimation Models:")
-        click.echo("- Depth Anything")
-        click.echo("- Zoe Depth")
+        print("Available Depth Estimation Models:")
+        print("- Depth Anything")
+        print("- Zoe Depth")
         ctx.exit()
 
     if image_filename is None:
-        click.echo("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
+        print("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
         return
     
     if verbose:
-        click.echo(f"Running depth estimation on {image_filename}")
+        print(f"Running depth estimation on {image_filename}")
 
     if dry_run:
-        click.echo(f"Dry run: Would estimate from image in {image_filename}")
+        print(f"Dry run: Would estimate from image in {image_filename}")
         return
-
+    Image = smart_import("mbodied.types.sense.Image")
+    DepthEstimationAgent = smart_import("mbodied.agents.sense.DepthEstimationAgent")
     image = Image(image_filename, size=(224, 224))
-    agent = DepthEstimationAgent(model_src=model_src)
+    agent: "DepthEstimationAgent" = DepthEstimationAgent(model_src=model_src)
     result = agent.act(image=image, api_name=api_name)
     result.pil.show()
 
@@ -284,12 +303,12 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
     dry_run = ctx.obj['DRY_RUN']
 
     if list:
-        click.echo("Available Segmentation Models:")
-        click.echo("- Segment Anything(SAM2)")
+        print("Available Segmentation Models:")
+        print("- Segment Anything(SAM2)")
         ctx.exit()
 
     if image_filename is None:
-        click.echo("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
+        print("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
         return
     
     if segment_type is None:
@@ -304,12 +323,15 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
         )
 
     if verbose:
-        click.echo(f"Running segmentation agent on {image_filename} to segment {segment_input}")
+        print(f"Running segmentation agent on {image_filename} to segment {segment_input}")
 
     if dry_run:
-        click.echo(f"Dry run: Would segment objects in {image_filename}")
+        print(f"Dry run: Would segment objects in {image_filename}")
         return
-
+    Image = smart_import("mbodied.types.sense.Image")
+    SegmentationAgent = smart_import("mbodied.agents.sense.SegmentationAgent")
+    BBox2D = smart_import("mbodied.types.geometry.BBox2D")
+    PixelCoords = smart_import("mbodied.types.geometry.PixelCoords")
     image = Image(image_filename, size=(224, 224))
     agent = SegmentationAgent(model_src=model_src)
 
@@ -330,12 +352,12 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
 def motion(ctx, list):
     """Commands related to robot motion tasks."""
     if list:
-        click.echo("Available Motion Models:")
-        click.echo("- OPENVLA MODEL")
+        print("Available Motion Models:")
+        print("- OPENVLA MODEL")
         ctx.exit()
     
     if ctx.invoked_subcommand is None:
-            click.echo("No subcommand provided. Try 'mbodied motion --help' for help")
+            print("No subcommand provided. Try 'mbodied motion --help' for help")
 
 @motion.command("openvla")
 @click.argument("image_filename")
@@ -375,12 +397,14 @@ def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key) -> N
     dry_run = ctx.obj['DRY_RUN']
 
     if verbose:
-        click.echo(f"Running OpenVLA motion agent on {image_filename} with instruction: {instruction}")
+        print(f"Running OpenVLA motion agent on {image_filename} with instruction: {instruction}")
 
     if dry_run:
-        click.echo(f"Dry run: Would generate robot motion from {image_filename} with instruction: {instruction}")
+        print(f"Dry run: Would generate robot motion from {image_filename} with instruction: {instruction}")
         return
-
+    Image = smart_import("mbodied.types.sense.Image")
+    OpenVlaAgent = smart_import("mbodied.agents.motion.OpenVlaAgent")
+    
     image = Image(image_filename, size=(224, 224))
     agent = OpenVlaAgent(model_src=model_src)
     motion_response = agent.act(instruction=instruction, image=image, unnorm_key=unnorm_key)
@@ -395,7 +419,7 @@ def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key) -> N
 @click.option("--params", type=str, help="JSON string with parameters for the agent.")
 @click.pass_context
 def auto(ctx, task, image_path, model_src, api_key, params):
-    """Dynamically select and run the correct agent based on the task.
+    r"""Dynamically select and run the correct agent based on the task.
 
     Example command:
         mbodied auto language --params "{\"instruction\": \"Tell me a math joke?\"}"
@@ -430,18 +454,20 @@ def auto(ctx, task, image_path, model_src, api_key, params):
     dry_run = ctx.obj['DRY_RUN']
 
     if verbose:
-        click.echo(f"Executing 'auto' command with task: {task}")
+        print(f"Executing 'auto' command with task: {task}")
 
     if dry_run:
-        click.echo(f"Dry run: Would execute 'auto' with task: {task}")
+        print(f"Dry run: Would execute 'auto' with task: {task}")
         return
-
+    AutoAgent = smart_import("mbodied.agents.auto.AutoAgent")
+    Image = smart_import("mbodied.types.sense.Image")
     if params:
         try:
             options = json.loads(params)
         except json.JSONDecodeError:
-            click.echo("Invalid JSON format for parameters.")
+            print("Invalid JSON format for parameters.")
             return
+  
     else:
         options = {}
     if "image" not in options:
@@ -455,13 +481,13 @@ def auto(ctx, task, image_path, model_src, api_key, params):
 
     response = auto_agent.act(**kwargs)
     if verbose:
-        click.echo(f"[Verbose] Auto agent response: {response}")
+        print(f"[Verbose] Auto agent response: {response}")
     print(f"Response: {response}")
 
 @cli.command("version")
 def version():
     """Display the version of mbodied."""
-    click.echo(f"mbodied version: {__version__}")
+    print(f"mbodied version: {__version__}")
 
 if __name__ == "__main__":
     cli()
