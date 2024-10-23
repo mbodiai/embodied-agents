@@ -22,7 +22,7 @@ Usage:
     python examples/5_teach_robot_record_dataset.py --task "pick up the remote" --backend "openai"
 """
 
-import click
+import rich_click as click
 
 from mbodied.agents.language import LanguageAgent
 from mbodied.data.replaying import Replayer

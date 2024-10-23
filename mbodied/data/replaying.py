@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 from typing import Any, Callable, List, Tuple
 
-import click
+import rich_click as click
 import h5py
 import numpy as np
 from datasets import Dataset, DatasetInfo, Features, Image, Value
