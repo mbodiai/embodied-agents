@@ -13,7 +13,7 @@ from typing import (
     Generic,
     Iterable,
     Optional,
-    TypeVarTuple,
+    TypeVar,
     get_type_hints,
 )
 
@@ -650,10 +650,9 @@ def array_to_data_dict_serializer(array: npt.ArrayLike) -> NumpyDataDict:
     return NumpyDataDict(data=data, data_type=dtype, shape=array.shape)
 
 
-Ts = TypeVarTuple("Ts")
+T = TypeVar("T")
 
-
-class NumpyArray(Generic[*Ts], NDArray[Any]):
+class NumpyArray(Generic[T], NDArray[Any]):
     """Pydantic validation for shape and dtype. Specify shape with a tuple of integers, "*" or `Any` for any size.
 
     If the last dimension is a type (e.g. np.uint8), it will validate the dtype as well.
