@@ -90,7 +90,6 @@ nav:
         - Audio Agent: api/agents/sense/audio/audio_agent.md
       - Depth Estimation Agent: api/agents/sense/depth_estimation_agent.md
       - Object Detection Agent: api/agents/sense/object_detection_agent.md
-      - Object Pose Estimator 3D: api/agents/sense/object_pose_estimator_3d.md
       - Segmentation Agent: api/agents/sense/segmentation_agent.md
       - Sensory Agent: api/agents/sense/sensory_agent.md
   - Data:

@@ -18,6 +18,15 @@ def create_markdown_content(module_path):
 def generate_api_reference(base_dir, output_dir):
     api_structure = {}
 
+    # Collect existing .md files
+    existing_md_files = set()
+    for root, dirs, files in os.walk(output_dir):
+        for file in files:
+            if file.endswith(".md"):
+                existing_md_files.add(os.path.abspath(os.path.join(root, file)))
+
+    generated_md_files = set()
+
     # Walk through the base directory
     for root, dirs, files in os.walk(base_dir):
         # Skip directories without an __init__.py file
@@ -43,19 +52,32 @@ def generate_api_reference(base_dir, output_dir):
                 with open(md_path, "w") as md_file:
                     md_file.write(content)
 
+                # Add to generated_md_files
+                generated_md_files.add(os.path.abspath(md_path))
+
                 # Organize structure for mkdocs.yml nav
                 # Split the relative path into sections for nesting
-                path_parts = relative_path.split(os.sep)
-                section_name = " ".join(path_parts).title()
-
-                # Create nested structure based on path
+                path_parts = relative_path.split(os.sep) if relative_path != "." else []
                 current_level = api_structure
                 for part in path_parts:
                     part_title = part.replace("_", " ").title()
                     current_level = current_level.setdefault(part_title, {})
 
                 # Add the file to the correct nested section
-                current_level[file.replace(".py", "").replace("_", " ").title()] = md_path.replace("docs/", "")
+                item_title = file.replace(".py", "").replace("_", " ").title()
+                current_level[item_title] = md_path.replace("docs/", "")
+
+    # Delete .md files that are no longer generated
+    md_files_to_delete = existing_md_files - generated_md_files
+    for md_file in md_files_to_delete:
+        os.remove(md_file)
+        print(f"Removed outdated documentation file: {md_file}")
+
+    # Remove empty directories
+    for root, dirs, files in os.walk(output_dir, topdown=False):
+        if not dirs and not files:
+            os.rmdir(root)
+            print(f"Removed empty directory: {root}")
 
     return api_structure
 
