@@ -452,11 +452,11 @@ class NumpyDataDict(TypedDict):
     data: List
     data_type: SupportedDTypes | str
     shape: Tuple[int, ...]
-
+    labels: List[str] | None
 
 if sys.version_info < (3, 11):
 
-    def array_validator(array: np.ndarray, shape: Tuple[int, ...] | None, dtype: SupportedDTypes | None) -> npt.NDArray:
+    def array_validator(array: np.ndarray, shape: Tuple[int, ...] | None, dtype: SupportedDTypes | None, labels = List[str] | None) -> npt.NDArray:
         if shape is not None:
             expected_ndim = len(shape)
             actual_ndim = array.ndim
@@ -469,17 +469,21 @@ if sys.version_info < (3, 11):
                     details = f"Dimension {i} has size {actual}, expected {expected}"
                     msg = "ShapeError"
                     raise PydanticCustomError(msg, details)
+        # Validate and adjust dtype if needed
+        if dtype and isinstance(dtype, type):
+            if (
+                array.dtype.type != dtype
+                and issubclass(dtype, np.integer)
+                and issubclass(array.dtype.type, np.floating)
+            ):
+                # Round and cast to integer if required
+                array = np.round(array).astype(dtype, copy=False)
 
-        if (
-            dtype
-            and array.dtype.type != dtype
-            and issubclass(dtype, np.integer)
-            and issubclass(array.dtype.type, np.floating)
-        ):
-            array = np.round(array).astype(dtype, copy=False)
-        if dtype and issubclass(dtype, np.dtypes.UInt64DType | np.dtypes.Int64DType):
-            dtype = np.int64
-            array = array.astype(dtype, copy=True)
+            # Special case for int64 and uint64 types
+            if issubclass(dtype, np.dtypes.UInt64DType | np.dtypes.Int64DType):
+                dtype = np.int64
+                array = array.astype(dtype, copy=True)
+
         return array
 else:
 
