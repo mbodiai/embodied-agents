@@ -50,6 +50,12 @@ def list_agents(verbose) -> None:
 @click.pass_context
 def cli(ctx: click.Context, verbose, dry_run, list, help) -> None:
     """CLI for various AI agents."""
+    if ctx.obj is None:
+        ctx.obj = {}
+
+    ctx.obj['VERBOSE'] = verbose
+    ctx.obj['DRY_RUN'] = dry_run
+
     if verbose:
         print("Verbose mode enabled.")
     if dry_run:
@@ -93,8 +99,8 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
     """
     verbose = ctx.obj['VERBOSE']
     dry_run = ctx.obj['DRY_RUN']
-    LanguageAgent: "LanguageAgent" = smart_import("mbodied.agents.language.LanguageAgent") # type: ignore # noqa
-    Image = smart_import("mbodied.types.sense.Image") # type: ignore # noqa
+    LanguageAgent: "LanguageAgent" = smart_import("mbodied.agents.language", attribute="LanguageAgent") # type: ignore # noqa
+    Image = smart_import("mbodied.types.sense", attribute="Image") # type: ignore # noqa
     if verbose:
         print(f"Running language agent from {model_src}")
 
@@ -200,8 +206,8 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
     if dry_run:
         print(f"Dry run: Would detect objects in {image_filename} with model: {model_type}, objects: {objects}")
         return
-    Image = smart_import("mbodied.types.sense.Image")
-    ObjectDetectionAgent = smart_import("mbodied.agents.sense.ObjectDetectionAgent")
+    Image = smart_import("mbodied.types.sense", attribute="Image")
+    ObjectDetectionAgent = smart_import("mbodied.agents.sense", attribute="ObjectDetectionAgent")
     image = Image(image_filename, size=(224, 224))
     objects_list = objects.split(",")
     agent: "ObjectDetectionAgent" = ObjectDetectionAgent(model_src=model_src)
@@ -254,8 +260,8 @@ def estimate_depth(ctx, image_filename, model_src, api_name, list) -> None:
     if dry_run:
         print(f"Dry run: Would estimate from image in {image_filename}")
         return
-    Image = smart_import("mbodied.types.sense.Image")
-    DepthEstimationAgent = smart_import("mbodied.agents.sense.DepthEstimationAgent")
+    Image = smart_import("mbodied.types.sense", attribute="Image")
+    DepthEstimationAgent = smart_import("mbodied.agents.sense", attribute="DepthEstimationAgent")
     image = Image(image_filename, size=(224, 224))
     agent: "DepthEstimationAgent" = DepthEstimationAgent(model_src=model_src)
     result = agent.act(image=image, api_name=api_name)
@@ -328,15 +334,15 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
     if dry_run:
         print(f"Dry run: Would segment objects in {image_filename}")
         return
-    Image = smart_import("mbodied.types.sense.Image")
-    SegmentationAgent = smart_import("mbodied.agents.sense.SegmentationAgent")
-    BBox2D = smart_import("mbodied.types.geometry.BBox2D")
-    PixelCoords = smart_import("mbodied.types.geometry.PixelCoords")
+    Image = smart_import("mbodied.types.sense", attribute="Image")
+    SegmentationAgent = smart_import("mbodied.agents.sense", attribute="SegmentationAgent")
+    BBox2D = smart_import("mbodied.types.sense.world", attribute="BBox2D")
+    PixelCoords = smart_import("mbodied.types.sense.world", attribute="PixelCoords")
     image = Image(image_filename, size=(224, 224))
     agent = SegmentationAgent(model_src=model_src)
 
     if segment_type == "bbox":
-        bbox_coords = list(map(int, segment_input.split(",")))
+        bbox_coords = [int(x) for x in segment_input.split(",")]
         input_data = BBox2D(x1=bbox_coords[0], y1=bbox_coords[1], x2=bbox_coords[2], y2=bbox_coords[3])
     elif segment_type == "coords":
         u, v = map(int, segment_input.split(","))
@@ -402,8 +408,8 @@ def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key) -> N
     if dry_run:
         print(f"Dry run: Would generate robot motion from {image_filename} with instruction: {instruction}")
         return
-    Image = smart_import("mbodied.types.sense.Image")
-    OpenVlaAgent = smart_import("mbodied.agents.motion.OpenVlaAgent")
+    Image = smart_import("mbodied.types.sense", attribute="Image")
+    OpenVlaAgent = smart_import("mbodied.agents.motion", attribute="OpenVlaAgent")
     
     image = Image(image_filename, size=(224, 224))
     agent = OpenVlaAgent(model_src=model_src)
@@ -459,8 +465,8 @@ def auto(ctx, task, image_path, model_src, api_key, params):
     if dry_run:
         print(f"Dry run: Would execute 'auto' with task: {task}")
         return
-    AutoAgent = smart_import("mbodied.agents.auto.AutoAgent")
-    Image = smart_import("mbodied.types.sense.Image")
+    AutoAgent = smart_import("mbodied.agents.auto", attribute="AutoAgent")
+    Image = smart_import("mbodied.types.sense", attribute="Image")
     if params:
         try:
             options = json.loads(params)
