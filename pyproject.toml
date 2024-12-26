@@ -40,10 +40,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 extras = ["xarm-python-sdk", "opencv-python", "torch", "transformers"]
-audio = [
- "pyaudio",
- "openai-whisper",
-]
+audio = ["pyaudio", "openai-whisper"]
 all = [
   "xarm-python-sdk",
   "opencv-python",
@@ -70,6 +67,9 @@ path = "mbodied/__about__.py"
 [tool.hatch.metadata]
 allow-direct-references = true
 
+[tool.hatch.build]
+exclude = ["assets/**"]
+
 [tool.hatch.build.targets.wheel.force-include]
 "resources" = "mbodied/resources"
 
@@ -81,11 +81,11 @@ dependencies = ["pytest", "pytest-mock", "pytest-asyncio"]
 [tool.hatch.envs.default.env-vars]
 [tool.hatch.envs.conda]
 type = "conda"
-python = "311"                       # Python version 3.10
-command = "conda"                    # Options: conda, mamba, micromamba
-conda-forge = false                  # Use conda-forge index
-environment-file = "environment.yml" # Specify environment file
-prefix = ".venv/"                    # Create environment in .venv/ folder
+python = "311"
+command = "conda"
+conda-forge = false
+environment-file = "environment.yml"
+prefix = ".venv/"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest -vv --ignore third_party {args:tests}"
@@ -220,10 +220,10 @@ line-ending = "auto"
 
 [tool.uv]
 dev-dependencies = [
-    "perftest>=0.0.2",
-    "pytest-asyncio>=0.24.0",
-    "pytest-mock>=3.14.0",
-    "pytest>=8.3.3",
+  "perftest>=0.0.2",
+  "pytest-asyncio>=0.24.0",
+  "pytest-mock>=3.14.0",
+  "pytest>=8.3.3",
 ]
 
 [tool.ruff.lint.pydocstyle]

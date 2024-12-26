@@ -1,7 +1,7 @@
-<div align="center">
- <img src="assets/logo_full.png" width=200;/>
+<div align="left">
+ <img src="assets/logo.png" width=200;/>
   <div>&nbsp;</div>
-  <div align="center">
+  <div align="left">
     &nbsp;&nbsp;&nbsp;&nbsp;
     <b><font size="5"></font></b>
     <sup>
@@ -164,6 +164,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] Automatic dataset recording on Robot
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
+- [ ] Google Gemini Backend
 - [ ] ROS integration
 - [ ] More Motor Agents, i.e. RT1
 - [ ] More device support, i.e. OpenCV camera

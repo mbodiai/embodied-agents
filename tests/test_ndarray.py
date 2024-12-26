@@ -15,20 +15,14 @@ from mbodied.types.sample import Sample
 class ModelWithArrays(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     any_array: NumpyArray[Any]
-    flexible_array: NumpyArray = Field(
-        default_factory=lambda: np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-    )
+    flexible_array: NumpyArray = Field(default_factory=lambda: np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     int_vector: NumpyArray[3, int] = Field(default_factory=lambda: np.array([1, 2, 3]))
-    float_matrix: NumpyArray[2, 2, np.float64] = Field(
-        default_factory=lambda: np.array([[1.0, 2.0], [3.0, 4.0]])
-    )
+    float_matrix: NumpyArray[2, 2, np.float64] = Field(default_factory=lambda: np.array([[1.0, 2.0], [3.0, 4.0]]))
     any_3d_array: NumpyArray["*", "*", "*", Any]  # type: ignore
     any_float_array: NumpyArray[float] = Field(description="Any float array")
     array: NumpyArray = Field(default_factory=lambda: np.array([1.0, 2.0, 3.0]))
     rotation_matrix: NumpyArray[3, 3, float] = Field(
-        default_factory=lambda: np.array(
-            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-        )
+        default_factory=lambda: np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
     )
 
 
@@ -36,36 +30,22 @@ class ModelWithArrays(BaseModel):
 def nested_model():
     class OtherModel(Sample):
         name: str = "OtherModel"
-        any_array: NumpyArray[Any, float] = Field(
-            default_factory=lambda: np.array([1.0, 2.0, 3.0])
-        )
-        coordinate: NumpyArray = Field(
-            default_factory=lambda: np.array([1.0, 2.0, 3.0])
-        )
+        any_array: NumpyArray[Any, float] = Field(default_factory=lambda: np.array([1.0, 2.0, 3.0]))
+        coordinate: NumpyArray = Field(default_factory=lambda: np.array([1.0, 2.0, 3.0]))
 
     class NestedSample(Sample):
-        any_array: NumpyArray[Any] = Field(
-            default_factory=lambda: np.array([1, 2, 3, 4])
-        )
+        any_array: NumpyArray[Any] = Field(default_factory=lambda: np.array([1, 2, 3, 4]))
         array: NumpyArray = Field(default_factory=lambda: np.array([1.0, 2.0, 3.0]))
         model: ModelWithArrays
-        flexible_array: NumpyArray = Field(
-            default_factory=lambda: np.array([[1, 2], [3, 4]])
-        )
+        flexible_array: NumpyArray = Field(default_factory=lambda: np.array([[1, 2], [3, 4]]))
         int_vector: NumpyArray[3, int]
-        float_matrix: NumpyArray[2, 2, np.float64] = Field(
-            default_factory=lambda: np.array([[1.0, 2.0], [3.0, 4.0]])
-        )
+        float_matrix: NumpyArray[2, 2, np.float64] = Field(default_factory=lambda: np.array([[1.0, 2.0], [3.0, 4.0]]))
         any_3d_array: NumpyArray["*", "*", "*", Any]
         any_float_array: NumpyArray[float] = Field(description="Any float array")
         rotation_matrix: NumpyArray[3, 3, float] = Field(
-            default_factory=lambda: np.array(
-                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-            )
+            default_factory=lambda: np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         )
-        coordinate: NumpyArray[Any, float] = Field(
-            default_factory=lambda: np.array([1.0, 2.0, 3.0])
-        )
+        coordinate: NumpyArray[Any, float] = Field(default_factory=lambda: np.array([1.0, 2.0, 3.0]))
         nested: OtherModel
 
     return NestedSample(
@@ -100,18 +80,17 @@ def test_basic_once():
     class TestModelWithArrays(Sample):
         float_matrix: NumpyArray[2, 2, np.float64]
 
-    assert TestModelWithArrays(
-        float_matrix=np.array([[1.0, 2.0], [3.0, 4.0]]).tolist()
-    ).float_matrix.tolist() == [[1.0, 2.0], [3.0, 4.0]]
+    assert TestModelWithArrays(float_matrix=np.array([[1.0, 2.0], [3.0, 4.0]]).tolist()).float_matrix.tolist() == [
+        [1.0, 2.0],
+        [3.0, 4.0],
+    ]
 
 
 def test_basic_serialize():
     class TestModelWithArrays(Sample):
         float_matrix: NumpyArray[2, 2, np.float64]
 
-    instance = TestModelWithArrays(
-        float_matrix=np.array([[1.0, 2.0], [3.0, 4.0]]).tolist()
-    )
+    instance = TestModelWithArrays(float_matrix=np.array([[1.0, 2.0], [3.0, 4.0]]).tolist())
     assert instance.float_matrix.tolist() == [
         [1.0, 2.0],
         [3.0, 4.0],
@@ -121,10 +100,7 @@ def test_basic_serialize():
         np.array([[1.0, 2.0], [3.0, 4.0]]).tolist(),
     )
     json = instance.model_dump_json()
-    assert (
-        json
-        == '{"float_matrix":{"data":[[1.0,2.0],[3.0,4.0]],"data_type":"float64","shape":[2,2]}}'
-    )
+    assert json == '{"float_matrix":{"data":[[1.0,2.0],[3.0,4.0]],"data_type":"float64","shape":[2,2]}}'
     assert np.array_equal(
         TestModelWithArrays.model_validate_json(json).float_matrix.tolist(),
         np.array([[1.0, 2.0], [3.0, 4.0]]).tolist(),
@@ -261,10 +237,7 @@ def test_edge_cases():
     )
     assert np.any(np.isinf(model.any_array.astype(float)))
     assert np.any(np.isnan(model.any_array.astype(float)))
-    assert np.all(
-        model.int_vector
-        == np.array([np.iinfo(np.int64).max, 0, np.iinfo(np.int64).min])
-    )
+    assert np.all(model.int_vector == np.array([np.iinfo(np.int64).max, 0, np.iinfo(np.int64).min]))
     assert np.isinf(model.float_matrix).any()
     assert np.isnan(model.float_matrix).any()
 

@@ -62,12 +62,12 @@ def smart_import(name: str, mode: Literal["lazy"] | None = None, attribute: Opti
     except ImportError as e:
         msg = f"Module {name} not found"
         raise NameError(msg) from e
-    
+
     if attribute:
         try:
             return getattr(module, attribute)
         except AttributeError as e:
             msg = f"Attribute `{attribute}` not found in module `{name}`"
             raise NameError(msg) from e
-        
+
     return module
