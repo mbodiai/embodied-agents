@@ -2,8 +2,6 @@
  <img src="assets/logo.png" width=200;/>
   <div>&nbsp;</div>
   <div align="left">
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <b><font size="5"></font></b>
     <sup>
       <a href="https://api.mbodi.ai">
         <i><font size="4">Benchmark, Explore, and Send API Requests Now</font></i>
