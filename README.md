@@ -232,6 +232,7 @@ Example Scripts:
 - [3_reason_plan_act_robot.py](examples/3_reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
 - [4_language_reason_plan_act_robot.py](examples/4_language_reason_plan_act_robot.py): Full example of all languaged based cognitive and motor agent executing task.
 - [5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py): Example of collecting dataset on robot's action at a specific frequency by just yelling at the robot!
+- [6_robot_with_rag.py](examples/6_robot_with_rag.py): Example with RAG to retrieve skills to run on the robot.
 
 ### Notebooks
 

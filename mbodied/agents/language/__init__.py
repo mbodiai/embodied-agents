@@ -13,5 +13,6 @@
 # limitations under the License.
 
 from .language_agent import LanguageAgent
+from .rag_agent import RagAgent
 
-__all__ = ["LanguageAgent"]
+__all__ = ["LanguageAgent", "RagAgent"]
