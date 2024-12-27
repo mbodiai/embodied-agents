@@ -22,5 +22,5 @@ from rich.traceback import install as install_traceback
 
 logger = logging.getLogger()
 logger.addHandler(RichHandler())
-install_traceback(word_wrap=True,max_frames=10)
+install_traceback(word_wrap=True, max_frames=10)
 install(max_length=100, max_string=100, overflow="fold")

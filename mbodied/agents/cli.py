@@ -13,10 +13,11 @@ from mbodied import __version__
 from mbodied.utils.import_utils import smart_import
 
 console = Console(style="light_goldenrod2")
-print = console.print # type: ignore # noqa
+print = console.print  # type: ignore # noqa
 if TYPE_CHECKING:
     from mbodied.agents.language import LanguageAgent
     from mbodied.agents.sense import DepthEstimationAgent, ObjectDetectionAgent
+
 
 def format_with_rich(doc: str, title: str = "Help") -> None:
     """
@@ -35,7 +36,7 @@ def format_with_rich(doc: str, title: str = "Help") -> None:
         "Inputs": "",
         "Outputs": "",
         "API Documentation": "",
-        "API Endpoint": ""
+        "API Endpoint": "",
     }
 
     current_section = None
@@ -74,7 +75,9 @@ def format_with_rich(doc: str, title: str = "Help") -> None:
                 input_name = normalized_line[start_idx:end_idx]
                 description = normalized_line.split("]:", 1)[1].strip()
                 inputs_table.add_row(input_name, description)
-        table.add_row("[bold yellow]Inputs:[/bold yellow]", inputs_table if inputs_table.row_count > 0 else "[dim]None[/dim]")
+        table.add_row(
+            "[bold yellow]Inputs:[/bold yellow]", inputs_table if inputs_table.row_count > 0 else "[dim]None[/dim]"
+        )
 
     if sections["Outputs"]:
         outputs_table = Table(box=rich.box.SQUARE)
@@ -88,7 +91,9 @@ def format_with_rich(doc: str, title: str = "Help") -> None:
                 output_name = normalized_line[start_idx:end_idx]
                 description = normalized_line.split("]:", 1)[1].strip()
                 outputs_table.add_row(output_name, description)
-        table.add_row("[bold yellow]Outputs:[/bold yellow]", outputs_table if outputs_table.row_count > 0 else "[dim]None[/dim]")
+        table.add_row(
+            "[bold yellow]Outputs:[/bold yellow]", outputs_table if outputs_table.row_count > 0 else "[dim]None[/dim]"
+        )
 
     if sections["Example Command"]:
         table.add_row("[bold yellow]Example Command:[/bold yellow]", f"[green]{sections['Example Command']}[/green]")
@@ -96,12 +101,18 @@ def format_with_rich(doc: str, title: str = "Help") -> None:
         table.add_row("[bold yellow]Response:[/bold yellow]", sections["Response"])
 
     if sections["API Documentation"]:
-        table.add_row("[bold yellow]API Documentation:[/bold yellow]", f"[blue underline]{sections['API Documentation']}[/blue underline]")
+        table.add_row(
+            "[bold yellow]API Documentation:[/bold yellow]",
+            f"[blue underline]{sections['API Documentation']}[/blue underline]",
+        )
 
     if sections["API Endpoint"]:
-        table.add_row("[bold yellow]API Endpoint:[/bold yellow]", f"[blue underline]{sections['API Endpoint']}[/blue underline]")
+        table.add_row(
+            "[bold yellow]API Endpoint:[/bold yellow]", f"[blue underline]{sections['API Endpoint']}[/blue underline]"
+        )
 
     console.print(Panel(table, title=f"[bold cyan]{title}[/bold cyan]"))
+
 
 def list_agents(verbose) -> None:
     """List available agents."""
@@ -119,7 +130,9 @@ def list_agents(verbose) -> None:
         seen = set()
         for agent in inspect.getmembers(sys.modules[f"mbodied.agents.{mode}"], inspect.isclass):
             if agent[0].endswith("Agent") and agent[0] not in seen:
-                description = inspect.getdoc(agent[1])[:100] if inspect.getdoc(agent[1]) else "No description available."
+                description = (
+                    inspect.getdoc(agent[1])[:100] if inspect.getdoc(agent[1]) else "No description available."
+                )
                 if verbose:
                     description = Markdown("""```python\n""" + inspect.getdoc(agent[1]))
                 table.add_row(agent[0], description)
@@ -131,6 +144,8 @@ def list_agents(verbose) -> None:
         console.print("Hint: Rerun with `--verbose` to see full descriptions.")
     console.print(Markdown("For more information, run `mbodied [language | sense | motion] --help`."))
     console.print("\n")
+
+
 @click.group(invoke_without_command=True)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output.")
 @click.option("--dry-run", is_flag=True, help="Simulate the action without executing.")
@@ -142,8 +157,8 @@ def cli(ctx: click.Context, verbose, dry_run, list, help) -> None:
     if ctx.obj is None:
         ctx.obj = {}
 
-    ctx.obj['VERBOSE'] = verbose
-    ctx.obj['DRY_RUN'] = dry_run
+    ctx.obj["VERBOSE"] = verbose
+    ctx.obj["DRY_RUN"] = dry_run
 
     if verbose:
         print("Verbose mode enabled.")
@@ -153,6 +168,7 @@ def cli(ctx: click.Context, verbose, dry_run, list, help) -> None:
         list_agents(verbose)
     if not ctx.invoked_subcommand or help:
         ctx.get_help()
+
 
 @cli.command("language")
 @click.option(
@@ -175,7 +191,7 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
 
     Response:
         "This is a robotic arm, specifically a PR2 (Personal Robot 2) developed by Willow Garage."
-    
+
     Inputs:
         - [model_src]: The model source for the LanguageAgent (e.g., openai, anthropic, or a gradio URL).
         - [api_key]: (Optional) API key for the remote actor, if needed.
@@ -187,10 +203,10 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
     Outputs:
         - [Response]: The natural language response generated by the LanguageAgent.
     """
-    verbose = ctx.obj['VERBOSE']
-    dry_run = ctx.obj['DRY_RUN']
-    LanguageAgent: "LanguageAgent" = smart_import("mbodied.agents.language", attribute="LanguageAgent") # type: ignore # noqa
-    Image = smart_import("mbodied.types.sense", attribute="Image") # type: ignore # noqa
+    verbose = ctx.obj["VERBOSE"]
+    dry_run = ctx.obj["DRY_RUN"]
+    LanguageAgent: "LanguageAgent" = smart_import("mbodied.agents.language", attribute="LanguageAgent")  # type: ignore # noqa
+    Image = smart_import("mbodied.types.sense", attribute="Image")  # type: ignore # noqa
     if help:
         format_with_rich(language_chat.__doc__, title="Language Help")
         ctx.exit()
@@ -198,7 +214,7 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
     if instruction is None:
         console.print("[cyan]Enter your initial instruction[/cyan]")
         instruction = Prompt.ask("Instruction")
-    
+
     if verbose:
         print(f"Running language agent from {model_src}")
 
@@ -218,11 +234,11 @@ def language_chat(ctx, model_src, api_key, context, instruction, image_path, loo
                 break
             response = agent.act(instruction=instruction, image=image, context=context)
             console.print(Panel(response, title="Assistant", expand=False))
-            
-            
+
         except KeyboardInterrupt:
             print("Interrupted.")
             break
+
 
 @cli.group(invoke_without_command=True)
 @click.option("--list", "-l", is_flag=True, help="List available sensory models.")
@@ -243,14 +259,13 @@ def sense(ctx, list, help):
         ctx.exit()
 
     if not ctx.invoked_subcommand or help:
-            ctx.get_help()
+        ctx.get_help()
+
 
 @sense.command("detect")
 @click.argument("image_filename", required=False)
 @click.option("--model-src", default="https://api.mbodi.ai/sense/", help="The model source URL.")
-@click.option(
-    "--objects", prompt=False, help="Comma-separated list of objects to detect."
-)
+@click.option("--objects", prompt=False, help="Comma-separated list of objects to detect.")
 @click.option(
     "--model-type",
     type=click.Choice(["YOLOWorld", "Grounding DINO"], case_sensitive=False),
@@ -269,7 +284,7 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
 
     Response:
         Annotated Image: The image with detected objects highlighted and labeled.
-    
+
     Inputs:
         - [image_filename]: Path to the image file.
         - [objects]: Comma-separated list of objects to detect (e.g., "car, person").
@@ -280,8 +295,8 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
 
     API Endpoint: https://api.mbodi.ai/sense/
     """
-    verbose = ctx.obj['VERBOSE']
-    dry_run = ctx.obj['DRY_RUN']
+    verbose = ctx.obj["VERBOSE"]
+    dry_run = ctx.obj["DRY_RUN"]
 
     if help:
         format_with_rich(detect_objects.__doc__, title="Detect Help")
@@ -292,21 +307,18 @@ def detect_objects(ctx, image_filename, model_src, objects, model_type, api_name
         print("- Grounding DINO")
         print("- YOLOWorld")
         ctx.exit()
-    
+
     if image_filename is None:
         print("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
         print("Run 'mbodied sense detect --help' for assistance")
         ctx.exit()
-    
+
     if objects is None:
-        objects = click.prompt(
-            "Objects to detect (comma-separated)"
-        )
-    
+        objects = click.prompt("Objects to detect (comma-separated)")
+
     if model_type is None:
         model_type = click.prompt(
-            "Model Type", 
-            type=click.Choice(["YOLOWorld", "Grounding DINO"], case_sensitive=False)
+            "Model Type", type=click.Choice(["YOLOWorld", "Grounding DINO"], case_sensitive=False)
         )
 
     if verbose:
@@ -347,12 +359,12 @@ def estimate_depth(ctx, image_filename, model_src, api_name, list, help) -> None
 
     Outputs:
         - [Depth Estimation Response]: A depth map image representing the depth information in the image.
-    
+
     Loaded as API: [https://api.mbodi.ai/sense/depth](https://api.mbodi.ai/sense/depth)
     API Endpoint: https://api.mbodi.ai/sense/
     """
-    verbose = ctx.obj['VERBOSE']
-    dry_run = ctx.obj['DRY_RUN']
+    verbose = ctx.obj["VERBOSE"]
+    dry_run = ctx.obj["DRY_RUN"]
 
     if help:
         format_with_rich(estimate_depth.__doc__, title="Depth Help")
@@ -368,7 +380,7 @@ def estimate_depth(ctx, image_filename, model_src, api_name, list, help) -> None
         print("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
         print("Run 'mbodied sense depth --help' for assistance")
         ctx.exit()
-    
+
     if verbose:
         print(f"Running depth estimation on {image_filename}")
 
@@ -381,6 +393,7 @@ def estimate_depth(ctx, image_filename, model_src, api_name, list, help) -> None
     agent: "DepthEstimationAgent" = DepthEstimationAgent(model_src=model_src)
     result = agent.act(image=image, api_name=api_name)
     result.pil.show()
+
 
 @sense.command("segment")
 @click.argument("image_filename", required=False)
@@ -421,8 +434,8 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
     Loaded as API: [https://api.mbodi.ai/sense/segment](https://api.mbodi.ai/sense/segment)
     API Endpoint: https://api.mbodi.ai/sense/
     """
-    verbose = ctx.obj['VERBOSE']
-    dry_run = ctx.obj['DRY_RUN']
+    verbose = ctx.obj["VERBOSE"]
+    dry_run = ctx.obj["DRY_RUN"]
 
     if help:
         format_with_rich(segment.__doc__, title="Segment Help")
@@ -437,17 +450,15 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
         print("Error: Missing argument 'IMAGE_FILENAME'. Specify an image filename")
         print("Run 'mbodied sense segment --help' for assistance")
         ctx.exit()
-    
+
     if segment_type is None:
         segment_type = click.prompt(
-            "Input type - bounding box or pixel coordinates", 
-            type=click.Choice(["bbox", "coords"], case_sensitive=False)
+            "Input type - bounding box or pixel coordinates",
+            type=click.Choice(["bbox", "coords"], case_sensitive=False),
         )
 
     if segment_input is None:
-        segment_input = click.prompt(
-            "Segment input data - x1,y1,x2,y2 (for bbox) or u,v (for coords)"
-        )
+        segment_input = click.prompt("Segment input data - x1,y1,x2,y2 (for bbox) or u,v (for coords)")
 
     if verbose:
         print(f"Running segmentation agent on {image_filename} to segment {segment_input}")
@@ -473,6 +484,7 @@ def segment(ctx, image_filename, model_src, segment_type, segment_input, api_nam
     print("Masks shape:", masks.shape)
     mask_image.pil.show()
 
+
 @cli.group(invoke_without_command=True)
 @click.option("--list", "-l", is_flag=True, help="List available models for motion.")
 @click.option("--help", "-h", is_flag=True, help="Show this message and exit.")
@@ -483,10 +495,11 @@ def motion(ctx, list, help):
         print("Available Motion Models:")
         print("- OPENVLA MODEL")
         ctx.exit()
-    
+
     if not ctx.invoked_subcommand or help:
         ctx.get_help()
         ctx.exit()
+
 
 @motion.command("openvla")
 @click.argument("image_filename", required=False)
@@ -497,7 +510,7 @@ def motion(ctx, list, help):
 @click.pass_context
 def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key, help) -> None:
     """Run the OpenVlaAgent to generate robot motion based on instruction and image.
-    
+
     Example command:
         mbodied motion openvla resources/xarm.jpeg --instruction "move forward"
 
@@ -522,13 +535,13 @@ def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key, help
 
     Outputs:
         - [Motion Response]: HandControl object containing pose and grasp information.
-    
+
     Loaded as API: [https://api.mbodi.ai/community-models/](https://api.mbodi.ai/community-models/)
-    
+
     API Endpoint: https://api.mbodi.ai/community-models/
     """
-    verbose = ctx.obj['VERBOSE']
-    dry_run = ctx.obj['DRY_RUN']
+    verbose = ctx.obj["VERBOSE"]
+    dry_run = ctx.obj["DRY_RUN"]
 
     if help:
         format_with_rich(openvla_motion.__doc__, title="OpenVLA Help")
@@ -540,9 +553,7 @@ def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key, help
         ctx.exit()
 
     if instruction is None:
-        instruction = click.prompt(
-            "Instruction"
-        )
+        instruction = click.prompt("Instruction")
 
     if verbose:
         print(f"Running OpenVLA motion agent on {image_filename} with instruction: {instruction}")
@@ -552,12 +563,13 @@ def openvla_motion(ctx, instruction, image_filename, model_src, unnorm_key, help
         ctx.exit()
     Image = smart_import("mbodied.types.sense", attribute="Image")
     OpenVlaAgent = smart_import("mbodied.agents.motion", attribute="OpenVlaAgent")
-    
+
     image = Image(image_filename, size=(224, 224))
     agent = OpenVlaAgent(model_src=model_src)
     motion_response = agent.act(instruction=instruction, image=image, unnorm_key=unnorm_key)
-    
+
     print("Motion Response:", motion_response.flatten())
+
 
 @cli.command("auto")
 @click.argument("task", required=False)
@@ -599,8 +611,8 @@ def auto(ctx, task, image_path, model_src, api_key, params, help):
     Outputs:
         - [Response]: The output generated by the selected agent based on the task, such as HandControl for motion or detected objects for sensing tasks.
     """
-    verbose = ctx.obj['VERBOSE']
-    dry_run = ctx.obj['DRY_RUN']
+    verbose = ctx.obj["VERBOSE"]
+    dry_run = ctx.obj["DRY_RUN"]
 
     if help:
         format_with_rich(auto.__doc__, title="Auto Help")
@@ -625,7 +637,7 @@ def auto(ctx, task, image_path, model_src, api_key, params, help):
         except json.JSONDecodeError:
             print("Invalid JSON format for parameters.")
             ctx.exit()
-  
+
     else:
         options = {}
     if "image" not in options:
@@ -642,10 +654,12 @@ def auto(ctx, task, image_path, model_src, api_key, params, help):
         print(f"[Verbose] Auto agent response: {response}")
     print(f"Response: {response}")
 
+
 @cli.command("version")
 def version():
     """Display the version of mbodied."""
     print(f"mbodied version: {__version__}")
+
 
 if __name__ == "__main__":
     cli()
