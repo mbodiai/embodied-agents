@@ -50,6 +50,7 @@ jobs:
         run: |
           # Add commands to clean up unnecessary files
           sudo apt-get clean
+          sudo apt install sqlite3
           sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
           # Add more cleanup commands as needed
 

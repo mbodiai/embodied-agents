@@ -220,13 +220,12 @@ class RagAgent(Agent):
 
         return prompt
 
-    def delete_all(self) -> None:
+    def delete(self) -> None:
         """Clean up the whole collection.
 
         Be cautious when using this method. It will delete all documents in the collection on disk.
         """
         self.chroma_client.delete_collection(self.collection_name)
-        self.collection = self.chroma_client.create_collection(name=self.collection_name)
 
 
 # -------------------------

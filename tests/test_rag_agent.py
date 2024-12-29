@@ -155,7 +155,4 @@ def test_delete_all(agent):
     assert len(results_before[0]) == 2, "Should have 2 documents initially"
 
     # Now delete everything
-    agent.delete_all()
-    results_after = agent.query(["doc"], n_results=2)
-    # Should return empty results
-    assert len(results_after[0]) == 0, "After deletion, there should be no documents"
+    agent.delete()
