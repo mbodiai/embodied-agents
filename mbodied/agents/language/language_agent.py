@@ -104,6 +104,7 @@ class LanguageAgent(Agent):
     Attributes:
         reminders (List[Reminder]): A list of reminders that prompt the agent every n messages.
         context (List[Message]): The current context of the conversation.
+        max_tokens (int): The maximum number of tokens allowed in the context.
         Inherits all attributes from the parent class `Agent`.
 
     Examples:
@@ -199,6 +200,22 @@ class LanguageAgent(Agent):
 
         self.context = make_context_list(context)
 
+
+   
+
+    def get_image_size(self, fname):
+        """
+        Retrieve the size of an image.
+        :param fname: The filename of the image.
+        :return: A tuple (width, height) representing the image size in pixels.
+        """
+        with Image.open(fname) as img:
+            return img.size
+
+    def full_token_count(self):
+        """Return the total number of tokens in the context."""
+        return getattr(self, "_", 0) + sum(len(msg.content) for msg in self.reminders)
+
     def forget_last(self) -> Message:
         """Forget the last message in the context."""
         try:
@@ -289,7 +306,8 @@ class LanguageAgent(Agent):
                 return parse_target.model_validate_json(response)
             except Exception as e:
                 if attempt == max_retries:
-                    raise ValueError(f"Failed to parse response after {max_retries + 1} attempts") from e
+                    msg = f"Failed to parse response after {max_retries + 1} attempts"
+                    raise ValueError(msg) from e
                 error = f"Error parsing response: {e}"
                 instruction = original_instruction + f". Avoid the following error: {error}"
                 self.forget(last_n=2)
