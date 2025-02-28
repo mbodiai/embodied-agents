@@ -17,21 +17,6 @@ class OpenVlaAgent(MotorAgent):
         HandControl(pose=Pose6D(x=1,y=2,z=3,roll=0,pitch=0,yaw=0), grasp=JointControl(value=0))
     """
 
-    def __init__(
-        self,
-        recorder="omit",
-        recorder_kwargs=None,
-        model_src=None,
-        model_kwargs=None,
-        **kwargs,
-    ):
-        super().__init__(
-            recorder=recorder,
-            recorder_kwargs=recorder_kwargs,
-            model_src=model_src,
-            model_kwargs=model_kwargs,
-            **kwargs,
-        )
 
     def act(self, instruction: str, image: Image, unnorm_key: str = "bridge_orig") -> Motion:
         """Act based on the instruction and image using the remote server.

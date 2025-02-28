@@ -1,15 +1,43 @@
 from functools import wraps
-from typing import Any, Dict, Literal, Type
-
+from typing import Any, Dict, Literal, Protocol, Type, overload
+from typing_extensions import TypedDict
+from rich.console import Console
 from mbodied.agents import Agent
 from mbodied.agents.language import LanguageAgent
+from mbodied.agents.agent import ModelSource
 from mbodied.agents.motion.openvla_agent import OpenVlaAgent
 from mbodied.agents.sense.depth_estimation_agent import DepthEstimationAgent
 from mbodied.agents.sense.object_detection_agent import ObjectDetectionAgent
 from mbodied.agents.sense.segmentation_agent import SegmentationAgent
 from mbodied.types.sense.vision import Image
 
+TaskTypes = Literal["language", "motion_openvla", "sense_object_detection", "sense_image_segmentation", "sense_depth_estimation"]
+class TaskAgentMap(TypedDict):
+    language: Type[LanguageAgent]
+    motion_openvla: Type[OpenVlaAgent]
+    sense_object_detection: Type[ObjectDetectionAgent]
+    sense_image_segmentation: Type[SegmentationAgent]
+    sense_depth_estimation: Type[DepthEstimationAgent]
 
+console = Console()
+class CustomTypedDict(Protocol):
+    @overload
+    @classmethod
+    def __getitem__(cls, key: Literal["language"]) -> Type[LanguageAgent]: ...
+    @overload
+    @classmethod
+    def __getitem__(cls, key: Literal["motion_openvla"]) -> Type[OpenVlaAgent]: ...
+    @overload
+    @classmethod
+    def __getitem__(cls, key: Literal["sense_object_detection"]) -> Type[ObjectDetectionAgent]: ...
+    @overload
+    @classmethod
+    def __getitem__(cls, key: Literal["sense_image_segmentation"]) -> Type[SegmentationAgent]: ...
+    @overload
+    @classmethod
+    def __getitem__(cls, key: Literal["sense_depth_estimation"]) -> Type[DepthEstimationAgent]: ...
+    
+    
 class AutoAgent(Agent):
     """AutoAgent that dynamically selects and initializes the correct agent based on the task and model.
 
@@ -29,74 +57,69 @@ class AutoAgent(Agent):
     ```
     """
 
-    TASK_TO_AGENT_MAP: Dict[
-        Literal[
-            "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation"
-        ],
-        Type[Agent],
-    ] = {
+    TASK_TO_AGENT_MAP: TaskAgentMap = {
         "language": LanguageAgent,
-        "motion-openvla": OpenVlaAgent,
-        "sense-object-detection": ObjectDetectionAgent,
-        "sense-image-segmentation": SegmentationAgent,
-        "sense-depth-estimation": DepthEstimationAgent,
+        "motion_openvla": OpenVlaAgent,
+        "sense_object_detection": ObjectDetectionAgent,
+        "sense_image_segmentation": SegmentationAgent,
+        "sense_depth_estimation": DepthEstimationAgent,
     }
-
+    @overload
+    def __init__(   
+        self, input: Any, model_src: ModelSource="openai", model_kwargs: Dict | None = None, **kwargs
+    ): ...
+    @overload
     def __init__(
-        self, task: str | None = None, model_src: str | None = None, model_kwargs: Dict | None = None, **kwargs
-    ):
+        self, task: TaskTypes = "language", model_src: ModelSource="openai", model_kwargs: Dict | None = None, **kwargs
+    ):...
+    def __init__(
+        self, *args, task: TaskTypes = "language", model_src: ModelSource = "openai", 
+        model_kwargs: Dict | None = None, **kwargs):
         """Initialize the AutoAgent with the specified task and model."""
-        if model_kwargs is None:
-            model_kwargs = {}
-        self.task = task
-        self.model_src = model_src
-        self.model_kwargs = model_kwargs
-        self.kwargs = kwargs
-        self._initialize_agent()
-
-    def _initialize_agent(self):
-        """Initialize the appropriate agent based on the task."""
-        if self.task not in self.TASK_TO_AGENT_MAP:
-            if self.model_src is None:
-                self.model_src = "openai"
-            self.agent = LanguageAgent(model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs)
+        self.console = Console()
+        if task not in self.TASK_TO_AGENT_MAP:
+            self.task = "language"
+            self._pending_instruction = task
         else:
-            self.agent = self.TASK_TO_AGENT_MAP[self.task](
-                model_src=self.model_src, model_kwargs=self.model_kwargs, **self.kwargs
-            )
+            self._pending_instruction = None
+            self.task = task
+        
+        # Initialize core properties
+        self.model_src = model_src
+        self.model_kwargs = model_kwargs or {}
+        self.kwargs = kwargs
+        
+        # Initialize agent
+        self.agent = self.TASK_TO_AGENT_MAP[self.task](
+            model_src=self.model_src,
+            model_kwargs=self.model_kwargs,
+            **self.kwargs
+        )
 
     def __getattr__(self, name: str) -> Any:
-        """Delegate attribute access to the agent if not found in AutoAgent."""
-        try:
-            attr = getattr(self.agent, name)
-            if callable(attr):
-
-                @wraps(attr)
-                def wrapper(*args, **kwargs):
-                    return attr(*args, **kwargs)
-
-                return wrapper
-            return attr
-        except AttributeError as err:
-            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from err
+        if hasattr(self.agent, name):
+            return getattr(self.agent, name)
+        return super().__getattribute__(name)
 
     def act(self, *args, **kwargs) -> Any:
-        """Invoke the agent's act method without reinitializing the agent."""
+        """Execute agent action with pending instruction if available."""
+        if self.task == "language":
+            if self._pending_instruction:
+                return self.agent.act(self._pending_instruction, *args, **kwargs)
         return self.agent.act(*args, **kwargs)
+
 
     @staticmethod
     def available_tasks() -> None:
         """Print available tasks that can be used with AutoAgent."""
-        print("Available tasks:")  # noqa: T201
+        console.print("Available tasks:")  # noqa: T201
         for task in AutoAgent.TASK_TO_AGENT_MAP:
-            print(f"- {task}")  # noqa: T201
+            console.print(f"- {task}")  # noqa: T201
 
 
 def get_agent(
-    task: Literal[
-        "language", "motion-openvla", "sense-object-detection", "sense-image-segmentation", "sense-depth-estimation"
-    ],
-    model_src: str,
+    task: TaskTypes,
+    model_src: ModelSource="openai",
     model_kwargs: Dict | None = None,
     **kwargs,
 ) -> Agent:

@@ -65,11 +65,10 @@ class AnthropicBackend(OpenAIBackendMixin):
         client: The client for the Anthropic service.
         serialized: The serializer for Anthropic-specific data formats.
     """
-
+    serializer = AnthropicSerializer()
     DEFAULT_MODEL = "claude-3-5-sonnet-20240620"
     INITIAL_CONTEXT = [
-        Message(
-            role="user", content="Imagine you are a robot with advanced spatial reasoning."),
+        Message(role="user", content="Imagine you are a robot with advanced spatial reasoning."),
         Message(role="assistant", content="Got it!"),
     ]
 
@@ -87,7 +86,7 @@ class AnthropicBackend(OpenAIBackendMixin):
         self.model = kwargs.pop("model", self.DEFAULT_MODEL)
         if self.client is None:
             self.client = anthropic.Anthropic(api_key=self.api_key)
-        self.serialized = AnthropicSerializer
+
 
     def predict(
         self,
@@ -109,8 +108,7 @@ class AnthropicBackend(OpenAIBackendMixin):
         """
         if model is None:
             model = self.DEFAULT_MODEL
-        serialized_messages = [self.serialized(
-            msg).serialize() for msg in context + [message]]
+        serialized_messages = [self.serialized(msg) for msg in context + [message]]
         completion = self.client.messages.create(
             model=model,
             messages=serialized_messages,
@@ -126,7 +124,9 @@ class AnthropicBackend(OpenAIBackendMixin):
         # For now, we'll use the synchronous method since Anthropic doesn't provide an async API
         return self.predict(message, context, model)
 
-    def stream(self, message: Message, context: List[Message] = None, model: str = "claude-3-5-sonnet-20240620", **kwargs):
+    def stream(
+        self, message: Message, context: List[Message] = None, model: str = "claude-3-5-sonnet-20240620", **kwargs
+    ):
         """Streams a completion for the given messages using the Anthropic API standard.
 
         Args:
@@ -136,8 +136,7 @@ class AnthropicBackend(OpenAIBackendMixin):
             **kwargs: Additional keyword arguments.
         """
         model = model or self.DEFAULT_MODEL
-        serialized_messages = [self.serialized(
-            msg).serialize() for msg in context + [message]]
+        serialized_messages = [self.serialized(msg) for msg in context + [message]]
         with self.client.messages.stream(
             max_tokens=1024,
             messages=serialized_messages,

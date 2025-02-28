@@ -1,9 +1,7 @@
-<div align="center">
- <img src="assets/logo_full.png" width=200;/>
+<div align="left">
+ <img src="assets/logo.png" width=200;/>
   <div>&nbsp;</div>
-  <div align="center">
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <b><font size="5"></font></b>
+  <div align="left">
     <sup>
       <a href="https://api.mbodi.ai">
         <i><font size="4">Benchmark, Explore, and Send API Requests Now</font></i>
@@ -15,7 +13,7 @@
 [![license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mbodied)](https://pypi.org/project/mbodied/)
 [![PyPI](https://img.shields.io/pypi/v/mbodied)](https://pypi.org/project/mbodied)
-[![Downloads](https://static.pepy.tech/badge/mbodied)](https://pepy.tech/project/mbodied)</br>
+[![Downloads](https://static.pepy.tech/badge/mbodied)](https://pepy.tech/project/mbodied)
 [![MacOS](https://github.com/mbodiai/opensource/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/mbodiai/opensource/actions/workflows/macos.yml)
 [![Ubuntu](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/mbodiai/opensource/actions/workflows/ubuntu.yml)
 
@@ -164,6 +162,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] Automatic dataset recording on Robot
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
+- [ ] Google Gemini Backend
 - [ ] ROS integration
 - [ ] More Motor Agents, i.e. RT1
 - [ ] More device support, i.e. OpenCV camera

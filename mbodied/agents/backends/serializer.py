@@ -172,11 +172,13 @@ class Serializer(Sample):
         """
         return {"type": "text", "text": text}
 
-    def __call__(self) -> dict[str, Any] | list[Any]:
+    def __call__(self,data=None) -> dict[str, Any] | list[Any]:
         """Calls the serialize method.
 
         Returns:
             A dictionary representing the serialized wrapped content.
 
         """
+        if data:
+            self.wrapped = data
         return self.model_dump()

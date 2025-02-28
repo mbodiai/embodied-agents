@@ -1,3 +1,3 @@
-from .auto_agent import AutoAgent
+from .auto_agent import AutoAgent, TaskTypes, ModelSource
 
-__all__ = ["AutoAgent"]
+__all__ = ["AutoAgent","TaskTypes","ModelSource"]

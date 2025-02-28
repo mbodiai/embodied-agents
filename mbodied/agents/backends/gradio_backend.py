@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gradio_client import Client
+from gradio_client.client import Client
 from gradio_client.client import Job
 
 from mbodied.agents.backends.backend import Backend
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from mbodied.agents.agent import ModelSource
 
 class GradioBackend(Backend):
     """Gradio backend that handles connections to gradio servers."""
 
     def __init__(
         self,
-        endpoint: str = None,
+        endpoint: "ModelSource",
         **kwargs,
     ) -> None:
         """Initializes the GradioBackend.
@@ -57,3 +59,7 @@ class GradioBackend(Backend):
             Job: Gradio job object.
         """
         return self.client.submit(api_name=api_name, result_callbacks=result_callbacks, *args, **kwargs)
+
+if __name__ == "__main__":
+    from mbodied.types.sense.vision import Image
+    agent = GradioBackend(endpoint="https://api.mbodi.ai/sense/")

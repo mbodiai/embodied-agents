@@ -51,12 +51,11 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
-from typing import AsyncGenerator, Generator, List, Literal, TypeAlias
+from typing import TYPE_CHECKING, AsyncGenerator, Final, Generator, List, Literal, TypeAlias
 
 from art import text2art
-from pydantic import AnyUrl, DirectoryPath, FilePath, NewPath
 
-from mbodied.agents import Agent
+from mbodied.agents.agent import Agent, ModelSource
 from mbodied.agents.backends import OpenAIBackend
 from mbodied.types.message import Message
 from mbodied.types.sample import Sample
@@ -85,15 +84,24 @@ class Reminder:
             raise IndexError("Invalid index")
 
 
-def make_context_list(context: list[str | Image | Message] | Image | str | Message | None) -> List[Message]:
+def make_context_list(
+    context: list[str | Image | Message] | Image | str | Message | None,
+) -> List[Message]:
     """Convert the context to a list of messages."""
     if isinstance(context, list):
-        return [Message(content=c) if not isinstance(c, Message) else c for c in context]
+        return [
+            Message(content=c) if not isinstance(c, Message) else c for c in context
+        ]
     if isinstance(context, Message):
         return [context]
     if isinstance(context, str | Image):
-        return [Message(role="user", content=[context]), Message(role="assistant", content="Understood.")]
+        return [
+            Message(role="user", content=[context]),
+            Message(role="assistant", content="Understood."),
+        ]
     return []
+
+
 
 
 class LanguageAgent(Agent):
@@ -144,11 +152,7 @@ class LanguageAgent(Agent):
 
     def __init__(
         self,
-        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http"]
-        | AnyUrl
-        | FilePath
-        | DirectoryPath
-        | NewPath = "openai",
+        model_src: ModelSource = "openai",
         context: list | Image | str | Message = None,
         api_key: str | None = os.getenv("OPENAI_API_KEY"),
         model_kwargs: dict = None,
@@ -199,9 +203,6 @@ class LanguageAgent(Agent):
         )
 
         self.context = make_context_list(context)
-
-
-   
 
     def get_image_size(self, fname):
         """
@@ -298,7 +299,9 @@ class LanguageAgent(Agent):
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         for attempt in range(max_retries + 1):
             if record:
-                response = self.act_and_record(instruction, image, context, model=model, **kwargs)
+                response = self.act_and_record(
+                    instruction, image, context, model=model, **kwargs
+                )
             else:
                 response = self.act(instruction, image, context, model=model, **kwargs)
             response = response[response.find("{") : response.rfind("}") + 1]
@@ -309,9 +312,13 @@ class LanguageAgent(Agent):
                     msg = f"Failed to parse response after {max_retries + 1} attempts"
                     raise ValueError(msg) from e
                 error = f"Error parsing response: {e}"
-                instruction = original_instruction + f". Avoid the following error: {error}"
+                instruction = (
+                    original_instruction + f". Avoid the following error: {error}"
+                )
                 self.forget(last_n=2)
-                logging.warning(f"\nReceived response: {response}.\n Retrying with error message: {instruction}")
+                logging.warning(
+                    f"\nReceived response: {response}.\n Retrying with error message: {instruction}"
+                )
         raise ValueError(f"Failed to parse response after {max_retries + 1} attempts")
 
     async def async_act_and_parse(
@@ -337,7 +344,10 @@ class LanguageAgent(Agent):
         )
 
     def prepare_inputs(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None
+        self,
+        instruction: str,
+        image: Image|None = None,
+        context: list | str | Image | Message |None= None,
     ) -> tuple[Message, list[Message]]:
         """Helper method to prepare the inputs for the agent.
 
@@ -363,7 +373,9 @@ class LanguageAgent(Agent):
 
         return message, memory
 
-    def postprocess_response(self, response: str, message: Message, memory: list[Message], **kwargs) -> str:
+    def postprocess_response(
+        self, response: str, message: Message, memory: list[Message], **kwargs
+    ) -> str:
         """Postprocess the response."""
         self.context.append(message)
         self.context.append(Message(role="assistant", content=response))
@@ -405,7 +417,12 @@ class LanguageAgent(Agent):
         return self.postprocess_response(response, message, memory, **kwargs)
 
     def act_and_stream(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self,
+        instruction: str,
+        image: Image | None = None,
+        context: list | str | Image | Message | None = None,
+        model=None,
+        **kwargs,
     ) -> Generator[str, None, str]:
         """Responds to the given instruction, image, and context and streams the response."""
         message, memory = self.prepare_inputs(instruction, image, context)
@@ -418,13 +435,20 @@ class LanguageAgent(Agent):
         return self.postprocess_response(response, message, memory, **kwargs)
 
     async def async_act_and_stream(
-        self, instruction: str, image: Image = None, context: list | str | Image | Message = None, model=None, **kwargs
+        self,
+        instruction: str,
+        image: Image = None,
+        context: list | str | Image | Message = None,
+        model=None,
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         message, memory = self.prepare_inputs(instruction, image, context)
         kwargs = {**kwargs, "model": model}
         model = kwargs.pop("model", None) or self.actor.DEFAULT_MODEL
         response = ""
-        async for chunk in self.actor.astream(message, context=memory, model=model, **kwargs):
+        async for chunk in self.actor.astream(
+            message, context=memory, model=model, **kwargs
+        ):
             response += chunk
             yield chunk
         self.postprocess_response(response, message, memory, **kwargs)

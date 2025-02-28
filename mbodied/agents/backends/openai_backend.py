@@ -109,7 +109,7 @@ class OpenAIBackendMixin(Backend):
             if aclient:
                 self.aclient = AsyncOpenAI(api_key=self.api_key or "any_key", **kwargs)
 
-        self.serialized = OpenAISerializer
+        self.serialized = OpenAISerializer()
         self.response_format = response_format
 
     @backoff.on_exception(
@@ -134,7 +134,7 @@ class OpenAIBackendMixin(Backend):
         """
         context = context or self.INITIAL_CONTEXT
         model = model or self.DEFAULT_MODEL
-        serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
+        serialized_messages = [self.serialized(msg)for msg in context + [message]]
 
         completion = self.client.chat.completions.create(
             model=model,

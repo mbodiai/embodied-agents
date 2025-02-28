@@ -1,1 +1,1 @@
-::: mbodied.agents.cli
+::: mbodied.cli

@@ -11,17 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Generator
+from mbodied.agents.backends.serializer import Serializer
 
 
-class Backend:
+class Backend(ABC):
     """Base class for agent backends."""
-
+    @property
+    @abstractmethod
+    def DEFAULT_MODEL(self) -> str:
+        raise NotImplementedError
+    serialized = Serializer()
     @abstractmethod
     def predict(self, *args, **kwargs) -> str:
         raise NotImplementedError
 
-    @abstractmethod
+
     def stream(self, *args, **kwargs) -> Generator[str, None, None]:
         raise NotImplementedError

@@ -24,12 +24,12 @@ import numpy.typing as npt
 try:
     from numpy.core._exceptions import UFuncTypeError  # noqa
 except (ImportError, ModuleNotFoundError, AttributeError, NameError):
-  try:
-    pass
-    from numpy._core._exceptions import UFuncTypeError 
-  except (ImportError, ModuleNotFoundError, AttributeError, NameError):
-    from numpy._core.exceptions import UFuncTypeError
-    
+    try:
+        pass
+        from numpy._core._exceptions import UFuncTypeError
+    except (ImportError, ModuleNotFoundError, AttributeError, NameError):
+        from numpy._core.exceptions import UFuncTypeError
+
 from numpy.lib.npyio import NpzFile
 from numpy.typing import NDArray
 from packaging.version import Version
@@ -426,28 +426,6 @@ def _compare_np_array_dicts(
     return True
 
 
-# def generate_pydantic_signature(
-#     init: Callable[..., None], fields: dict[str, FieldInfo], config_wrapper: ConfigWrapper, is_dataclass: bool = False,
-# ) -> Signature:
-#     """Generate signature for a pydantic BaseModel or dataclass.
-
-#     Args:
-#         init: The class init.
-#         fields: The model fields.
-#         config_wrapper: The config wrapper instance.
-#         is_dataclass: Whether the model is a dataclass.
-
-#     Returns:
-#         The dataclass/BaseModel subclass signature.
-#     """
-#     merged_params = _generate_signature_parameters(init, fields, config_wrapper)
-
-#     if is_dataclass:
-#         merged_params = {k: _process_param_defaults(v) for k, v in merged_params.items()}
-
-#     return Signature(parameters=list(merged_params.values()), return_annotation=None)
-
-
 class NumpyDataDict(TypedDict):
     data: List
     data_type: SupportedDTypes | str
@@ -456,7 +434,9 @@ class NumpyDataDict(TypedDict):
 
 if sys.version_info < (3, 11):
 
-    def array_validator(array: np.ndarray, shape: Tuple[int, ...] | None, dtype: SupportedDTypes | None) -> npt.NDArray:
+    def array_validator(
+        array: np.ndarray, shape: Tuple[int, ...] | None, dtype: SupportedDTypes | None, labels=List[str] | None
+    ) -> npt.NDArray:
         if shape is not None:
             expected_ndim = len(shape)
             actual_ndim = array.ndim
@@ -469,17 +449,21 @@ if sys.version_info < (3, 11):
                     details = f"Dimension {i} has size {actual}, expected {expected}"
                     msg = "ShapeError"
                     raise PydanticCustomError(msg, details)
+        # Validate and adjust dtype if needed
+        if dtype and isinstance(dtype, type):
+            if (
+                array.dtype.type != dtype
+                and issubclass(dtype, np.integer)
+                and issubclass(array.dtype.type, np.floating)
+            ):
+                # Round and cast to integer if required
+                array = np.round(array).astype(dtype, copy=False)
 
-        if (
-            dtype
-            and array.dtype.type != dtype
-            and issubclass(dtype, np.integer)
-            and issubclass(array.dtype.type, np.floating)
-        ):
-            array = np.round(array).astype(dtype, copy=False)
-        if dtype and issubclass(dtype, np.dtypes.UInt64DType | np.dtypes.Int64DType):
-            dtype = np.int64
-            array = array.astype(dtype, copy=True)
+            # Special case for int64 and uint64 types
+            if issubclass(dtype, np.dtypes.UInt64DType | np.dtypes.Int64DType):
+                dtype = np.int64
+                array = array.astype(dtype, copy=True)
+
         return array
 else:
 
@@ -651,6 +635,7 @@ def array_to_data_dict_serializer(array: npt.ArrayLike) -> NumpyDataDict:
 
 
 T = TypeVar("T")
+
 
 class NumpyArray(Generic[T], NDArray[Any]):
     """Pydantic validation for shape and dtype. Specify shape with a tuple of integers, "*" or `Any` for any size.

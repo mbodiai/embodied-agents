@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+
+from mbodied.agents.agent import ModelSource
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.sense.vision import Image
 
-
+ 
 class DepthEstimationAgent(SensoryAgent):
     """A depth estimation agent that uses a remote depth estimation server to estimate depth from an image.
 
@@ -26,7 +29,7 @@ class DepthEstimationAgent(SensoryAgent):
 
     def __init__(
         self,
-        model_src="https://api.mbodi.ai/sense/",
+        model_src:ModelSource="https://api.mbodi.ai/sense/",
         model_kwargs=None,
         **kwargs,
     ):

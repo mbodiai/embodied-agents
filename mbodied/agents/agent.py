@@ -17,13 +17,23 @@ import asyncio
 import logging
 from inspect import signature
 from pathlib import Path
-from typing import Literal
+from typing import Callable, Literal, Type, TypeAlias,TypeVar,Generic
+from typing_extensions import TYPE_CHECKING, Annotated, Any, Dict, Protocol, overload
 
 from mbodied.agents.backends import AnthropicBackend, GradioBackend, HttpxBackend, OllamaBackend, OpenAIBackend
 from mbodied.data.recording import Recorder
 from mbodied.types.sample import Sample
-
+from pydantic import DirectoryPath, FilePath, NewPath,validate_call
 Backend = AnthropicBackend | GradioBackend | OpenAIBackend | HttpxBackend | OllamaBackend
+
+
+
+from pydantic import AnyUrl
+from pydantic_core import Url
+ModelSource: TypeAlias = (
+    Literal["openai", "anthropic", "gradio", "ollama", "http"]
+    | Annotated[str,AnyUrl | DirectoryPath | FilePath | NewPath]
+)
 
 
 class Agent:
@@ -38,7 +48,7 @@ class Agent:
         kwargs (dict): Additional arguments to pass to the recorder.
     """
 
-    ACTOR_MAP = {
+    ACTOR_MAP: dict[  Literal["openai", "anthropic", "gradio", "ollama", "http"],Type[Backend]] = {
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
         "ollama": OllamaBackend,
@@ -47,7 +57,7 @@ class Agent:
     }
 
     @staticmethod
-    def init_backend(model_src: str, model_kwargs: dict, api_key: str) -> type:
+    def init_backend(model_src: ModelSource, model_kwargs: dict, api_key: str) -> Backend:
         """Initialize the backend based on the model source.
 
         Args:
@@ -67,7 +77,7 @@ class Agent:
         return Agent.handle_default(model_src, model_kwargs)
 
     @staticmethod
-    def handle_default(model_src: str, model_kwargs: dict) -> None:
+    def handle_default(model_src: ModelSource, model_kwargs: Dict[str,Any]) -> Backend:
         """Default to gradio then httpx backend if the model source is not recognized.
 
         Args:
@@ -91,9 +101,9 @@ class Agent:
     def __init__(
         self,
         recorder: Literal["omit", "auto"] | str = "omit",
-        recorder_kwargs=None,
+        recorder_kwargs: dict = None,
         api_key: str = None,
-        model_src=None,
+        model_src: ModelSource = "openai",
         model_kwargs=None,
     ):
         """Initialize the agent, optionally setting up a recorder, remote actor, or loading a local model.
@@ -121,7 +131,7 @@ class Agent:
 
         model_kwargs = model_kwargs or {}
         self.actor = None
-        if isinstance(model_src, str) and Path(model_src[:120]).exists():
+        if isinstance(model_src, str) and Path(model_src[:250]).exists():
             self.load_model(model_src, **model_kwargs)
         else:
             self.actor: Backend = self.init_backend(model_src, model_kwargs, api_key)
