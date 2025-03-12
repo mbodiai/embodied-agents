@@ -15,6 +15,6 @@
 from .depth_estimation_agent import DepthEstimationAgent
 from .object_detection_agent import ObjectDetectionAgent
 from .segmentation_agent import SegmentationAgent
-from .sensory_agent import SensoryAgent
+from .sensor_agent import SensorAgent
 
-__all__ = ["SensoryAgent", "DepthEstimationAgent", "ObjectDetectionAgent", "SegmentationAgent"]
+__all__ = ["SensorAgent", "DepthEstimationAgent", "ObjectDetectionAgent", "SegmentationAgent"]

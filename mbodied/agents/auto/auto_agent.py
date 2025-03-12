@@ -1,23 +1,26 @@
-from functools import wraps
 from typing import Any, Dict, Literal, Protocol, Type, overload
-from typing_extensions import TypedDict
+
 from rich.console import Console
+from typing_extensions import TypedDict, cast
+
 from mbodied.agents import Agent
-from mbodied.agents.language import LanguageAgent
 from mbodied.agents.agent import ModelSource
+from mbodied.agents.language import LanguageAgent
 from mbodied.agents.motion.openvla_agent import OpenVlaAgent
 from mbodied.agents.sense.depth_estimation_agent import DepthEstimationAgent
 from mbodied.agents.sense.object_detection_agent import ObjectDetectionAgent
 from mbodied.agents.sense.segmentation_agent import SegmentationAgent
+from mbodied.agents.sense.sensor_agent import SensorAgent
 from mbodied.types.sense.vision import Image
 
-TaskTypes = Literal["language", "motion_openvla", "sense_object_detection", "sense_image_segmentation", "sense_depth_estimation"]
+TaskTypes = Literal["language","motion","sense","detection","segmentation","depth"]
 class TaskAgentMap(TypedDict):
     language: Type[LanguageAgent]
-    motion_openvla: Type[OpenVlaAgent]
-    sense_object_detection: Type[ObjectDetectionAgent]
-    sense_image_segmentation: Type[SegmentationAgent]
-    sense_depth_estimation: Type[DepthEstimationAgent]
+    motion: Type[OpenVlaAgent]
+    detection: Type[ObjectDetectionAgent]
+    segmentation: Type[SegmentationAgent]
+    depth: Type[DepthEstimationAgent]
+    sense: Type[SensorAgent]
 
 console = Console()
 class CustomTypedDict(Protocol):
@@ -26,16 +29,16 @@ class CustomTypedDict(Protocol):
     def __getitem__(cls, key: Literal["language"]) -> Type[LanguageAgent]: ...
     @overload
     @classmethod
-    def __getitem__(cls, key: Literal["motion_openvla"]) -> Type[OpenVlaAgent]: ...
+    def __getitem__(cls, key: Literal["motion"]) -> Type[OpenVlaAgent]: ...
     @overload
     @classmethod
-    def __getitem__(cls, key: Literal["sense_object_detection"]) -> Type[ObjectDetectionAgent]: ...
+    def __getitem__(cls, key: Literal["detection"]) -> Type[ObjectDetectionAgent]: ...
     @overload
     @classmethod
-    def __getitem__(cls, key: Literal["sense_image_segmentation"]) -> Type[SegmentationAgent]: ...
+    def __getitem__(cls, key: Literal["segmentation"]) -> Type[SegmentationAgent]: ...
     @overload
     @classmethod
-    def __getitem__(cls, key: Literal["sense_depth_estimation"]) -> Type[DepthEstimationAgent]: ...
+    def __getitem__(cls, key: Literal["depth"]) -> Type[DepthEstimationAgent]: ...
     
     
 class AutoAgent(Agent):
@@ -59,10 +62,11 @@ class AutoAgent(Agent):
 
     TASK_TO_AGENT_MAP: TaskAgentMap = {
         "language": LanguageAgent,
-        "motion_openvla": OpenVlaAgent,
-        "sense_object_detection": ObjectDetectionAgent,
-        "sense_image_segmentation": SegmentationAgent,
-        "sense_depth_estimation": DepthEstimationAgent,
+        "motion": OpenVlaAgent,
+        "depth": DepthEstimationAgent,
+        "detection": ObjectDetectionAgent,
+        "segmentation": SegmentationAgent,
+        "sense":SensorAgent,
     }
     @overload
     def __init__(   
@@ -103,9 +107,8 @@ class AutoAgent(Agent):
 
     def act(self, *args, **kwargs) -> Any:
         """Execute agent action with pending instruction if available."""
-        if self.task == "language":
-            if self._pending_instruction:
-                return self.agent.act(self._pending_instruction, *args, **kwargs)
+        if self.task == "language" and self._pending_instruction:
+            return self.agent.act(self._pending_instruction, *args, **kwargs)
         return self.agent.act(*args, **kwargs)
 
 
@@ -163,17 +166,17 @@ if __name__ == "__main__":
     for chunk in stream:
         print(chunk)
 
-    auto_agent = AutoAgent(task="motion-openvla", model_src="https://api.mbodi.ai/community-models/")
+    auto_agent = AutoAgent(task="motion", model_src="https://api.mbodi.ai/community-models/")
     action = auto_agent.act("move hand forward", Image(size=(224, 224)))
     print(action)
 
     auto_agent = AutoAgent(
-        task="motion-openvla", model_src="gradio", model_kwargs={"endpoint": "https://api.mbodi.ai/community-models/"}
+        task="motion", model_src="gradio", model_kwargs={"endpoint": "https://api.mbodi.ai/community-models/"}
     )
     action = auto_agent.act("move hand forward", Image(size=(224, 224)), "bridge_orig")
     print(action)
 
-    auto_agent = AutoAgent(task="sense-depth-estimation", model_src="https://api.mbodi.ai/sense/")
+    auto_agent = AutoAgent(task="depth", model_src="https://api.mbodi.ai/sense/")
     image = Image("resources/bridge_example.jpeg", size=(224, 224))
     result = auto_agent.act(image=image)
     result.pil.show()

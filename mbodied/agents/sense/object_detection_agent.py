@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from mbodied.agents.sense.sensory_agent import SensoryAgent
+from mbodied.agents.sense.sensor_agent import SensorAgent
 from mbodied.types.sense.vision import Image
 from mbodied.types.sense.world import World
 
 
-class ObjectDetectionAgent(SensoryAgent):
+class ObjectDetectionAgent(SensorAgent):
     """A object detection agent that uses a remote object detection, i.e. YOLOWorld, Grounding Dino, to detect objects in an image."""
 
     def __init__(

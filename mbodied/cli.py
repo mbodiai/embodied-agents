@@ -77,7 +77,10 @@ def format_with_rich(doc: str, title: str = "Help") -> None:
             sections[current_section] += stripped
 
     if sections["Inputs"]:
-        inputs_table = Table(box=rich.box.SQUARE)
+        from rich.box import Box
+        NO_BOX = Box("    \n" * 8)
+        BOX_TYPE: Box = NO_BOX
+        inputs_table = Table(box=NO_BOX)
         inputs_table.add_column("Input Name", style="bold cyan", no_wrap=True)
         inputs_table.add_column("Description", style="dim")
         for input_line in sections["Inputs"].split("\n"):
@@ -93,7 +96,10 @@ def format_with_rich(doc: str, title: str = "Help") -> None:
         )
 
     if sections["Outputs"]:
-        outputs_table = Table(box=rich.box.SQUARE)
+        from rich.box import Box
+        NO_BOX = Box("    \n" * 8)
+        BOX_TYPE: Box = NO_BOX
+        outputs_table = Table(box=NO_BOX)
         outputs_table.add_column("Output Name", style="bold cyan", no_wrap=True)
         outputs_table.add_column("Description", style="dim")
         for output_line in sections["Outputs"].split("\n"):
@@ -136,8 +142,12 @@ def list_agents(verbose) -> None:
     from rich.markdown import Markdown
 
     for mode in ["language", "sense", "motion"]:
-        table = Table(title=f"{mode.capitalize()} Agents")
-        table.add_column("Agent Name", style="bold cyan")
+        from rich.box import Box
+        NO_BOX = Box("    \n" * 8)
+        BOX_TYPE: Box = NO_BOX
+        table = Table(title=f"\n{mode.capitalize()} Agents\n", box=NO_BOX,title_justify="center",header_style="bold white")
+
+        table.add_column("Agent", style="bold cyan")
         table.add_column("Description", style="blue")
 
         smart_import(f"mbodied.agents.{mode}")
@@ -148,15 +158,15 @@ def list_agents(verbose) -> None:
                     (inspect.getdoc(agent[1]) or "")[:100] if inspect.getdoc(agent[1]) else "No description available."
                 )
                 if verbose:
-                    description = Markdown("""```python\n""" + (inspect.getdoc(agent[1] + "```") or "```"))
+                    description = Markdown("""""" + ( ("\n```python\nExample".join((inspect.getdoc(agent[1]) or "").split("Example",maxsplit=1)))  or "" + "```") or "```", style="white")
                 table.add_row(agent[0], description)
                 seen.add(agent[0])
 
         getconsole().print(table, overflow="ellipsis")
     getconsole().print("\n")
     if not verbose:
-        getconsole().print("Hint: Rerun with `--verbose` to see full descriptions.")
-    getconsole().print(Markdown("For more information, run `mbodied [language | sense | motion] --help`."))
+        getconsole().print("Hint: Rerun with `--verbose` to see full descriptions.",style="")
+    getconsole().print(Markdown("For more information, run `mbodied [language | sense | motion] --help`.\n", style="" ))
     getconsole().print("\n")
 
 

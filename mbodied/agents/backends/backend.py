@@ -13,15 +13,16 @@
 # limitations under the License.
 from abc import ABC, abstractmethod
 from typing import Generator
+
 from mbodied.agents.backends.serializer import Serializer
 
 
 class Backend(ABC):
     """Base class for agent backends."""
     @property
-    @abstractmethod
     def DEFAULT_MODEL(self) -> str:
         raise NotImplementedError
+        
     serialized = Serializer()
     @abstractmethod
     def predict(self, *args, **kwargs) -> str:

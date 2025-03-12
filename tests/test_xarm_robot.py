@@ -12,39 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import pytest
 from unittest.mock import MagicMock
 import math
-import sys
-
 
 from mbodied.types.motion.control import HandControl, Pose6D
 from mbodied.robots.xarm_robot import XarmRobot
 
 
 @pytest.fixture
-def mock_xarm_api(mocker):
-    # Mock the XArmAPI methods that are used in XarmRobot
-    mock = mocker.patch("mbodied.robots.xarm_robot.XArmAPI")
-    mock_instance = mock.return_value
-    mock_instance.motion_enable.return_value = None
-    mock_instance.clean_error.return_value = None
-    mock_instance.set_mode.return_value = None
-    mock_instance.set_state.return_value = None
-    mock_instance.set_gripper_mode.return_value = None
-    mock_instance.set_gripper_enable.return_value = None
-    mock_instance.set_gripper_speed.return_value = None
-    mock_instance.set_position.return_value = None
-    mock_instance.set_gripper_position.return_value = None
-    mock_instance.get_position.return_value = (0, [300, 0, 325, -3.14, 0, 0])
-    mock_instance.get_gripper_position.return_value = (0, 800)
-    return mock_instance
+def mock_xarm_api():
+    """Create a properly configured mock for XArmAPI"""
+    mock = MagicMock()
+    mock.motion_enable.return_value = 0  # Success code
+    mock.clean_error.return_value = 0
+    mock.set_mode.return_value = 0
+    mock.set_state.return_value = 0
+    mock.set_gripper_mode.return_value = 0
+    mock.set_gripper_enable.return_value = 0
+    mock.set_gripper_speed.return_value = 0
+    mock.set_position.return_value = 0
+    mock.set_gripper_position.return_value = 0
+    mock.get_position.return_value = (0, [300, 0, 325, -3.14, 0, 0])
+    mock.get_gripper_position.return_value = (0, 800)
+    mock.set_collision_sensitivity.return_value = 0
+    mock.set_self_collision_detection.return_value = 0
+    return mock
 
 
 @pytest.fixture
-def xarm(mock_xarm_api):
-    # Explicitly initialize XarmRobot to trigger the mocked calls
-    return XarmRobot(ip="192.168.1.228")
+def xarm(mock_xarm_api, monkeypatch):
+    """Create XarmRobot with mocked XArmAPI"""
+    # Patch the XArmAPI constructor to return our mock
+    monkeypatch.setattr("mbodied.robots.xarm_robot.XArmAPI", lambda *args, **kwargs: mock_xarm_api)
+    
+    # Create and return XarmRobot instance
+    robot = XarmRobot(ip="192.168.1.228")
+    return robot
+
 
 
 def test_initialization(mock_xarm_api, xarm):

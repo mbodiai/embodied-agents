@@ -1,28 +1,28 @@
 # Sensory Agent
 
-The `SensoryAgent` is an abstract base class designed for creating agents that interact with various sensory components, such as images and/or depth maps. These agents can connect to different backends to process sensory data, enabling tasks like object detection, depth estimation, and more.
+The `SensorAgent` is an abstract base class designed for creating agents that interact with various sensory components, such as images and/or depth maps. These agents can connect to different backends to process sensory data, enabling tasks like object detection, depth estimation, and more.
 
 ## Key Features
 
 - **Backend Flexibility**: Natively supports multiple API services including OpenAI, Anthropic, vLLM, Ollama, HTTPX, and any Gradio endpoints.
-- **Extensibility**: The `SensoryAgent` class provides a flexible template for building custom sensory agents tailored to specific tasks or services.
+- **Extensibility**: The `SensorAgent` class provides a flexible template for building custom sensory agents tailored to specific tasks or services.
 
 ## Quick Start
 
 ### 1. Import the Sensory Agent
 
-Begin by importing the `SensoryAgent` class from the `mbodied` package.
+Begin by importing the `SensorAgent` class from the `mbodied` package.
 
 ```python
-from mbodied.agents.sense.sensory_agent import SensoryAgent
+from mbodied.agents.sense.sensor_agent import SensorAgent
 ```
 
 ### 2. Define a Custom Sensory Agent
 
-Create a subclass of `SensoryAgent` to define a custom sensory agent. For example,
+Create a subclass of `SensorAgent` to define a custom sensory agent. For example,
 
 ```python
-class MySensoryAgent(SensoryAgent):
+class MySensorAgent(SensorAgent):
 
     def __init__(
         self,
@@ -43,17 +43,17 @@ class MySensoryAgent(SensoryAgent):
         return response
 ```
 
-In this example, the `MySensoryAgent` class is configured to interact with a Gradio endpoint at the specified `model_src`. The `act` method sends data to the backend and returns the response.
+In this example, the `MySensorAgent` class is configured to interact with a Gradio endpoint at the specified `model_src`. The `act` method sends data to the backend and returns the response.
 
 ### 3. Use the Custom Agent in Your Script
 
 In another script, you can import and use your custom sensory agent as follows:
 
 ```python
-from path.to.your.agent import MySensoryAgent
+from path.to.your.agent import MySensorAgent
 
 # Initialize the agent
-agent = MySensoryAgent()
+agent = MySensorAgent()
 
 # Use the agent to process data
 response = agent.act(image=your_image_data)

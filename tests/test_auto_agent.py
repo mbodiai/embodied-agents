@@ -16,7 +16,7 @@ def mock_openvla_gradio_backend():
 
 @pytest.fixture
 def auto_openvla_agent(mock_openvla_gradio_backend):
-    agent = AutoAgent(task="motion-openvla", model_src="http://1.2.3.4:1234/")
+    agent = AutoAgent(task="motion", model_src="http://1.2.3.4:1234/")
     agent.actor = mock_openvla_gradio_backend
     return agent
 
@@ -36,7 +36,7 @@ def test_auto_openvla_agent_act(auto_openvla_agent):
 
 @pytest.fixture
 def auto_openvla_agent_get_method(mock_openvla_gradio_backend):
-    agent = get_agent(task="motion-openvla", model_src="http://1.2.3.4:1234/")
+    agent = get_agent(task="motion", model_src="http://1.2.3.4:1234/")
     agent.actor = mock_openvla_gradio_backend
     return agent
 
@@ -63,7 +63,7 @@ def mock_depth_gradio_backend():
 
 @pytest.fixture
 def depth_agent(mock_depth_gradio_backend):
-    agent = AutoAgent(task="sense-depth-estimation", model_src="http://1.2.3.4:1234/")
+    agent = AutoAgent(task="depth", model_src="http://1.2.3.4:1234/")
     agent.actor = mock_openvla_gradio_backend
     return agent
 

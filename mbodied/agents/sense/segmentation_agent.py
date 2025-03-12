@@ -3,12 +3,12 @@ from typing import List
 
 import numpy as np
 
-from mbodied.agents.sense.sensory_agent import SensoryAgent
+from mbodied.agents.sense.sensor_agent import SensorAgent
 from mbodied.types.sense.vision import Image
 from mbodied.types.sense.world import BBox2D, PixelCoords
 
 
-class SegmentationAgent(SensoryAgent):
+class SegmentationAgent(SensorAgent):
     """An image segmentation agent that uses a remote segmentation server to segment objects in an image."""
 
     def __init__(

@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from mbodied.agents import Agent
-from mbodied.types.sense.sensor_reading import SensorReading
+from mbodied.types.sense.sensor import State
 
 
-class SensoryAgent(Agent):
+class SensorAgent(Agent):
     """Abstract base class for sensory agents.
 
     This class provides a template for creating agents that can sense the environment.
@@ -33,7 +33,7 @@ class SensoryAgent(Agent):
         """
         super().__init__(**kwargs)
 
-    def act(self, **kwargs) -> SensorReading:
+    def act(self, **kwargs) -> State:
         """Abstract method to define the sensing mechanism of the agent.
 
         Args:
@@ -44,7 +44,7 @@ class SensoryAgent(Agent):
         """
         raise NotImplementedError
 
-    def sense(self, **kwargs) -> SensorReading:
+    def sense(self, **kwargs) -> State:
         """Generate a SensorReading based on given parameters.
 
         Args:

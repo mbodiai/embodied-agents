@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gradio_client.client import Client
-from gradio_client.client import Job
+from typing import TYPE_CHECKING
+
+from gradio_client.client import Client, Job
 
 from mbodied.agents.backends.backend import Backend
-from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from mbodied.agents.agent import ModelSource
 

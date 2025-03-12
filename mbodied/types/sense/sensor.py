@@ -15,5 +15,5 @@
 from mbodied.types.sample import Sample
 
 
-class SensorReading(Sample):
+class State(Sample):
     pass

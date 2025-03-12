@@ -91,7 +91,7 @@ nav:
       - Depth Estimation Agent: api/agents/sense/depth_estimation_agent.md
       - Object Detection Agent: api/agents/sense/object_detection_agent.md
       - Segmentation Agent: api/agents/sense/segmentation_agent.md
-      - Sensory Agent: api/agents/sense/sensory_agent.md
+      - Sensory Agent: api/agents/sense/sensor_agent.md
   - Data:
     - Recording: api/data/recording.md
     - Replaying: api/data/replaying.md

@@ -15,11 +15,11 @@
 
 
 from mbodied.agents.agent import ModelSource
-from mbodied.agents.sense.sensory_agent import SensoryAgent
+from mbodied.agents.sense.sensor_agent import SensorAgent
 from mbodied.types.sense.vision import Image
 
  
-class DepthEstimationAgent(SensoryAgent):
+class DepthEstimationAgent(SensorAgent):
     """A depth estimation agent that uses a remote depth estimation server to estimate depth from an image.
 
     Examples:
