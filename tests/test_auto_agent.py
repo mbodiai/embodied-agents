@@ -69,8 +69,10 @@ def test_auto_openvla_agent_act(auto_openvla_agent_get_method):
 
 @pytest.fixture
 def mock_depth_gradio_backend():
-    # Create a temp path that would be a valid location for a numpy file
-    temp_path = tempfile.mktemp(suffix=".npy")
+    # Create a temp file that would be a valid location for a numpy file
+    temp_file = tempfile.NamedTemporaryFile(suffix=".npy", delete=False)
+    temp_path = temp_file.name
+    temp_file.close()
     dummy_image_b64 = get_dummy_base64_image()
 
     with patch.object(GradioBackend, "__init__", lambda x, model_src=None, **kwargs: None):

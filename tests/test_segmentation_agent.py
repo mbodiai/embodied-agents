@@ -20,8 +20,10 @@ def get_dummy_base64_image():
 
 @pytest.fixture
 def mock_gradio_backend():
-    # Create a temp path that would be a valid location for a numpy file
-    temp_path = tempfile.mktemp(suffix=".npy")
+    # Create a temp file that would be a valid location for a numpy file
+    temp_file = tempfile.NamedTemporaryFile(suffix=".npy", delete=False)
+    temp_path = temp_file.name
+    temp_file.close()
     dummy_image_b64 = get_dummy_base64_image()
 
     with patch(
