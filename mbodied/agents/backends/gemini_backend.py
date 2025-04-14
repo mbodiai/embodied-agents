@@ -15,7 +15,6 @@
 import os
 from typing import Any, List
 
-import backoff
 from google import genai
 from google.genai import types
 
@@ -39,9 +38,7 @@ class GeminiSerializer(Serializer):
             A serialized image for the Gemini API.
         """
         # For Gemini, we can pass the PIL image object directly or use the base64 data
-        if image.pil:
-            return image.pil
-        return image.base64
+        return image.pil
 
     @classmethod
     def serialize_text(cls, text: str) -> str:
@@ -55,29 +52,29 @@ class GeminiSerializer(Serializer):
         """
         return text
 
-    @classmethod
-    def serialize(cls, message: Message) -> Any:
+    def serialize(self) -> Any:
         """Serializes a message for the Gemini API.
-
-        Args:
-            message: The message to be serialized.
 
         Returns:
             A serialized message for the Gemini API.
         """
-        # Gemini expects raw content in a list
-        content = []
+        if isinstance(self.wrapped, Message):
+            # Gemini expects raw content in a list
+            content = []
+            
+            for item in self.wrapped.content:
+                if isinstance(item, str):
+                    content.append(self.serialize_text(item))
+                elif isinstance(item, Image):
+                    content.append(self.serialize_image(item))
+                else:
+                    raise ValueError(f"Unsupported content type: {type(item)}")
+            
+            # If we only have one content item, return it directly
+            return content[0] if len(content) == 1 else content
         
-        for item in message.content:
-            if isinstance(item, str):
-                content.append(cls.serialize_text(item))
-            elif isinstance(item, Image):
-                content.append(cls.serialize_image(item))
-            else:
-                raise ValueError(f"Unsupported content type: {type(item)}")
-        
-        # If we only have one content item, return it directly
-        return content[0] if len(content) == 1 else content
+        # For other types, use default serialization
+        return super().serialize()
 
 
 class GeminiBackend(OpenAIBackendMixin):
@@ -110,20 +107,14 @@ class GeminiBackend(OpenAIBackendMixin):
         """
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("MBODI_API_KEY")
         self.client = client
-        
+
         self.model = kwargs.pop("model", self.DEFAULT_MODEL)
         if self.client is None:
             self.client = genai.Client(api_key=self.api_key)
-            
+
         self.serialized = GeminiSerializer
         self._chat_sessions = {}
 
-    @backoff.on_exception(
-        backoff.expo,
-        Exception,  # Replace with specific Gemini exceptions if available
-        max_tries=3,
-        on_backoff=lambda details: print(f"Backing off {details['wait']:.1f} seconds after {details['tries']} tries."),
-    )
     def predict(
         self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
     ) -> str:
@@ -140,21 +131,21 @@ class GeminiBackend(OpenAIBackendMixin):
         """
         context = context or self.INITIAL_CONTEXT
         model = model or self.model or self.DEFAULT_MODEL
-        
+
         # For system instructions, extract from context if available
         system_instruction = None
         messages_to_process = context + [message]
-        
+
         # Check if first message is a system message
         if messages_to_process and messages_to_process[0].role == "system":
             system_instruction = self.serialized(messages_to_process[0]).serialize()
             messages_to_process = messages_to_process[1:]
-        
+
         # Prepare the content from the message
         contents = []
         for msg in messages_to_process:
             contents.append(self.serialized(msg).serialize())
-        
+
         # Create config with system instruction if available
         config = None
         if system_instruction:
@@ -162,22 +153,18 @@ class GeminiBackend(OpenAIBackendMixin):
                 system_instruction=system_instruction,
                 temperature=kwargs.pop("temperature", 0),
                 max_output_tokens=kwargs.pop("max_tokens", 1000),
-                **kwargs
+                **kwargs,
             )
         else:
             config = types.GenerateContentConfig(
-                temperature=kwargs.pop("temperature", 0),
-                max_output_tokens=kwargs.pop("max_tokens", 1000),
-                **kwargs
+                temperature=kwargs.pop("temperature", 0), max_output_tokens=kwargs.pop("max_tokens", 1000), **kwargs
             )
-            
+
         # Make the API call
-        response = self.client.models.generate_content(
-            model=model,
-            contents=contents,
-            config=config
-        )
-        
+        print("contents", contents)
+        print("config", config)
+        response = self.client.models.generate_content(model=model, contents=contents, config=config)
+
         return response.text
 
     def stream(self, message: Message, context: List[Message] = None, model: str = None, **kwargs):
@@ -191,21 +178,21 @@ class GeminiBackend(OpenAIBackendMixin):
         """
         context = context or self.INITIAL_CONTEXT
         model = model or self.model or self.DEFAULT_MODEL
-        
+
         # For system instructions, extract from context if available
         system_instruction = None
         messages_to_process = context + [message]
-        
+
         # Check if first message is a system message
         if messages_to_process and messages_to_process[0].role == "system":
             system_instruction = self.serialized(messages_to_process[0]).serialize()
             messages_to_process = messages_to_process[1:]
-        
+
         # Prepare the content from the message
         contents = []
         for msg in messages_to_process:
             contents.append(self.serialized(msg).serialize())
-        
+
         # Create config with system instruction if available
         config = None
         if system_instruction:
@@ -213,74 +200,71 @@ class GeminiBackend(OpenAIBackendMixin):
                 system_instruction=system_instruction,
                 temperature=kwargs.pop("temperature", 0),
                 max_output_tokens=kwargs.pop("max_tokens", 1000),
-                **kwargs
+                **kwargs,
             )
         else:
             config = types.GenerateContentConfig(
-                temperature=kwargs.pop("temperature", 0),
-                max_output_tokens=kwargs.pop("max_tokens", 1000),
-                **kwargs
+                temperature=kwargs.pop("temperature", 0), max_output_tokens=kwargs.pop("max_tokens", 1000), **kwargs
             )
-            
+
         # Make the streaming API call
-        stream = self.client.models.generate_content_stream(
-            model=model,
-            contents=contents,
-            config=config
-        )
-        
+        stream = self.client.models.generate_content_stream(model=model, contents=contents, config=config)
+
         for chunk in stream:
             yield chunk.text or ""
+
 
 if __name__ == "__main__":
     import os
     from dotenv import load_dotenv
-    
+
     # Load API key from environment variables
     load_dotenv()
     api_key = os.getenv("GOOGLE_API_KEY")
-    
-    if not api_key:
-        print("No GOOGLE_API_KEY found in environment variables. Please set it before running.")
-        exit(1)
-    
+
     # Initialize the backend
     backend = GeminiBackend(api_key=api_key)
-    
+
     try:
-        # Test simple text completion
-        message = Message(role="user", content="What is the capital of France?")
+        message = Message(role="user", content=[Image("resources/bridge_example.jpeg"), "What do you see in this image?"])
         print("\n=== Simple Text Completion ===")
         response = backend.predict(message)
         print(f"Response: {response}")
-        
-        # Test with custom model and parameters
-        print("\n=== Custom Parameters ===")
-        response = backend.predict(
-            message, 
-            model="gemini-2.0-flash",
-            temperature=0.7,
-            max_tokens=100
-        )
-        print(f"Response with custom parameters: {response}")
-        
-        # Test streaming
-        print("\n=== Streaming Response ===")
-        print("Streaming response: ", end="")
-        for chunk in backend.stream(Message(role="user", content="Count from 1 to 5")):
-            print(chunk, end="", flush=True)
-        print("\n")
-        
-        # Test with system instruction
-        print("\n=== System Instruction ===")
-        context = [Message(role="system", content="You are a helpful robot assistant named Gemini.")]
-        response = backend.predict(
-            Message(role="user", content="What's your name?"),
-            context=context
-        )
-        print(f"Response with system instruction: {response}")
-        
+
+        # # Test simple text completion
+        # message = Message(role="user", content="What is the capital of France and then tell me what are you?")
+        # print("\n=== Simple Text Completion ===")
+        # response = backend.predict(message)
+        # print(f"Response: {response}")
+
+
+        # # Test with system instruction
+        # print("\n=== System Instruction ===")
+        # context = [Message(role="system", content="Your name is Bob.")]
+        # response = backend.predict(
+        #     Message(role="user", content="What's your name?"),
+        #     context=context
+        # )
+        # print(f"Response with system instruction: {response}")
+
+        # # Test with custom model and parameters
+        # print("\n=== Custom Parameters ===")
+        # response = backend.predict(
+        #     message,
+        #     model="gemini-2.0-flash",
+        #     temperature=0.7,
+        #     max_tokens=100
+        # )
+        # print(f"Response with custom parameters: {response}")
+
+        # # Test streaming
+        # print("\n=== Streaming Response ===")
+        # print("Streaming response: ", end="")
+        # for chunk in backend.stream(Message(role="user", content="Count from 1 to 100")):
+        #     print(chunk, end="", flush=True)
+        # print("\n")
+
     except Exception as e:
         print(f"Error during testing: {e}")
-        
+
     print("\nTesting completed!")
