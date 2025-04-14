@@ -419,7 +419,7 @@ def main():
     resp = ""
     for chunk in agent.act_and_stream("Hello, world!"):
         resp += chunk
-    print(resp)
+        print(resp)
 
 
 async def async_main():
