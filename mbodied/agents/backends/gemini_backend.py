@@ -37,7 +37,7 @@ class GeminiSerializer(Serializer):
         Returns:
             A serialized image for the Gemini API.
         """
-        # For Gemini, we can pass the PIL image object directly or use the base64 data
+        # For Gemini, we can pass the PIL image object directly
         return image.pil
 
     @classmethod
@@ -61,7 +61,7 @@ class GeminiSerializer(Serializer):
         if isinstance(self.wrapped, Message):
             # Gemini expects raw content in a list
             content = []
-            
+
             for item in self.wrapped.content:
                 if isinstance(item, str):
                     content.append(self.serialize_text(item))
@@ -69,10 +69,10 @@ class GeminiSerializer(Serializer):
                     content.append(self.serialize_image(item))
                 else:
                     raise ValueError(f"Unsupported content type: {type(item)}")
-            
+
             # If we only have one content item, return it directly
             return content[0] if len(content) == 1 else content
-        
+
         # For other types, use default serialization
         return super().serialize()
 
@@ -113,7 +113,6 @@ class GeminiBackend(OpenAIBackendMixin):
             self.client = genai.Client(api_key=self.api_key)
 
         self.serialized = GeminiSerializer
-        self._chat_sessions = {}
 
     def predict(
         self, message: Message, context: List[Message] | None = None, model: str | None = None, **kwargs
@@ -161,8 +160,6 @@ class GeminiBackend(OpenAIBackendMixin):
             )
 
         # Make the API call
-        print("contents", contents)
-        print("config", config)
         response = self.client.models.generate_content(model=model, contents=contents, config=config)
 
         return response.text
@@ -215,56 +212,7 @@ class GeminiBackend(OpenAIBackendMixin):
 
 
 if __name__ == "__main__":
-    import os
-    from dotenv import load_dotenv
-
-    # Load API key from environment variables
-    load_dotenv()
-    api_key = os.getenv("GOOGLE_API_KEY")
-
-    # Initialize the backend
-    backend = GeminiBackend(api_key=api_key)
-
-    try:
-        message = Message(role="user", content=[Image("resources/bridge_example.jpeg"), "What do you see in this image?"])
-        print("\n=== Simple Text Completion ===")
-        response = backend.predict(message)
-        print(f"Response: {response}")
-
-        # # Test simple text completion
-        # message = Message(role="user", content="What is the capital of France and then tell me what are you?")
-        # print("\n=== Simple Text Completion ===")
-        # response = backend.predict(message)
-        # print(f"Response: {response}")
-
-
-        # # Test with system instruction
-        # print("\n=== System Instruction ===")
-        # context = [Message(role="system", content="Your name is Bob.")]
-        # response = backend.predict(
-        #     Message(role="user", content="What's your name?"),
-        #     context=context
-        # )
-        # print(f"Response with system instruction: {response}")
-
-        # # Test with custom model and parameters
-        # print("\n=== Custom Parameters ===")
-        # response = backend.predict(
-        #     message,
-        #     model="gemini-2.0-flash",
-        #     temperature=0.7,
-        #     max_tokens=100
-        # )
-        # print(f"Response with custom parameters: {response}")
-
-        # # Test streaming
-        # print("\n=== Streaming Response ===")
-        # print("Streaming response: ", end="")
-        # for chunk in backend.stream(Message(role="user", content="Count from 1 to 100")):
-        #     print(chunk, end="", flush=True)
-        # print("\n")
-
-    except Exception as e:
-        print(f"Error during testing: {e}")
-
-    print("\nTesting completed!")
+    backend = GeminiBackend(context=["You are a robot with advanced spatial reasoning."])
+    message = Message(role="user", content=[Image("resources/bridge_example.jpeg"), "What do you see in this image?"])
+    response = backend.predict(message)
+    print(response)
