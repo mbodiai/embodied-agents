@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
+
 from mbodied.agents.sense.sensory_agent import SensoryAgent
 from mbodied.types.sense.vision import Image
 
@@ -49,12 +51,13 @@ class DepthEstimationAgent(SensoryAgent):
         """
         if self.actor is None:
             raise ValueError("Remote actor for agent not initialized.")
-        response = self.actor.predict(image.base64, *args, api_name=api_name, **kwargs)
-        return Image(response)
+        response, depth_file = self.actor.predict(image.base64, *args, api_name=api_name, **kwargs)
+        return Image(response), np.load(depth_file)
 
 
 # Example usage:
 if __name__ == "__main__":
     agent = DepthEstimationAgent(model_src="https://api.mbodi.ai/sense/")
-    result = agent.act(image=Image("resources/bridge_example.jpeg"))
+    result, depth_array = agent.act(image=Image("resources/bridge_example.jpeg"))
     result.pil.show()
+    print("Depth array shape", depth_array.shape)
