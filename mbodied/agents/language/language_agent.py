@@ -143,7 +143,7 @@ class LanguageAgent(Agent):
 
     def __init__(
         self,
-        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http"]
+        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http", "gemini"]
         | AnyUrl
         | FilePath
         | DirectoryPath
@@ -163,6 +163,7 @@ class LanguageAgent(Agent):
             model_src: The source of the model to use for inference. It can be one of the following:
                 - "openai": Use the OpenAI backend (or vLLM).
                 - "anthropic": Use the Anthropic backend.
+                - "gemini": Use the Gemini backend.
                 - "gradio": Use the Gradio backend.
                 - "ollama": Use the Ollama backend.
                 - "http": Use a custom HTTP API backend.

@@ -87,7 +87,7 @@ A call to `act` or `async_act` can perform local or remote inference synchronous
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
-- Language Agents natively support OpenAI, Anthropic, Ollama, vLLM, Gradio, etc
+- Language Agents natively support OpenAI, Anthropic, Gemini, Ollama, vLLM, Gradio, etc
 - Motor Agents natively support OpenVLA, RT1(upcoming)
 - Sensory Agents support Depth Anything, YOLO, Segment Anything 2
 
@@ -149,19 +149,13 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [OpenVLA](https://api.mbodi.ai/community-models/)
 - [Sensory Tools](https://api.mbodi.ai/sense/)
 
-### Support Matrix
-
-- Closed: OpenAI, Anthropic
-- Open Weights: OpenVLA, Idefics2, Llava-1.6-Mistral, Phi-3-vision-128k-instruct
-- All gradio endpoints hosted on HuggingFace spaces.
-
 ### Roadmap
 
 - [x] OpenVLA Motor Agent
 - [x] Automatic dataset recording on Robot
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
-- [ ] Google Gemini Backend
+- [x] Google Gemini Backend
 - [ ] Pi0 Motor Agent
 - [ ] ROS integration
 - [ ] More Motor Agents, i.e. RT1
@@ -357,7 +351,7 @@ The [Backend](mbodied/base/backend.py) class is an abstract base class for Backe
 
 The [Language Agent](mbodied/agents/language/language_agent.py) can connect to different backends or transformers of your choice. It includes methods for recording conversations, managing context, looking up messages, forgetting messages, storing context, and acting based on an instruction and an image.
 
-Natively supports API services: OpenAI, Anthropic, vLLM, Ollama, HTTPX, or any gradio endpoints. More upcoming!
+Natively supports API services: OpenAI, Anthropic, Gemini vLLM, Ollama, HTTPX, or any gradio endpoints. More upcoming!
 
 To use OpenAI for your robot backend:
 

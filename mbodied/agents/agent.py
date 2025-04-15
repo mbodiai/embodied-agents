@@ -19,11 +19,18 @@ from inspect import signature
 from pathlib import Path
 from typing import Literal
 
-from mbodied.agents.backends import AnthropicBackend, GradioBackend, HttpxBackend, OllamaBackend, OpenAIBackend
+from mbodied.agents.backends import (
+    AnthropicBackend,
+    GeminiBackend,
+    GradioBackend,
+    HttpxBackend,
+    OllamaBackend,
+    OpenAIBackend,
+)
 from mbodied.data.recording import Recorder
 from mbodied.types.sample import Sample
 
-Backend = AnthropicBackend | GradioBackend | OpenAIBackend | HttpxBackend | OllamaBackend
+Backend = AnthropicBackend | GeminiBackend | GradioBackend | OpenAIBackend | HttpxBackend | OllamaBackend
 
 
 class Agent:
@@ -41,6 +48,7 @@ class Agent:
     ACTOR_MAP = {
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
+        "gemini": GeminiBackend,
         "ollama": OllamaBackend,
         "gradio": GradioBackend,
         "http": HttpxBackend,
