@@ -221,7 +221,7 @@ def test_language_agent_history(mock_openai_init, mock_openai_act):
 def test_auto_language_agent(mock_openai_init, mock_openai_act):
     agent = AutoAgent(task="language", model_src="openai", context="Hello, how are you?")
     agent.act("What's your name?")
-    assert len(agent.context) == 4
+    assert len(agent.context) == 3
     # Default to LanguageAgent.
     agent = AutoAgent()
     agent.act("What's your name?")
