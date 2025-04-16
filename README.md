@@ -148,7 +148,6 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 
 - [OpenVLA](https://api.mbodi.ai/community-models/)
 - [Sensory Tools](https://api.mbodi.ai/sense/)
-- [Embodied AI Playground](https://api.mbodi.ai/benchmark/)
 
 ### Roadmap
 
@@ -157,6 +156,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
 - [x] Google Gemini Backend
+- [ ] Pi0 Motor Agent
 - [ ] ROS integration
 - [ ] More Motor Agents, i.e. RT1
 - [ ] More device support, i.e. OpenCV camera

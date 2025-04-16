@@ -59,11 +59,11 @@ class SegmentationAgent(SensoryAgent):
         else:
             raise ValueError("Unsupported input type. Must be BBox2D, List[BBox2D], or PixelCoords.")
 
-        segmented_image, masks = self.actor.predict(
+        segmented_image, masks_file = self.actor.predict(
             image.base64, input_type, input_data_str, *args, api_name=api_name, **kwargs
         )
         # Convert gradio Dataframe numpy to numpy array.
-        masks = np.array(masks["data"])
+        masks = np.load(masks_file)
         return Image(segmented_image), masks
 
 

@@ -391,8 +391,9 @@ def estimate_depth(ctx, image_filename, model_src, api_name, list, help) -> None
     DepthEstimationAgent = smart_import("mbodied.agents.sense", attribute="DepthEstimationAgent")
     image = Image(path=image_filename, size=(224, 224))
     agent: "DepthEstimationAgent" = DepthEstimationAgent(model_src=model_src)
-    result = agent.act(image=image, api_name=api_name)
+    result, depth_array = agent.act(image=image, api_name=api_name)
     result.pil.show()
+    print("Depth array shape", depth_array.shape)
 
 
 @sense.command("segment")
