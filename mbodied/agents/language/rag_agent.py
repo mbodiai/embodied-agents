@@ -167,6 +167,9 @@ class RagAgent(Agent):
             query_texts: List of query strings.
             n_results: Number of documents to retrieve.
             distance_threshold: Filter out results above this distance score.
+
+        Returns:
+            A list of lists of strings, where each inner list contains the content of the documents that are closest to the query.
         """
         if distance_threshold is None:
             distance_threshold = self.distance_threshold
@@ -194,6 +197,9 @@ class RagAgent(Agent):
             n_results: Number of context documents to retrieve.
             distance_threshold: Filter out results above this distance score.
             custom_prompt: Optional custom prompt to prepend to the response.
+
+        Returns:
+            A string containing the constructed prompt with RAG results.
         """
         # Query for relevant documents
         relevant_docs = self.query(
@@ -211,9 +217,9 @@ class RagAgent(Agent):
             prompt += f"{custom_prompt}\n"
         prompt += (
             "Below are some context documents:\n\n"
-            f"{'-'*40}\n"
+            f"{'-' * 40}\n"
             f"{chr(10).join(context_docs)}\n"
-            f"{'-'*40}\n"
+            f"{'-' * 40}\n"
             "Here's the User's query:\n\n"
             f"{user_query}"
         )

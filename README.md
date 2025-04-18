@@ -31,6 +31,13 @@
 
 **Updates:**
 
+**April 18, 2025 — embodied-agents v1.5**
+
+- Updated sensory endpoints
+- Added support for Google Gemini as the language agent backend
+- Enabled tool calling for Language Agent (OpenAI)
+- Added Retrieval-Augmented Generation (RAG) functionalities — see [example](examples/6_robot_with_rag.py)
+
 **Aug 28 2024, embodied-agents v1.2**
 
 - New [Doc site](https://api.mbodi.ai/docs) is up!
@@ -147,7 +154,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 ### Endpoints
 
 - [OpenVLA](https://api.mbodi.ai/community-models/)
-- [Sensory Tools](https://api.mbodi.ai/sense/)
+- [Sensory Tools](https://api.mbodi.ai/sense/) (Depth Estimation, Image Segmentation, Object Detection)
 
 ### Roadmap
 
@@ -156,9 +163,10 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
 - [x] Google Gemini Backend
+- [x] Retrieval-Augmented Generation (RAG)
 - [ ] Pi0 Motor Agent
 - [ ] ROS integration
-- [ ] More Motor Agents, i.e. RT1
+- [ ] More Motor Agents, i.e. RT1, Octo
 - [ ] More device support, i.e. OpenCV camera
 - [ ] Fine-tuning Scripts
 
