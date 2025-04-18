@@ -89,11 +89,5 @@ def test_anthropic_backend_stream(anthropic_backend):
     assert results == expected_results
 
 
-@pytest.mark.asyncio
-async def test_anthropic_backend_async_predict(anthropic_backend):
-    response = await anthropic_backend.async_predict(Message("hi"), context=[])
-    assert response == mock_anthropic_response
-
-
 if __name__ == "__main__":
     pytest.main([__file__])

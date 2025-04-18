@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from typing import Any, List
 
 import anthropic
@@ -80,7 +81,7 @@ class AnthropicBackend(OpenAIBackendMixin):
             client: An optional client for the Anthropic service.
             kwargs: Additional keyword arguments.
         """
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         self.client = client
 
         self.model = kwargs.pop("model", self.DEFAULT_MODEL)
@@ -116,13 +117,6 @@ class AnthropicBackend(OpenAIBackendMixin):
             **kwargs,
         )
         return completion.content[0].text
-
-    async def async_predict(
-        self, message: Message, context: List[Message] | None = None, model: Any | None = None
-    ) -> str:
-        """Asynchronously predict the next message in the conversation."""
-        # For now, we'll use the synchronous method since Anthropic doesn't provide an async API
-        return self.predict(message, context, model)
 
     def stream(
         self, message: Message, context: List[Message] = None, model: str = "claude-3-5-sonnet-20240620", **kwargs

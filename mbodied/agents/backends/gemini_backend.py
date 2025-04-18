@@ -105,7 +105,7 @@ class GeminiBackend(OpenAIBackendMixin):
             client: An optional client for the Gemini service.
             **kwargs: Additional keyword arguments.
         """
-        self.api_key = api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("MBODI_API_KEY")
+        self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
         self.client = client
 
         self.model = kwargs.pop("model", self.DEFAULT_MODEL)
