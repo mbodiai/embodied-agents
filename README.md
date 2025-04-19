@@ -31,7 +31,7 @@
 
 **Updates:**
 
-**April 18, 2024 — embodied-agents v1.5**
+**April 18, 2025 — embodied-agents v1.5**
 
 - Updated sensory endpoints
 - Added support for Google Gemini as the language agent backend
