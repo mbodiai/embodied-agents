@@ -22,28 +22,35 @@
 🚀 **Simple Robot Agent Example:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1KN0JohcjHX42wABBHe-CxXP-NWJjbZts?usp=sharing) </br>
 💻 **Simulation Example with [SimplerEnv](https://github.com/simpler-env/SimplerEnv):** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/18oiuw1yTxO5x-eT7Z8qNyWtjyYd8cECI?usp=sharing) </br>
 🤖 **Motor Agent using OpenVLA:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/1flnMrqyepGOO8J9rE6rehzaLdZPsw6lX?usp=sharing)</br>
-⏺️ **Record Dataset on a Robot**[<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing)</br>
+⏺️ **Record Dataset on a Robot:** [<img align="center" src="https://colab.research.google.com/assets/colab-badge.svg" />](https://colab.research.google.com/drive/15UuFbMUJGEjqJ_7I_b5EvKvLCKnAc8bB?usp=sharing)</br>
 
-🫡 **Support, Discussion, and How-To's** **:** </br>
+🫡 **Support, Discussion, and How-To's:** </br>
 [![](https://dcbadge.limes.pink/api/server/BPQ7FEGxNb?theme=discord&?logoColor=pink)](https://discord.gg/BPQ7FEGxNb)
 
 </div>
 
 **Updates:**
 
-**Aug 28 2024, embodied-agents v1.2**
+**April 18, 2024 — embodied-agents v1.5**
+
+- Updated sensory endpoints
+- Added support for Google Gemini as the language agent backend
+- Enabled tool calling for Language Agent (OpenAI)
+- Added Retrieval-Augmented Generation (RAG) functionalities — see [example](examples/6_robot_with_rag.py)
+
+**Aug 28, 2024, embodied-agents v1.2**
 
 - New [Doc site](https://api.mbodi.ai/docs) is up!
 - Added the features to record dataset on [robot](mbodied/robots/robot.py) natively.
-- Add multiple new Sensory Agents, i.e. [depth estimation](mbodied/agents/sense/depth_estimation_agent.py), [object detection](mbodied/agents/sense/object_detection_agent.py), [image segmentation](mbodied/agents/sense/segmentation_agent.py) with public [API endpoints](https://api.mbodi.ai/sense/) hosted. And a simple cli `mbodied` for trying them.
+- Added multiple new Sensory Agents, e.g., [depth estimation](mbodied/agents/sense/depth_estimation_agent.py), [object detection](mbodied/agents/sense/object_detection_agent.py), [image segmentation](mbodied/agents/sense/segmentation_agent.py) with public [API endpoints](https://api.mbodi.ai/sense/) hosted. And a simple cli `mbodied` for trying them.
 - Added [Auto Agent](mbodied/agents/auto/auto_agent.py) for dynamic agents selection.
 
-**June 30 2024, embodied-agents v1.0**:
+**June 30, 2024, embodied-agents v1.0**:
 
 - Added Motor Agent supporting OpenVLA with free [API endpoint](https://api.mbodi.ai/community-models) hosted.
-- Added Sensory Agent supporting i.e. 3D object pose detection.
+- Added Sensory Agent supporting e.g., 3D object pose detection.
 - Improved automatic dataset recording.
-- Agent now can make remote act calls to API servers i.e. Gradio, vLLM.
+- Agent now can make remote act calls to API servers e.g., Gradio, vLLM.
 - Bug fixes and performance improvements have been made.
 - PyPI project is renamed to `mbodied`.
 
@@ -62,7 +69,7 @@
     - [Features](#features)
     - [Endpoints](#endpoints)
     - [Support Matrix](#support-matrix)
-    - [To Do](#to-do)
+    - [Roadmap](#roadmap)
   - [Installation](#installation)
   - [Getting Started](#getting-started)
     - [Customize a Motion to fit a robot's action space.](#customize-a-motion-to-fit-a-robots-action-space)
@@ -98,7 +105,7 @@ Jump to [getting started](#getting-started) to get up and running on [real hardw
 ### Motivation
 
 <details>
-<summary>There is a signifcant barrier to entry for running SOTA models in robotics</summary>
+<summary>There is a significant barrier to entry for running SOTA models in robotics</summary>
 
 It is currently unrealistic to run state-of-the-art AI models on edge devices for responsive, real-time applications. Furthermore,
 the complexity of integrating multiple models across different modalities is a significant barrier to entry for many researchers,
@@ -110,9 +117,9 @@ integrate large models into existing robot stacks.
 ### Goals
 
 <details>
-<summary>Facillitate data-collection and sharing among roboticists.</summary>
+<summary>Facilitate data-collection and sharing among roboticists.</summary>
 
-This requires reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availibility.
+This requires reducing much of the complexities involved with setting up inference endpoints, converting between different model formats, and collecting and storing new datasets for future availability.
 
 We aim to achieve this by:
 
@@ -139,15 +146,15 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 
 ### Features
 
-- Extensible, user-friendly python SDK with explicit typing and modularity
+- Extensible, user-friendly Python SDK with explicit typing and modularity
 - Asynchronous and remote thread-safe agent execution for maximal responsiveness and scalability.
-- Full-compatiblity with HuggingFace Spaces, Datasets, Gymnasium Spaces, Ollama, and any OpenAI-compatible api.
+- Full-compatibility with HuggingFace Spaces, Datasets, Gymnasium Spaces, Ollama, and any OpenAI-compatible API.
 - Automatic dataset-recording and optionally uploads dataset to huggingface hub.
 
 ### Endpoints
 
 - [OpenVLA](https://api.mbodi.ai/community-models/)
-- [Sensory Tools](https://api.mbodi.ai/sense/)
+- [Sensory Tools](https://api.mbodi.ai/sense/) (Depth Estimation, Image Segmentation, Object Detection)
 
 ### Roadmap
 
@@ -156,10 +163,11 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 - [x] Yolo, SAM2, DepthAnything Sensory Agents
 - [x] Auto Agent
 - [x] Google Gemini Backend
+- [x] Retrieval-Augmented Generation (RAG)
 - [ ] Pi0 Motor Agent
 - [ ] ROS integration
-- [ ] More Motor Agents, i.e. RT1
-- [ ] More device support, i.e. OpenCV camera
+- [ ] More Motor Agents, e.g., RT1, Octo
+- [ ] More device support, e.g., OpenCV camera
 - [ ] Fine-tuning Scripts
 
 ## Installation
@@ -167,7 +175,7 @@ _Embodied Agents are not yet capable of learning from in-context experience_:
 ```shell
 pip install mbodied
 
-# With extra dependencies, i.e. torch, opencv-python, etc.
+# With extra dependencies, e.g., torch, opencv-python, etc.
 pip install mbodied[extras]
 
 # For audio support
@@ -232,6 +240,7 @@ Example Scripts:
 - [3_reason_plan_act_robot.py](examples/3_reason_plan_act_robot.py): Full example of language based cognitive agent and OpenVLA motor agent executing task.
 - [4_language_reason_plan_act_robot.py](examples/4_language_reason_plan_act_robot.py): Full example of all languaged based cognitive and motor agent executing task.
 - [5_teach_robot_record_dataset.py](examples/5_teach_robot_record_dataset.py): Example of collecting dataset on robot's action at a specific frequency by just yelling at the robot!
+- [6_robot_with_rag.py](examples/6_robot_with_rag.py): Example with RAG to retrieve skills to run on the robot.
 
 ### Notebooks
 
@@ -391,8 +400,8 @@ response = agent.act("Hello, how are you?", model="llama3.1")
 
 ### Motor Agent
 
-[Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, i.e. OpenVLA, RT1, Octo, etc.
-Some small model, like RT1, can run on edge devices. However, some, like OpenVLA, may be challenging to run without quantization. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
+[Motor Agent](mbodied/agents/motion/motor_agent.py) is similar to Language Agent but instead of returning a string, it always returns a `Motion`. Motor Agent is generally powered by robotic transformer models, e.g., OpenVLA, RT1, Octo, etc.
+Some small models, like RT1, can run on edge devices. However, some, like OpenVLA, may be challenging to run without quantization. See [OpenVLA Agent](mbodied/agents/motion/openvla_agent.py) and an [example OpenVLA server](examples/servers/gradio_example_openvla.py)
 
 ### Sensory Agent
 
