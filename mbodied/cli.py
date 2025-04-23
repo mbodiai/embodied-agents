@@ -138,8 +138,8 @@ def list_agents(verbose) -> None:
     import inspect
     import sys
 
-    from rich.table import Table
     from rich.markdown import Markdown
+    from rich.table import Table
 
     for mode in ["language", "sense", "motion"]:
         from rich.box import Box
