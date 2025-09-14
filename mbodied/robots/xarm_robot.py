@@ -14,28 +14,21 @@
 
 import logging
 import math
-from typing import Any
+import numpy as np
 
-from gymnasium import spaces
 
 try:
     from xarm.wrapper import XArmAPI
 except ImportError:
     logging.warning("XarmAPI not found. Please install the xArm-Python-SDK package.")
-    xarm = Any
-
-    class XArmAPI:
-        def __init__(self, *args, **kwargs):
-            pass
-
-    xarm.wrapper = XArmAPI
-
+  
 
 from mbodied.robots import Robot
-from mbodied.types.motion.control import HandControl
-from mbodied.types.sense.vision import Image
+from embdata.motion.control import AbsoluteHandControl, HandControl
+from embdata.coordinate import Pose6D
+from embdata.array import ArrayLike, sz
 
-
+DEFAULT_HOME_POSE = Pose6D(translation=[300, 0, 325], orientation=[math.radians(180), 0, 0])
 class XarmRobot(Robot):
     """Control the xArm robot arm with SDK.
 
@@ -51,7 +44,7 @@ class XarmRobot(Robot):
         home_pos: The home position of the robot arm.
     """
 
-    def __init__(self, ip: str = "192.168.1.228", use_realsense: bool = False):
+    def __init__(self, ip: str = "192.168.1.228", arm_speed: int = 200, gripper_speed: int = 2000, home_pose: ArrayLike[sz[6],float]|Pose6D=DEFAULT_HOME_POSE):
         """Initializes the XarmRobot and sets up the robot arm.
 
         Args:
@@ -68,42 +61,36 @@ class XarmRobot(Robot):
 
         self.arm.set_gripper_mode(0)
         self.arm.set_gripper_enable(True)
-        self.arm.set_gripper_speed(2000)
+        self.arm.set_gripper_speed(gripper_speed)
 
-        self.home_pos = [300, 0, 325, math.radians(180), 0, 0]
-        self.arm_speed = 200
-        self.arm.set_position(*self.home_pos, wait=True, speed=self.arm_speed)
+        self.home_pos = home_pose[:]
+        self.arm_speed = arm_speed
+        self.arm.set_position(*self.home_pos, is_radian=True, wait=True, speed=self.arm_speed)
         self.arm.set_gripper_position(800, wait=True)
         self.arm.set_collision_sensitivity(3)
         self.arm.set_self_collision_detection(True)
 
-        self.use_realsense = False
-        if use_realsense:
-            self.use_realsense = True
-            from mbodied.hardware.realsense_camera import RealsenseCamera
+    def clip_scale_grasp(self, grasp: float) -> float:
+            n = grasp if 0.0 <= grasp <= 1.0 else ((grasp + 1.0) * 0.5 if -1.0 <= grasp <= 1.0 else grasp)
+            return max(0, min(800, int(round(n * 800.0))))
+        
 
-            self.realsense_camera = RealsenseCamera(width=640, height=480, fps=30)
+    def do(self, motion:  list[HandControl]|HandControl) -> None:
+        """Execute relative pose(s) via SE(3) using translation/orientation vectors.
 
-    def do(self, motion: HandControl | list[HandControl]) -> None:
-        """Executes HandControl(s).
-
-        HandControl is in meters and radians.
-
-        Args:
-            motion: The HandControl motion(s) to be executed.
+        Accepts a single `Pose6D` or `HandControl`, or a list of them. If a
+        `HandControl` is provided, its `pose` is used directly.
         """
-        if not isinstance(motion, list):
-            motion = [motion]
-        for m in motion:
-            current_pos = self.arm.get_position()[1]
-            current_pos[0] += m.pose.x * 1000
-            current_pos[1] += m.pose.y * 1000
-            current_pos[2] += m.pose.z * 1000
-            current_pos[3] += m.pose.roll
-            current_pos[4] += m.pose.pitch
-            current_pos[5] += m.pose.yaw
-            self.arm.set_position(*current_pos, wait=True, speed=self.arm_speed)
-            self.arm.set_gripper_position(0 if m.grasp.value <= 0.5 else 800, wait=True)
+        items = motion if isinstance(motion, list) else [motion]
+        current_pose = self.get_state().pose
+        for item in items:
+            is_relative = item.info["fields"]["pose"]["motion_type"] == "relative"
+            target_pose = current_pose * item.pose if is_relative else item.pose
+            t_mm = target_pose.translation * 1000.0
+            self.arm.set_position(*[*t_mm, *target_pose.orientation], wait=True, speed=self.arm_speed)
+         
+            self.arm.set_gripper_position(self.clip_scale_grasp(item.grasp), wait=True)
+            current_pose = target_pose
 
     def get_state(self) -> HandControl:
         """Gets the current pose (absolute HandControl) of the robot arm.
@@ -111,44 +98,22 @@ class XarmRobot(Robot):
         Returns:
             The current pose of the robot arm.
         """
-        current_pos = self.arm.get_position()[1]
-        current_pos[0] = round(current_pos[0] / 1000, 5)
-        current_pos[1] = round(current_pos[1] / 1000, 5)
-        current_pos[2] = round(current_pos[2] / 1000, 5)
-        current_pos[3] = round(current_pos[3], 3)
-        current_pos[4] = round(current_pos[4], 3)
-        current_pos[5] = round(current_pos[5], 3)
+        pos = self.arm.get_position(is_radian=True)[1]
+        gripper_pos = self.arm.get_gripper_position()
+        grasp = gripper_pos[1] if  isinstance(gripper_pos, tuple) and gripper_pos[0] == 0 else 0
+        return AbsoluteHandControl(
+            pose=Pose6D(
+                translation=np.array(pos[:3]) / 1000.0,
+                orientation=np.array(pos[3:6]),
+            ),
+            grasp=grasp or 0,
+        )
 
-        hand_control = current_pos.copy()
-        if self.arm.get_gripper_position()[1] >= 750:
-            hand_control.append(1)
-        else:
-            hand_control.append(0)
-        return HandControl.unflatten(hand_control)
 
-    def prepare_action(self, old_pose: HandControl, new_pose: HandControl) -> HandControl:
-        """Calculates the action between two poses.
-
-        Args:
-            old_pose: The old pose(state) of the hardware.
-            new_pose: The new pose(state) of the hardware.
-
-        Returns:
-            The action to be taken between the old and new poses.
-        """
-        # Calculate the difference between the old and new poses. Use absolute value for grasp.
-        old = list(old_pose.flatten())
-        new = list(new_pose.flatten())
-        result = [(new[i] - old[i]) for i in range(len(new) - 1)] + [new[-1]]
-        return HandControl.unflatten(result)
-
-    def capture(self) -> Image:
+    def capture(self) -> HandControl:
         """Captures an image from the robot camera."""
-        if self.use_realsense:
-            rgb_image, _, _ = self.realsense_camera.capture_realsense_images()
-            return Image(rgb_image, size=(224, 224))
-        return Image(size=(224, 224))
+        return self.get_state()
 
-    def get_observation(self) -> Image:
+    def get_observation(self) -> HandControl:
         """Captures an image for recording."""
         return self.capture()

@@ -17,7 +17,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Sequence, Union, get_origin
+from typing import Any, Dict, List, Literal, Self, Sequence, Union, get_origin
 
 import numpy as np
 from datasets import Dataset
@@ -113,7 +113,7 @@ class Sample(BaseModel):
         return self.model_dump(exclude_none=exclude_none, exclude=exclude)
 
     @classmethod
-    def unflatten(cls, one_d_array_or_dict, schema=None) -> "Sample":
+    def unflatten(cls, one_d_array_or_dict, schema=None) -> Self:
         """Unflatten a one-dimensional array or dictionary into a Sample instance.
 
         If a dictionary is provided, its keys are ignored.
@@ -165,7 +165,7 @@ class Sample(BaseModel):
         self,
         output_type: Flattenable = "dict",
         non_numerical: Literal["ignore", "forbid", "allow"] = "allow",
-    ) -> Dict[str, Any] | np.ndarray | "torch.Tensor" | List:
+    ) -> "Dict[str, Any] | np.ndarray | torch.Tensor | List":
         accumulator = {} if output_type == "dict" else []
 
         def flatten_recursive(obj, path=""):
@@ -459,7 +459,7 @@ class Sample(BaseModel):
         return cls(sampled)
 
     @classmethod
-    def pack_from(cls, samples: List[Union["Sample", Dict]]) -> "Sample":
+    def pack_from(cls, samples: List[Union["Sample", Dict]]) -> Self:
         """Pack a list of samples into a single sample with lists for attributes.
 
         Args:
@@ -491,7 +491,7 @@ class Sample(BaseModel):
 
     def unpack(self, to_dicts=False) -> List[Union["Sample", Dict]]:
         """Unpack the packed Sample object into a list of Sample objects or dictionaries."""
-        attributes = list(self.model_extra.keys()) + list(self.model_fields.keys())
+        attributes = list(self.model_extra.keys()) + list(type(self).model_fields.keys()) if self.model_extra else list(type(self).model_fields.keys())
         attributes = [attr for attr in attributes if getattr(self, attr) is not None]
         if not attributes or getattr(self, attributes[0]) is None:
             return []
@@ -525,9 +525,9 @@ class Sample(BaseModel):
     def model_field_info(self, key: str) -> FieldInfo:
         """Get the FieldInfo for a given attribute key."""
         if self.model_extra and self.model_extra.get(key) is not None:
-            info = FieldInfo(metadata=self.model_extra[key])
-        if self.model_fields.get(key) is not None:
-            info = FieldInfo(metadata=self.model_fields[key])
+            info = FieldInfo(json_schema_extra=self.model_extra[key])
+        if type(self).model_fields.get(key) is not None:
+            info = FieldInfo(json_schema_extra=type(self).model_fields[key].json_schema_extra)
 
         if info and hasattr(info, "annotation"):
             return info.annotation
@@ -546,7 +546,7 @@ class Sample(BaseModel):
             space_dict[key] = value.space() if isinstance(value, Sample) else self.space_for(value, info=info)
         return spaces.Dict(space_dict)
 
-    def random_sample(self) -> "Sample":
+    def random_sample(self) -> Self:
         """Generate a random Sample instance based on its instance attributes. Omits None values.
 
         Override this method in subclasses to customize the sample generation.

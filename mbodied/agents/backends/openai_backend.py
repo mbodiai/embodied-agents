@@ -20,7 +20,7 @@ import backoff
 import httpx
 from anthropic import RateLimitError as AnthropicRateLimitError
 from openai._exceptions import RateLimitError as OpenAIRateLimitError
-
+from openai import AsyncOpenAI
 from mbodied.agents.backends.backend import Backend
 from mbodied.agents.backends.serializer import Serializer
 from mbodied.types.message import Message
@@ -88,7 +88,6 @@ class OpenAIBackendMixin(Backend):
         api_key: str | None = None,
         client: Any | None = None,
         response_format: str = None,
-        aclient=False,
         **kwargs,
     ):
         """Initializes the OpenAIBackend with the given API key and client.
@@ -106,9 +105,8 @@ class OpenAIBackendMixin(Backend):
             from openai import AsyncOpenAI, OpenAI
 
             kwargs.pop("model_src", None)
-            self.client = OpenAI(api_key=self.api_key or "any_key", **kwargs)
-            if aclient:
-                self.aclient = AsyncOpenAI(api_key=self.api_key or "any_key", **kwargs)
+            self.client = OpenAI(api_key=self.api_key or "any_key", **kwargs)   
+            self.aclient = AsyncOpenAI(api_key=self.api_key or "any_key", **kwargs)
 
         self.serialized = OpenAISerializer
         self.response_format = response_format
@@ -220,8 +218,7 @@ class OpenAIBackendMixin(Backend):
             When tools is provided:
                 tuple[str, Any]: Tuples of (content_delta, tool_call_delta) where either may be None
         """
-        if not hasattr(self, "aclient"):
-            raise AttributeError("AsyncOpenAI client not initialized. Pass in aclient=True to the constructor.")
+        self.aclient = self.aclient or AsyncOpenAI(api_key=self.api_key or "any_key", **kwargs)
         model = model or self.DEFAULT_MODEL
         context = context or self.INITIAL_CONTEXT
         serialized_messages = [self.serialized(msg).serialize() for msg in context + [message]]
