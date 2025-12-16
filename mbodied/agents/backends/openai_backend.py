@@ -149,7 +149,6 @@ class OpenAIBackendMixin(Backend):
             model=model,
             messages=serialized_messages,
             temperature=0,
-            max_tokens=1000,
             tools=tools,
             **kwargs,
         )
