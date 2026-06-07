@@ -30,6 +30,7 @@ from mbodied.types.motion.control import (
     MobileSingleArmControl,
 )
 from mbodied.data.recording import Recorder
+from mbodied.types.motion import Motion, RelativeMotionField
 
 
 @pytest.fixture(autouse=True)
@@ -76,6 +77,28 @@ def test_joint_control_deserialization():
     json_data = '{"value": 2.5}'
     jc = JointControl.model_validate_json(json_data)
     assert jc.value == 2.5
+
+
+def test_joint_control_rejects_out_of_bounds_value():
+    with pytest.raises(ValueError, match="value must be within bounds"):
+        JointControl(value=4.0)
+
+
+def test_motion_field_validates_vector_bounds_and_shape():
+    class ArmDelta(Motion):
+        joints: list[float] = RelativeMotionField(
+            default_factory=list,
+            bounds=[-1.0, 1.0],
+            shape=(3,),
+        )
+
+    assert ArmDelta(joints=[-1.0, 0.0, 1.0]).joints == [-1.0, 0.0, 1.0]
+
+    with pytest.raises(ValueError, match="joints must have shape"):
+        ArmDelta(joints=[0.0, 1.0])
+
+    with pytest.raises(ValueError, match="joints must be within bounds"):
+        ArmDelta(joints=[0.0, 1.25, 0.0])
 
 
 def test_full_joint_control_serialization():
