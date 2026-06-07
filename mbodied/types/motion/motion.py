@@ -38,7 +38,8 @@ See the Pydantic documentation for more information on how to define Pydantic mo
 
 from typing import Any
 
-from pydantic import ConfigDict, Field
+import numpy as np
+from pydantic import ConfigDict, Field, model_validator
 from pydantic_core import PydanticUndefined
 from typing_extensions import Literal
 
@@ -222,3 +223,33 @@ class Motion(Sample):
     """Base class for a motion."""
 
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True, extra="forbid")
+
+    @model_validator(mode="after")
+    def validate_motion_fields(self) -> "Motion":
+        """Validate MotionField bounds and shapes after Pydantic coercion."""
+        for field_name, field_info in self.__class__.model_fields.items():
+            motion_metadata = field_info.json_schema_extra or {}
+            bounds = motion_metadata.get("bounds")
+            shape = motion_metadata.get("shape")
+
+            if bounds is None and shape is None:
+                continue
+
+            value = getattr(self, field_name)
+            if value is None:
+                continue
+
+            if shape is not None:
+                value_shape = np.asarray(value).shape
+                if value_shape != tuple(shape):
+                    msg = f"{field_name} must have shape {tuple(shape)}, got {value_shape}"
+                    raise ValueError(msg)
+
+            if bounds is not None:
+                lower, upper = bounds
+                values = np.asarray(value, dtype=float)
+                if np.any(values < lower) or np.any(values > upper):
+                    msg = f"{field_name} must be within bounds [{lower}, {upper}]"
+                    raise ValueError(msg)
+
+        return self
