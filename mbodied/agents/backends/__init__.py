@@ -16,6 +16,7 @@ from .anthropic_backend import AnthropicBackend, AnthropicSerializer
 from .gemini_backend import GeminiBackend, GeminiSerializer
 from .gradio_backend import GradioBackend
 from .httpx_backend import HttpxBackend, HttpxSerializer
+from .minimax_backend import MiniMaxBackend, MiniMaxSerializer
 from .ollama_backend import OllamaBackend, OllamaSerializer
 from .openai_backend import OpenAIBackendMixin as OpenAIBackend
 from .openai_backend import OpenAISerializer
@@ -23,11 +24,13 @@ from .openai_backend import OpenAISerializer
 __all__ = [
     "AnthropicBackend",
     "GeminiBackend",
+    "MiniMaxBackend",
     "OllamaBackend",
     "OpenAIBackend",
     "OpenVLABackend",
     "AnthropicSerializer",
     "GeminiSerializer",
+    "MiniMaxSerializer",
     "OllamaSerializer",
     "OpenAISerializer",
     "OpenVLASerializer",

@@ -149,7 +149,7 @@ class LanguageAgent(Agent):
 
     def __init__(
         self,
-        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http", "gemini"]
+        model_src: Literal["openai", "anthropic", "gradio", "ollama", "http", "gemini", "minimax"]
         | AnyUrl
         | FilePath
         | DirectoryPath
@@ -170,6 +170,7 @@ class LanguageAgent(Agent):
                 - "openai": Use the OpenAI backend (or vLLM).
                 - "anthropic": Use the Anthropic backend.
                 - "gemini": Use the Gemini backend.
+                - "minimax": Use the MiniMax backend.
                 - "gradio": Use the Gradio backend.
                 - "ollama": Use the Ollama backend.
                 - "http": Use a custom HTTP API backend.

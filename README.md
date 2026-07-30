@@ -94,7 +94,7 @@ A call to `act` or `async_act` can perform local or remote inference synchronous
 
 <img src="assets/architecture.jpg" alt="Architecture Diagram" style="width: 700px;">
 
-- Language Agents natively support OpenAI, Anthropic, Gemini, Ollama, vLLM, Gradio, etc
+- Language Agents natively support OpenAI, Anthropic, Gemini, MiniMax, Ollama, vLLM, Gradio, etc
 - Motor Agents natively support OpenVLA, RT1(upcoming)
 - Sensory Agents support Depth Anything, YOLO, Segment Anything 2
 
