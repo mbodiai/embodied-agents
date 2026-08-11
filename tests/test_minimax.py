@@ -16,6 +16,7 @@ from unittest import mock
 
 import pytest
 from mbodied.agents.backends import MiniMaxBackend
+from mbodied.agents.backends.anthropic_backend import AnthropicSerializer
 from mbodied.agents.backends.minimax_backend import MiniMaxSerializer
 from mbodied.types.message import Message
 from mbodied.types.sense.vision import Image
@@ -48,6 +49,37 @@ class FakeOpenAI:
         self.chat = self.Chat()
 
 
+class FakeAnthropic:
+    class Content:
+        def __init__(self, text):
+            self.text = text
+
+    class Message:
+        def __init__(self, content):
+            self.content = [FakeAnthropic.Content(text=content)]
+
+    class Messages:
+        @staticmethod
+        def create(*args, **kwargs):
+            return FakeAnthropic.Message(content=mock_minimax_response)
+
+        @staticmethod
+        def stream(*args, **kwargs):
+            class Stream:
+                text_stream = iter(["Streaming response part 1", "Streaming response part 2"])
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, exc_type, exc_value, traceback):
+                    pass
+
+            return Stream()
+
+    def __init__(self):
+        self.messages = self.Messages()
+
+
 @pytest.fixture
 def minimax_api_key():
     return "fake_minimax_api_key"
@@ -58,25 +90,56 @@ def minimax_backend(minimax_api_key):
     return MiniMaxBackend(api_key=minimax_api_key, client=FakeOpenAI())
 
 
-def test_minimax_default_model_and_base_url():
+def test_minimax_default_model_and_base_url(minimax_api_key):
     assert MiniMaxBackend.DEFAULT_MODEL == "MiniMax-M3"
+    assert MiniMaxBackend.SUPPORTED_MODELS == ("MiniMax-M3", "MiniMax-M2.7")
     assert MiniMaxBackend(api_key=minimax_api_key, client=FakeOpenAI()).base_url == "https://api.minimax.io/v1"
 
 
-def test_minimax_regional_base_urls():
-    assert (
-        MiniMaxBackend(api_key=minimax_api_key, client=FakeOpenAI(), region="global").base_url
-        == "https://api.minimax.io/v1"
-    )
-    assert (
-        MiniMaxBackend(api_key=minimax_api_key, client=FakeOpenAI(), region="cn").base_url
-        == "https://api.minimaxi.com/v1"
-    )
+@pytest.mark.parametrize(
+    ("region", "api_format", "expected_url"),
+    [
+        ("global_en", "openai", "https://api.minimax.io/v1"),
+        ("cn_zh", "openai", "https://api.minimaxi.com/v1"),
+        ("global_en", "anthropic", "https://api.minimax.io/anthropic"),
+        ("cn_zh", "anthropic", "https://api.minimaxi.com/anthropic"),
+        ("global", "openai", "https://api.minimax.io/v1"),
+        ("cn", "openai", "https://api.minimaxi.com/v1"),
+    ],
+)
+def test_minimax_regional_base_urls(minimax_api_key, region, api_format, expected_url):
+    client = FakeOpenAI() if api_format == "openai" else FakeAnthropic()
+    backend = MiniMaxBackend(api_key=minimax_api_key, client=client, region=region, api_format=api_format)
+    assert backend.base_url == expected_url
 
 
 def test_minimax_backend_create_completion(minimax_backend):
     response = minimax_backend.predict(Message("hi"), context=[])
     assert response == mock_minimax_response
+
+
+def test_minimax_backend_supports_m2_7(minimax_backend):
+    minimax_backend.client.chat.completions.create = mock.Mock(
+        return_value=FakeOpenAI.Completion(text=mock_minimax_response)
+    )
+    response = minimax_backend.predict(Message("hi"), context=[], model="MiniMax-M2.7")
+    assert response == mock_minimax_response
+    assert minimax_backend.client.chat.completions.create.call_args.kwargs["model"] == "MiniMax-M2.7"
+
+
+def test_minimax_anthropic_backend_create_completion(minimax_api_key):
+    backend = MiniMaxBackend(api_key=minimax_api_key, client=FakeAnthropic(), api_format="anthropic")
+    backend.client.messages.create = mock.Mock(return_value=FakeAnthropic.Message(content=mock_minimax_response))
+    response = backend.predict(Message("hi"), context=[])
+    assert response == mock_minimax_response
+    assert backend.serialized is AnthropicSerializer
+    assert backend.client.messages.create.call_args.kwargs["model"] == "MiniMax-M3"
+
+
+def test_minimax_anthropic_backend_stream(minimax_api_key):
+    backend = MiniMaxBackend(api_key=minimax_api_key, client=FakeAnthropic(), api_format="anthropic")
+    response = list(backend.stream(Message("hi"), context=[]))
+    assert response == ["Streaming response part 1", "Streaming response part 2"]
 
 
 def test_minimax_backend_with_context(minimax_backend):
@@ -113,6 +176,18 @@ def test_language_backend_language_agent_act_minimax(minimax_api_key):
     from mbodied.agents.language import LanguageAgent
 
     agent = LanguageAgent(api_key=minimax_api_key, model_src="minimax")
+    response = agent.act("Hello, MiniMax!", context=[])
+    assert response == mock_minimax_response
+
+
+def test_language_backend_language_agent_act_minimax_anthropic(minimax_api_key):
+    from mbodied.agents.language import LanguageAgent
+
+    agent = LanguageAgent(
+        api_key=minimax_api_key,
+        model_src="minimax",
+        model_kwargs={"api_format": "anthropic", "client": FakeAnthropic()},
+    )
     response = agent.act("Hello, MiniMax!", context=[])
     assert response == mock_minimax_response
 
