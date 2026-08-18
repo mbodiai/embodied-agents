@@ -88,6 +88,7 @@ nav:
     - Sense:
       - Audio:
         - Audio Agent: api/agents/sense/audio/audio_agent.md
+        - Minimax Speech: api/agents/sense/audio/minimax_speech.md
       - Depth Estimation Agent: api/agents/sense/depth_estimation_agent.md
       - Object Detection Agent: api/agents/sense/object_detection_agent.md
       - Segmentation Agent: api/agents/sense/segmentation_agent.md

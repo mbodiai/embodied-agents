@@ -17,6 +17,7 @@ import os
 import platform
 import threading
 import wave
+from pathlib import Path
 
 try:
     import playsound
@@ -28,12 +29,16 @@ from openai import OpenAI
 from typing_extensions import Literal
 
 from mbodied.agents import Agent
+from mbodied.agents.sense.audio.minimax_speech import MiniMaxSpeechBackend
+
+TTS_PROVIDERS = {"minimax": MiniMaxSpeechBackend}
 
 
 class AudioAgent(Agent):
     """Handles audio recording, playback, and speech-to-text transcription.
 
     This module uses OpenAI's API to transcribe audio input and synthesize speech.
+    Speech synthesis can also be delegated to another provider listed in `TTS_PROVIDERS`.
     Set Environment Variable NO_AUDIO=1 to disable audio recording and playback.
     It will then take input from the terminal.
 
@@ -54,6 +59,8 @@ class AudioAgent(Agent):
         use_pyaudio: bool = True,
         api_key: str = None,
         run_local: bool = False,
+        tts_provider: str = None,
+        tts_kwargs: dict = None,
     ):
         """Initializes the AudioAgent with specified parameters.
 
@@ -63,12 +70,17 @@ class AudioAgent(Agent):
             use_pyaudio: Whether to use PyAudio for playback. Prefer setting to False for Mac.
             api_key: The API key for OpenAI.
             run_local: Whether to run the whisper model locally instead of using OpenAI.
+            tts_provider: The provider to synthesize speech with, one of `TTS_PROVIDERS`.
+                Defaults to None, which keeps the default speech path.
+            tts_kwargs: Additional arguments to pass to the speech provider, such as
+                its api_key, region or model.
         """
         self.recording = False
         self.record_lock = threading.Lock()
         self.listen_filename = listen_filename
         self.speak_filename = tmp_speak_filename
         self.use_pyaudio = use_pyaudio
+        self.speech_backend = self.init_speech_backend(tts_provider, tts_kwargs)
         if os.getenv("NO_AUDIO"):
             return
         self.run_local = False
@@ -81,6 +93,26 @@ class AudioAgent(Agent):
             self.model = whisper.load_model("base")
         else:
             self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
+
+    @staticmethod
+    def init_speech_backend(tts_provider: str | None, tts_kwargs: dict | None) -> MiniMaxSpeechBackend | None:
+        """Initializes the speech provider to synthesize with, if one was requested.
+
+        Args:
+            tts_provider: The provider name, one of `TTS_PROVIDERS`.
+            tts_kwargs: Additional arguments to pass to the provider.
+
+        Returns:
+            The speech backend, or None to use the default speech path.
+
+        Raises:
+            ValueError: If the provider name is not recognized.
+        """
+        if tts_provider is None:
+            return None
+        if tts_provider not in TTS_PROVIDERS:
+            raise ValueError(f"tts_provider must be one of {sorted(TTS_PROVIDERS)}, got {tts_provider!r}.")
+        return TTS_PROVIDERS[tts_provider](**(tts_kwargs or {}))
 
     def act(self, *args, **kwargs):
         return self.listen(*args, **kwargs)
@@ -160,28 +192,33 @@ class AudioAgent(Agent):
         except Exception as e:
             logging.error(f"Failed to save audio: {e}")
 
-    def speak(self, message: str, voice: str = "onyx", api_key: str = None) -> None:
-        """Synthesizes speech from text using OpenAI's API and plays it back.
+    def speak(self, message: str, voice: str = "onyx", api_key: str = None, **kwargs) -> None:
+        """Synthesizes speech from text and plays it back.
 
         Args:
             message: The text message to synthesize.
-            voice: The voice model to use for synthesis.
+            voice: The voice model to use for synthesis. Only used by the default speech path.
             api_key: The API key for OpenAI.
+            **kwargs: Additional synthesis options for the configured speech provider,
+                such as its voice_setting or audio_setting.
         """
         if os.environ.get("NO_AUDIO"):
             return
         try:
-            client = self.client or OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
-            with (
-                client.with_streaming_response.audio.speech.create(
-                    model="tts-1",
-                    voice=voice,
-                    input=message,
-                ) as response,
-                open(self.speak_filename, "wb") as out_file,
-            ):
-                for chunk in response.iter_bytes():
-                    out_file.write(chunk)
+            if self.speech_backend is not None:
+                Path(self.speak_filename).write_bytes(self.speech_backend.synthesize(message, **kwargs))
+            else:
+                client = self.client or OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
+                with (
+                    client.with_streaming_response.audio.speech.create(
+                        model="tts-1",
+                        voice=voice,
+                        input=message,
+                    ) as response,
+                    open(self.speak_filename, "wb") as out_file,
+                ):
+                    for chunk in response.iter_bytes():
+                        out_file.write(chunk)
         except Exception as e:
             logging.error(f"Failed to create or save speech: {e}")
             return
