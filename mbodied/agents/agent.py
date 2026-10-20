@@ -24,13 +24,16 @@ from mbodied.agents.backends import (
     GeminiBackend,
     GradioBackend,
     HttpxBackend,
+    MiniMaxBackend,
     OllamaBackend,
     OpenAIBackend,
 )
 from mbodied.data.recording import Recorder
 from mbodied.types.sample import Sample
 
-Backend = AnthropicBackend | GeminiBackend | GradioBackend | OpenAIBackend | HttpxBackend | OllamaBackend
+Backend = (
+    AnthropicBackend | GeminiBackend | GradioBackend | MiniMaxBackend | OpenAIBackend | HttpxBackend | OllamaBackend
+)
 
 
 class Agent:
@@ -49,6 +52,7 @@ class Agent:
         "openai": OpenAIBackend,
         "anthropic": AnthropicBackend,
         "gemini": GeminiBackend,
+        "minimax": MiniMaxBackend,
         "ollama": OllamaBackend,
         "gradio": GradioBackend,
         "http": HttpxBackend,

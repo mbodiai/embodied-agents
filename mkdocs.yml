@@ -75,6 +75,7 @@ nav:
       - Backend: api/agents/backends/backend.md
       - Gradio Backend: api/agents/backends/gradio_backend.md
       - Httpx Backend: api/agents/backends/httpx_backend.md
+      - Minimax Backend: api/agents/backends/minimax_backend.md
       - Ollama Backend: api/agents/backends/ollama_backend.md
       - Openai Backend: api/agents/backends/openai_backend.md
       - Serializer: api/agents/backends/serializer.md
