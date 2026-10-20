@@ -20,7 +20,7 @@ while keeping text and image message serialization compatible with each API.
 """
 
 import os
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from typing import Any, Literal
 
 from mbodied.agents.backends.anthropic_backend import AnthropicSerializer
@@ -96,8 +96,9 @@ class MiniMaxBackend(OpenAIBackendMixin):
         serialized: The serializer for the selected API format.
     """
 
-    DEFAULT_MODEL = "MiniMax-M3"
-    SUPPORTED_MODELS = ("MiniMax-M3", "MiniMax-M2.7")
+    DEFAULT_MODEL = "MiniMax-M3.1-Flash"
+    # Recommended models; explicit legacy and custom model IDs remain accepted.
+    SUPPORTED_MODELS = ("MiniMax-M3.1-Flash", "MiniMax-M3")
     INITIAL_CONTEXT = [
         Message(role="system", content="You are a robot with advanced spatial reasoning."),
     ]
@@ -211,3 +212,15 @@ class MiniMaxBackend(OpenAIBackendMixin):
             **kwargs,
         ) as stream:
             yield from stream.text_stream
+
+    async def astream(
+        self,
+        message: Message,
+        context: list[Message] | None = None,
+        model: str | None = None,
+        tools: list[Any] | None = None,
+        **kwargs,
+    ) -> AsyncGenerator[str | tuple[str, Any], None]:
+        """Stream asynchronously using the MiniMax default when no model is supplied."""
+        async for chunk in super().astream(message, context=context, model=model, tools=tools, **kwargs):
+            yield chunk

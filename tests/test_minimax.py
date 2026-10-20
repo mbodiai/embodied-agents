@@ -91,8 +91,8 @@ def minimax_backend(minimax_api_key):
 
 
 def test_minimax_default_model_and_base_url(minimax_api_key):
-    assert MiniMaxBackend.DEFAULT_MODEL == "MiniMax-M3"
-    assert MiniMaxBackend.SUPPORTED_MODELS == ("MiniMax-M3", "MiniMax-M2.7")
+    assert MiniMaxBackend.DEFAULT_MODEL == "MiniMax-M3.1-Flash"
+    assert MiniMaxBackend.SUPPORTED_MODELS == ("MiniMax-M3.1-Flash", "MiniMax-M3")
     assert MiniMaxBackend(api_key=minimax_api_key, client=FakeOpenAI()).base_url == "https://api.minimax.io/v1"
 
 
@@ -133,7 +133,7 @@ def test_minimax_anthropic_backend_create_completion(minimax_api_key):
     response = backend.predict(Message("hi"), context=[])
     assert response == mock_minimax_response
     assert backend.serialized is AnthropicSerializer
-    assert backend.client.messages.create.call_args.kwargs["model"] == "MiniMax-M3"
+    assert backend.client.messages.create.call_args.kwargs["model"] == "MiniMax-M3.1-Flash"
 
 
 def test_minimax_anthropic_backend_stream(minimax_api_key):
